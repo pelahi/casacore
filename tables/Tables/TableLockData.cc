@@ -52,6 +52,7 @@ TableLockData::~TableLockData()
 void TableLockData::makeLock (const String& name, Bool create,
 			      FileLocker::LockType type, uInt locknr)
 {
+    /*
     //# Create lock file object only when not created yet.
     //# It is acceptable that no lock file exists for a readonly table
     //# (to be able to read older tables).
@@ -72,11 +73,13 @@ void TableLockData::makeLock (const String& name, Bool create,
 			       itsLock->lastMessage() + ")"));
 	}
     }
+    */
 }
 
 Bool TableLockData::acquire (MemoryIO* info,
 			     FileLocker::LockType type, uInt nattempts)
 {
+    /*
     //# Try to acquire a lock.
     //# Show a message when we have to wait for a long time.
     //# Start with n attempts, show a message and continue thereafter.
@@ -119,6 +122,8 @@ Bool TableLockData::acquire (MemoryIO* info,
 	}
     }
     return status;
+    */
+    return false;
 }
 
 void TableLockData::release (Bool always)

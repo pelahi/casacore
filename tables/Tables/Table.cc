@@ -70,6 +70,7 @@ Table::Table()
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 1" << endl;
     baseTabPtr_p = new NullTable();
     baseTabPtr_p->link();
 }
@@ -79,6 +80,7 @@ Table::Table()
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 2" << endl;
   open (name, "", option, TableLock(), tsmOpt);
 }
 
@@ -88,18 +90,20 @@ Table::Table (const String& name, const TableLock& lockOptions,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 3" << endl;
   open (name, "", option, lockOptions, tsmOpt);
 }
-    
+
   Table::Table (const String& name, const String& type, TableOption option,
                 const TSMOption& tsmOpt)
 : baseTabPtr_p     (0),
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 4" << endl;
   open (name, type, option, TableLock(), tsmOpt);
 }
-    
+
 Table::Table (const String& name, const String& type,
 	      const TableLock& lockOptions, TableOption option,
               const TSMOption& tsmOpt)
@@ -107,6 +111,7 @@ Table::Table (const String& name, const String& type,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 5" << endl;
   open (name, type, option, lockOptions, tsmOpt);
 }
 
@@ -116,6 +121,7 @@ Table::Table (const String& name, const String& type,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 6" << endl;
     SetupNewTable newtab("", TableDesc(), Table::Scratch);
     if (type == Table::Memory) {
         baseTabPtr_p = new MemoryTable (newtab, 0, False);
@@ -132,6 +138,7 @@ Table::Table (SetupNewTable& newtab, uInt nrrow, Bool initialize,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 7" << endl;
     baseTabPtr_p = new PlainTable (newtab, nrrow, initialize,
 				   TableLock(), endianFormat, tsmOpt);
     baseTabPtr_p->link();
@@ -143,6 +150,7 @@ Table::Table (SetupNewTable& newtab, Table::TableType type,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 8" << endl;
     if (type == Table::Memory) {
         baseTabPtr_p = new MemoryTable (newtab, nrrow, initialize);
     } else {
@@ -159,6 +167,7 @@ Table::Table (SetupNewTable& newtab, Table::TableType type,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 9" << endl;
     if (type == Table::Memory) {
         baseTabPtr_p = new MemoryTable (newtab, nrrow, initialize);
     } else {
@@ -174,6 +183,7 @@ Table::Table (SetupNewTable& newtab, TableLock::LockOption lockOption,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 10" << endl;
     baseTabPtr_p = new PlainTable (newtab, nrrow, initialize,
 				   TableLock(lockOption),
 				   endianFormat, tsmOpt);
@@ -186,6 +196,7 @@ Table::Table (SetupNewTable& newtab, const TableLock& lockOptions,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 11" << endl;
     baseTabPtr_p = new PlainTable (newtab, nrrow, initialize, lockOptions,
 				   endianFormat, tsmOpt);
     baseTabPtr_p->link();
@@ -198,6 +209,7 @@ Table::Table (const Block<Table>& tables,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 12" << endl;
     Block<BaseTable*> btab(tables.nelements());
     for (uInt i=0; i<tables.nelements(); ++i) {
       btab[i] = tables[i].baseTablePtr();
@@ -214,6 +226,7 @@ Table::Table (const Block<String>& tableNames,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 13" << endl;
   baseTabPtr_p = new ConcatTable (tableNames, subTables, subDirName,
 				    option, TableLock(), tsmOpt);
     baseTabPtr_p->link();
@@ -227,6 +240,7 @@ Table::Table (const Block<String>& tableNames,
   isCounted_p      (True),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 14" << endl;
   baseTabPtr_p = new ConcatTable (tableNames, subTables, String(),
 				    option, lockOptions, tsmOpt);
     baseTabPtr_p->link();
@@ -237,6 +251,7 @@ Table::Table (BaseTable* btp, Bool countIt)
   isCounted_p      (countIt),
   lastModCounter_p (0)
 {
+    cout << "Table::Table 15" << endl;
     if (isCounted_p  &&  baseTabPtr_p != 0) {
 	baseTabPtr_p->link();
     }
@@ -247,6 +262,7 @@ Table::Table (const Table& that)
   isCounted_p      (that.isCounted_p),
   lastModCounter_p (that.lastModCounter_p)
 {
+    cout << "Table::Table 16" << endl;
     if (isCounted_p  &&  baseTabPtr_p != 0) {
 	baseTabPtr_p->link();
     }
@@ -484,6 +500,7 @@ Table Table::copyToMemoryTable (const String& newName, Bool noRows) const
 void Table::open (const String& name, const String& type, int tableOption,
 		  const TableLock& lockOptions, const TSMOption& tsmOpt)
 {
+    cout << "open table" << endl;
     //# Option Delete is effectively the same as Old followed by a
     //# markForDelete.
     Bool deleteOpt = False;
@@ -568,7 +585,7 @@ BaseTable* Table::makeBaseTable (const String& name, const String& type,
     }
     return baseTabPtr;
 }
-	
+
 BaseTable* Table::lookCache (const String& name, int tableOption,
 			     const TableLock& lockOptions)
 {
@@ -907,7 +924,7 @@ Bool Table::isReadable (const String& tableName, Bool throwIf)
             throw;
         }
 	valid = False;
-    } 
+    }
     return valid;
 }
 //# Test if table exists and is writable.

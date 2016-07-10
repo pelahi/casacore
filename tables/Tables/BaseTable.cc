@@ -160,6 +160,7 @@ void BaseTable::scratchCallback (Bool isScratch, const String& oldName) const
 Bool BaseTable::makeTableDir()
 {
     //# Exit if the table directory has already been created.
+    /*
     if (madeDir_p) {
 	return False;
     }
@@ -176,7 +177,7 @@ Bool BaseTable::makeTableDir()
 	    throw (TableDuplFile(name_p,
 				 " (and is not a true table directory)"));
 	}
-	Directory tdir(file);
+//	Directory tdir(file);
 	if (! tdir.isEmpty()) {
 	    //# Check if file table.dat exist in it.
 	    File mfile (Table::fileName(name_p));
@@ -197,8 +198,8 @@ Bool BaseTable::makeTableDir()
 	}
     } else {
 	//# Create the table directory.
-	Directory dir(name_p);
-	dir.create();
+//	Directory dir(name_p);
+//	dir.create();
     }
     //# Create table.dat.
     //# First do a scratch callback that a table is getting created.
@@ -208,6 +209,7 @@ Bool BaseTable::makeTableDir()
     RegularFile dfile (Table::fileName(name_p));
     dfile.create();
     madeDir_p = True;
+    */
     return True;
 }
 
@@ -353,7 +355,7 @@ void BaseTable::prepareCopyRename (const String& newName,
 	if (tableOption == Table::Update) {
             throw (TableNoFile(newName));
 	}
-    }   
+    }
 }
 
 //# Rename a table.

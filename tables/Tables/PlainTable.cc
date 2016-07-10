@@ -60,6 +60,7 @@ PlainTable::PlainTable (SetupNewTable& newtab, uInt nrrow, Bool initialize,
   lockPtr_p      (0),
   tsmOption_p    (tsmOption)
 {
+    cout << "PlainTable::PlainTable 1" << endl;
   try {
     // Determine and set the endian option.
     setEndian (endianFormat);
@@ -162,6 +163,7 @@ PlainTable::PlainTable (AipsIO&, uInt version, const String& tabname,
   lockPtr_p      (0),
   tsmOption_p    (tsmOption)
 {
+    cout << "PlainTable::PlainTable 2" << endl;
     // Replace default TSM option for existing table.
     tsmOption_p.fillOption (False);
     //# Set initially to no write in destructor.
@@ -613,8 +615,8 @@ TableRecord& PlainTable::rwKeywordSet()
     tableChanged_p = True;
     return rec;
 }
-    
-    
+
+
 
 //# Get a column object.
 BaseColumn* PlainTable::getColumn (uInt columnIndex) const
