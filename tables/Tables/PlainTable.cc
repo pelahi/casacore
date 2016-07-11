@@ -519,6 +519,7 @@ void PlainTable::resync()
 
 Bool PlainTable::putFile (Bool always)
 {
+    /*
     TableTrace::traceFile (itsTraceId, "flush");
     Bool writeTab = always || tableChanged_p;
     Bool written = writeTab;
@@ -556,6 +557,8 @@ Bool PlainTable::putFile (Bool always)
     tableChanged_p = False;
     colSetPtr_p->dataManChanged() = False;
     return writeTab;
+    */
+    return true;
 }
 
 MemoryIO* PlainTable::releaseCallBack (void* plainTableObject, Bool always)

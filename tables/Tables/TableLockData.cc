@@ -128,6 +128,7 @@ Bool TableLockData::acquire (MemoryIO* info,
 
 void TableLockData::release (Bool always)
 {
+    /*
     //# Only release if not permanently locked.
     if (always  ||  !isPermanent()) {
 	MemoryIO* memIO = 0;
@@ -141,6 +142,7 @@ void TableLockData::release (Bool always)
 			       ") when releasing lock on " + itsLock->name()));
 	}
     }
+    */
 }
 
 } //# NAMESPACE CASACORE - END

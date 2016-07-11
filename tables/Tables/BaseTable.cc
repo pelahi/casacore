@@ -47,9 +47,9 @@
 #include <casacore/casa/Utilities/PtrHolder.h>
 #include <casacore/casa/BasicSL/String.h>
 #include <casacore/casa/Utilities/GenSort.h>
-#include <casacore/casa/IO/AipsIO.h>
-#include <casacore/casa/OS/File.h>
-#include <casacore/casa/OS/RegularFile.h>
+//#include <casacore/casa/IO/AipsIO.h>
+//#include <casacore/casa/OS/File.h>
+//#include <casacore/casa/OS/RegularFile.h>
 #include <casacore/casa/OS/Directory.h>
 #include <casacore/casa/Utilities/Assert.h>
 
@@ -255,6 +255,7 @@ void BaseTable::flushTableInfo()
 
 void BaseTable::writeStart (AipsIO& ios, Bool bigEndian)
 {
+    /*
     //# Check option.
     if (!openedForWrite()) {
 	throw (TableInvOpt ("BaseTable::writeStart",
@@ -277,6 +278,7 @@ void BaseTable::writeStart (AipsIO& ios, Bool bigEndian)
     if (made && !isMarkedForDelete()) {
 	scratchCallback (False, name_p);
     }
+    */
 }
 
 //# End writing a table file.
