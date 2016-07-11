@@ -64,7 +64,7 @@ SSMBase::SSMBase (Int aBucketSize, uInt aCacheSize)
   itsStringHandler     (0),
   itsPersCacheSize     (max(aCacheSize,2u)),
   itsCacheSize         (0),
-  itsNrBuckets         (0), 
+  itsNrBuckets         (0),
   itsNrIdxBuckets      (0),
   itsFirstIdxBucket    (-1),
   itsIdxBucketOffset   (0),
@@ -75,7 +75,8 @@ SSMBase::SSMBase (Int aBucketSize, uInt aCacheSize)
   itsBucketSize        (0),
   itsBucketRows        (0),
   isDataChanged        (False)
-{ 
+{
+    /*
   if (aBucketSize < 0) {
     itsBucketRows = -aBucketSize;
   } else if (aBucketSize == 0) {
@@ -83,6 +84,7 @@ SSMBase::SSMBase (Int aBucketSize, uInt aCacheSize)
   } else {
     itsBucketSize = aBucketSize;
   }
+  */
 }
 
 SSMBase::SSMBase (const String& aDataManName,
@@ -96,7 +98,7 @@ SSMBase::SSMBase (const String& aDataManName,
   itsStringHandler     (0),
   itsPersCacheSize     (max(aCacheSize,2u)),
   itsCacheSize         (0),
-  itsNrBuckets         (0), 
+  itsNrBuckets         (0),
   itsNrIdxBuckets      (0),
   itsFirstIdxBucket    (-1),
   itsIdxBucketOffset   (0),
@@ -107,7 +109,8 @@ SSMBase::SSMBase (const String& aDataManName,
   itsBucketSize        (0),
   itsBucketRows        (0),
   isDataChanged        (False)
-{ 
+{
+    /*
   if (aBucketSize < 0) {
     itsBucketRows = -aBucketSize;
   } else if (aBucketSize == 0) {
@@ -115,6 +118,7 @@ SSMBase::SSMBase (const String& aDataManName,
   } else {
     itsBucketSize = aBucketSize;
   }
+  */
 }
 
 SSMBase::SSMBase (const String& aDataManName,
@@ -128,7 +132,7 @@ SSMBase::SSMBase (const String& aDataManName,
   itsStringHandler     (0),
   itsPersCacheSize     (2),
   itsCacheSize         (0),
-  itsNrBuckets         (0), 
+  itsNrBuckets         (0),
   itsNrIdxBuckets      (0),
   itsFirstIdxBucket    (-1),
   itsIdxBucketOffset   (0),
@@ -139,7 +143,8 @@ SSMBase::SSMBase (const String& aDataManName,
   itsBucketSize        (0),
   itsBucketRows        (0),
   isDataChanged        (False)
-{ 
+{
+    /*
   // Get bucketrows if defined.
   if (spec.isDefined ("BUCKETROWS")) {
     itsBucketRows = spec.asInt ("BUCKETROWS");
@@ -157,6 +162,7 @@ SSMBase::SSMBase (const String& aDataManName,
   if (spec.isDefined ("PERSCACHESIZE")) {
     itsPersCacheSize = max(2, spec.asInt ("PERSCACHESIZE"));
   }
+  */
 }
 
 SSMBase::SSMBase (const SSMBase& that)
@@ -184,6 +190,7 @@ SSMBase::SSMBase (const SSMBase& that)
 
 SSMBase::~SSMBase()
 {
+    /*
   for (uInt i=0; i<ncolumn(); i++) {
     delete itsPtrColumn[i];
   }
@@ -194,25 +201,30 @@ SSMBase::~SSMBase()
   delete itsFile;
   delete itsIosFile;
   delete itsStringHandler;
+  */
 }
 
 DataManager* SSMBase::clone() const
 {
+    cout << "SSMBase::clone" << endl;
   return new SSMBase (*this);
 }
 
 String SSMBase::dataManagerType() const
 {
+    cout << "SSMBase::dataManagerType" << endl;
   return "StandardStMan";
 }
 
 String SSMBase::dataManagerName() const
 {
+    cout << "SSMBase::dataManagerName" << endl;
   return itsDataManName;
 }
 
 Record SSMBase::dataManagerSpec() const
 {
+    cout << "SSMBase::dataManagerSpec" << endl;
   Record rec = getProperties();
   rec.define ("BUCKETSIZE", Int(itsBucketSize));
   rec.define ("PERSCACHESIZE", Int(itsPersCacheSize));
@@ -222,6 +234,7 @@ Record SSMBase::dataManagerSpec() const
 
 Record SSMBase::getProperties() const
 {
+    cout << "SSMBase::getProperties" << endl;
   // Make sure the cache is initialized, so the header has certainly been read.
   const_cast<SSMBase*>(this)->getCache();
   Record rec;
@@ -231,65 +244,80 @@ Record SSMBase::getProperties() const
 
 void SSMBase::setProperties (const Record& rec)
 {
+    cout << "SSMBase::setProperties" << endl;
+    /*
   if (rec.isDefined("ActualCacheSize")) {
     setCacheSize (rec.asInt("ActualCacheSize"), False);
   }
+  */
 }
 
 void SSMBase::clearCache()
 {
+    cout << "SSMBase::clearCache" << endl;
+    /*
   if (itsCache != 0) {
     itsStringHandler->flush();
     itsCache->clear();
   }
+  */
 }
 
 void SSMBase::showBaseStatistics (ostream& anOs) const
 {
+    cout << "SSMBase::showBaseStatistics" << endl;
+    /*
   anOs << "StandardStMan Base statistics:" << endl;
-  anOs << "Nr of columns               : " << ncolumn() << endl ; 
+  anOs << "Nr of columns               : " << ncolumn() << endl ;
   anOs << "Nr of rows in the columns   : " << itsNrRows << endl;
   for (uInt i=0;i<ncolumn();i++) {
     anOs << " ColIndex["<<i<<"]           : " << itsColIndexMap[i];
     anOs << " ColOffset["<<i<<"]          : " << itsColumnOffset[i] << endl;
   }
-  anOs << "CacheSize                   : " << itsCacheSize << endl ; 
-  anOs << "Size of buckets             : " << itsBucketSize << endl ; 
-  anOs << "Total buckets               : " << itsNrBuckets << endl ; 
-  anOs << "Total Index buckets         : " << itsNrIdxBuckets << endl ; 
-  anOs << "1st Index bucket            : " << itsFirstIdxBucket << endl ; 
-  anOs << "Index bucket offset         : " << itsIdxBucketOffset << endl ; 
-  anOs << "last String bucket used     : " << itsLastStringBucket << endl ; 
-  anOs << "Total free buckets          : " << itsFreeBucketsNr << endl ; 
-  anOs << "1st free bucket             : " << itsFirstFreeBucket << endl ; 
+  anOs << "CacheSize                   : " << itsCacheSize << endl ;
+  anOs << "Size of buckets             : " << itsBucketSize << endl ;
+  anOs << "Total buckets               : " << itsNrBuckets << endl ;
+  anOs << "Total Index buckets         : " << itsNrIdxBuckets << endl ;
+  anOs << "1st Index bucket            : " << itsFirstIdxBucket << endl ;
+  anOs << "Index bucket offset         : " << itsIdxBucketOffset << endl ;
+  anOs << "last String bucket used     : " << itsLastStringBucket << endl ;
+  anOs << "Total free buckets          : " << itsFreeBucketsNr << endl ;
+  anOs << "1st free bucket             : " << itsFirstFreeBucket << endl ;
   anOs << endl;
+  */
 
 }
 
 void SSMBase::showCacheStatistics (ostream& anOs) const
 {
+    cout << "SSMBase::showCacheStatistics" << endl;
+    /*
   if (itsCache != 0) {
     anOs << "StandardStMan cache statistics:" << endl;
     itsCache->showStatistics (anOs);
     anOs << endl;
   }
+  */
 }
 
 void SSMBase::showIndexStatistics (ostream & anOs) const
 {
+    cout << "SSMBase::showIndexStatistics" << endl;
+    /*
   uInt aNrIdx=itsPtrIndex.nelements();
   for (uInt i=0; i < aNrIdx; i++) {
     anOs << "StandardStMan index: " << i << " statistics:" << endl;
     itsPtrIndex[i]->showStatistics (anOs);
     anOs << endl;
   }
+  */
 }
 
 DataManagerColumn* SSMBase::makeScalarColumn (const String&,
 					      int aDataType,
 					      const String&)
 {
-
+    cout << "SSMBase::makeScalarColumn" << endl;
   //# Extend itsPtrColumn block if needed.
   if (ncolumn() >= itsPtrColumn.nelements()) {
     itsPtrColumn.resize (itsPtrColumn.nelements() + 32);
@@ -303,6 +331,7 @@ DataManagerColumn* SSMBase::makeDirArrColumn (const String&,
 					      int aDataType,
 					      const String&)
 {
+    cout << "SSMBase::makeDirArrColumn" << endl;
   //# Extend itsPtrColumn block if needed.
   if (ncolumn() >= itsPtrColumn.nelements()) {
     itsPtrColumn.resize (itsPtrColumn.nelements() + 32);
@@ -316,6 +345,7 @@ DataManagerColumn* SSMBase::makeIndArrColumn (const String&,
 					      int aDataType,
 					      const String&)
 {
+    cout << "SSMBase::makeIndArrColumn" << endl;
   //# Extend itsPtrColumn block if needed.
   if (ncolumn() >= itsPtrColumn.nelements()) {
     itsPtrColumn.resize (itsPtrColumn.nelements() + 32);
@@ -339,6 +369,7 @@ DataManager* SSMBase::makeObject (const String& group, const Record& spec)
 
 void SSMBase::setCacheSize (uInt aCacheSize, Bool canExceedNrBuckets)
 {
+    /*
   itsCacheSize = max(aCacheSize,2u);
   // Limit the cache size if needed.
   if (!canExceedNrBuckets  &&  itsCacheSize > getCache().nBucket()) {
@@ -347,19 +378,21 @@ void SSMBase::setCacheSize (uInt aCacheSize, Bool canExceedNrBuckets)
   if (itsCache != 0) {
     itsCache->resize (itsCacheSize);
   }
+  */
 }
 
 void SSMBase::makeCache()
 {
+    /*
   if (itsCache == 0) {
     Bool forceFill= False;
-    
+
     if (itsPtrIndex.nelements() == 0) {
       itsFile->open();
       readHeader();
       forceFill=True;
     }
-    
+
     // Set cache size to persistent cache size if not set explicitly yet.
     if (itsCacheSize == 0) {
       itsCacheSize = itsPersCacheSize;
@@ -367,34 +400,40 @@ void SSMBase::makeCache()
     itsCache = new BucketCache (itsFile, 512, itsBucketSize,
 				itsNrBuckets, itsCacheSize,
 				this,
-				SSMBase::readCallBack, 
+				SSMBase::readCallBack,
 				SSMBase::writeCallBack,
 				SSMBase::initCallBack,
 				SSMBase::deleteCallBack);
-    itsCache->resync (itsNrBuckets, itsFreeBucketsNr, 
+    itsCache->resync (itsNrBuckets, itsFreeBucketsNr,
 		      itsFirstFreeBucket);
 
     if (forceFill) {
       readIndexBuckets();
     }
   }
+  */
 }
 
 uInt SSMBase::getRowsPerBucket(uInt aColumn) const
 {
-  return itsPtrIndex[itsColIndexMap[aColumn]]->getRowsPerBucket();
+//  return itsPtrIndex[itsColIndexMap[aColumn]]->getRowsPerBucket();
+ return 0;
 }
 
 uInt SSMBase::getNewBucket()
 {
+    /*
   char* aBucketPtr = new char[itsBucketSize];
   memset (aBucketPtr,0,itsBucketSize);
   // Get a new bucket number from bucketcache
   return getCache().addBucket(aBucketPtr);
+  */
+    return 0;
 }
 
 void SSMBase::readHeader()
 {
+    /*
   // Set at start of file.
   itsFile->seek(0);
   // Use the file given by the BucketFile object
@@ -449,10 +488,12 @@ void SSMBase::readHeader()
   }
   itsPtrIndex.resize (nrinx, True, False);
   itsPtrIndex = 0;
+  */
 }
 
 void SSMBase::readIndexBuckets()
 {
+    /*
   TypeIO*   aMio;
   MemoryIO  aMemBuf(itsIndexLength);
 
@@ -496,7 +537,7 @@ void SSMBase::readIndexBuckets()
     }
     aNr-=idxBucketSize;
   }
-  
+
   aMemBuf.seek(0);
 
   uInt aNrIdx=itsPtrIndex.nelements();
@@ -504,13 +545,15 @@ void SSMBase::readIndexBuckets()
     itsPtrIndex[i] = new SSMIndex(this);
     itsPtrIndex[i]->get(anMOs);
   }
-  
+
   anMOs.close();
   delete aMio;
+  */
 }
 
 void SSMBase::writeIndex()
 {
+    /*
   TypeIO*   aTio;
   TypeIO*   aMio;
   MemoryIO  aMemBuf;
@@ -541,7 +584,7 @@ void SSMBase::writeIndex()
   // Leave space for next bucket nr.
   const uChar* aMemPtr = aMemBuf.getBuffer();
   uInt idxLength = aMemBuf.length();
-  uInt idxBucketSize = itsBucketSize-aCLength; 
+  uInt idxBucketSize = itsBucketSize-aCLength;
   uInt aNrBuckets = idxLength / idxBucketSize;
   uInt aRestSize  = idxLength % idxBucketSize;
   if (aRestSize != 0) {
@@ -582,14 +625,14 @@ void SSMBase::writeIndex()
       aRestSize = idxBucketSize;
       anOldBucket = aNewBucket;
     }
- 
+
     // New Index is written, give old indexbuckets free, and save firstBucketNr
     Int aBucket = itsFirstIdxBucket;
     while (aBucket != -1) {
       char* aBucketPtr = getBucket(aBucket);
       CanonicalConversion::toLocal (aBucket, aBucketPtr+aCLength/2);
       itsCache->removeBucket();
-    }    
+    }
     itsFirstIdxBucket = aNewBucket;
     // If the index fits in half a bucket, we might be able to use the other
     // half when writying the index the next time.
@@ -614,7 +657,7 @@ void SSMBase::writeIndex()
 
   itsFile->seek (0);
   AipsIO anOs (aTio);
-  
+
   // write a few items at the beginning of the file  AipsIO anOs (aTio);
   // The endian switch is a new feature. So only put it if little endian
   // is used. In that way older software can read newer tables.
@@ -635,20 +678,23 @@ void SSMBase::writeIndex()
   anOs << itsLastStringBucket;          // Last String bucket in use
   anOs << idxLength;                    // length of index
   anOs << uInt(itsPtrIndex.nelements());// Nr of indices
-  
-  anOs.putend();  
+
+  anOs.putend();
   anOs.close();
   delete aTio;
   aFio->flush();
   // Synchronize to make sure it gets written to disk.
   // This is needed for NFS-files under Linux (to resolve defect 2752).
   itsFile->fsync();
+  */
 }
 
 void SSMBase::setBucketDirty()
 {
+    /*
   itsCache->setDirty();
   isDataChanged = True;
+  */
 }
 
 //# The storage manager can add rows.
@@ -675,6 +721,7 @@ Bool SSMBase::canRemoveColumn() const
 
 void SSMBase::addRow (uInt aNrRows)
 {
+    /*
   //make sure cache is available and filled (I need itsPtrIndex)
   getCache();
 
@@ -691,15 +738,17 @@ void SSMBase::addRow (uInt aNrRows)
 
   itsNrRows+=aNrRows;
   isDataChanged = True;
+  */
 }
 
 void SSMBase::removeRow (uInt aRowNr)
 {
+    /*
   uInt aNrCol = ncolumn();
   for (uInt j=0; j< aNrCol; j++) {
     itsPtrColumn[j]->deleteRow(aRowNr);
   }
-  
+
   uInt aNrIdx=itsPtrIndex.nelements();
   for (uInt i=0; i< aNrIdx; i++) {
     Int anEmptyBucket=itsPtrIndex[i]->deleteRow(aRowNr);
@@ -727,11 +776,13 @@ void SSMBase::removeRow (uInt aRowNr)
     //    recreate();
   }
   isDataChanged = True;
+  */
 }
 
 void SSMBase::addColumn (DataManagerColumn* aColumn)
 {
 
+    /*
   // Be sure cache is filled
   getCache();
 
@@ -745,16 +796,16 @@ void SSMBase::addColumn (DataManagerColumn* aColumn)
   Int  anOffset=-1;
   Int  aBestFit=-1;
   uInt saveIndex=0;
-  Int  saveOffset=-1; 
+  Int  saveOffset=-1;
 
   // Try if there is  freespace available where this column can fit (best fit)
   // For now we assume that a best fit will be :
   //                                             1) exact fit
   //                                             2) any fit
 
-  for (uInt i=0; i<itsPtrIndex.nelements() && 
+  for (uInt i=0; i<itsPtrIndex.nelements() &&
 	         aBestFit != aSearchLength; i++) {
-   
+
     Int aFoundFit =itsPtrIndex[i]->getFree(anOffset,aSearchLength);
     if (aFoundFit == 0) {
       // Perfect Fit Found
@@ -767,12 +818,12 @@ void SSMBase::addColumn (DataManagerColumn* aColumn)
 	saveIndex=i;
 	saveOffset=anOffset;
       }
-    }    
+    }
   }
 
   // If fit found use this space, else make new column
   uInt nCol = aSSMC->getColNr();
-  itsColumnOffset.resize(ncolumn(),True);                            
+  itsColumnOffset.resize(ncolumn(),True);
   itsColIndexMap.resize(ncolumn(),True);
   if (aBestFit != -1) {
     itsPtrIndex[saveIndex]->addColumn(saveOffset,aSearchLength);
@@ -792,45 +843,50 @@ void SSMBase::addColumn (DataManagerColumn* aColumn)
 
     uInt nrIdx=itsPtrIndex.nelements();
     itsPtrIndex.resize(nrIdx+1,True);
-    
+
     itsPtrIndex[nrIdx] = new SSMIndex(this,rowsPerBucket);
     uInt aSize =(rowsPerBucket*aSSMC->getExternalSizeBits() + 7) / 8;
     itsPtrIndex[nrIdx]->setNrColumns(1,aSize);
     itsPtrIndex[nrIdx]->addRow(itsNrRows);
 
     itsColIndexMap[nCol]=nrIdx;
-    itsColumnOffset[nCol]=0;                            
-  
+    itsColumnOffset[nCol]=0;
+
 
   }
 
   aSSMC->addRow(itsNrRows,0,aBestFit != -1);
   isDataChanged = True;
+  */
 }
 
 void SSMBase::removeBucket (uInt aBucketNr)
 {
+    /*
   getCache().getBucket(aBucketNr);
   getCache().removeBucket();
-}  
+  */
+}
 
 char*  SSMBase::getBucket (uInt aBucketNr)
 {
-  return itsCache->getBucket(aBucketNr);
+//  return itsCache->getBucket(aBucketNr);
+  return 0;
 }
-  
+
 
 void SSMBase::removeColumn (DataManagerColumn* aColumn)
 {
+    /*
   getCache();
 
   SSMColumn* aSSMC = dynamic_cast<SSMColumn*> (aColumn);
   AlwaysAssert ( aSSMC != 0, AipsError);
-  
+
   uInt aNrCol = ncolumn();
   uInt aColNr = aSSMC->getColNr();
   Bool isFound=False;
-  
+
   for (uInt i=0; i<aNrCol && !isFound ; i++) {
     if (itsPtrColumn[i]->getColNr() == aColNr) {
       isFound=True;
@@ -864,7 +920,7 @@ void SSMBase::removeColumn (DataManagerColumn* aColumn)
         // decrement the columnnumber by 1
 	itsPtrColumn[j]->setColNr(itsPtrColumn[j]->getColNr()-1);
         // move the offsets of the remaining columns to the left also
-	itsColumnOffset[j] = itsColumnOffset[j+1];	
+	itsColumnOffset[j] = itsColumnOffset[j+1];
 	itsColIndexMap[j] = itsColIndexMap[j+1];
 	itsPtrColumn[j] = itsPtrColumn[j+1];
       }
@@ -872,41 +928,51 @@ void SSMBase::removeColumn (DataManagerColumn* aColumn)
       isDataChanged = True;
     }
   }
+  */
 }
 
 
 char* SSMBase::readCallBack (void* anOwner, const char* aBucketStorage)
 {
+    /*
   uInt aSize = static_cast<SSMBase*>(anOwner)->getBucketSize();
   char* aBucket = new char [aSize];
   memcpy (aBucket, aBucketStorage, aSize);
   return aBucket;
+  */
+    return 0;
 }
 
 void SSMBase::writeCallBack (void* anOwner, char* aBucketStorage,
                              const char* aBucket)
 {
+    /*
   uInt aSize = static_cast<SSMBase*>(anOwner)->getBucketSize();
   memcpy (aBucketStorage, aBucket, aSize);
+  */
 }
 
 void SSMBase::deleteCallBack (void*, char* aBucket)
 {
-  delete [] aBucket;
+//  delete [] aBucket;
 }
 
 char* SSMBase::initCallBack (void* anOwner)
 {
+    /*
   uInt aSize = static_cast<SSMBase*>(anOwner)->getBucketSize();
   char* aBucket = new char [aSize];
   memset (aBucket,0,aSize);
   return aBucket;
+  */
+    return 0;
 }
 
-char* SSMBase::find(uInt aRowNr,     uInt aColNr, 
+char* SSMBase::find(uInt aRowNr,     uInt aColNr,
 		    uInt& aStartRow, uInt& anEndRow)
 {
- 
+
+    /*
   // Make sure that cache is available and filled.
   getCache();
   SSMIndex* anIndexPtr = itsPtrIndex[itsColIndexMap[aColNr]];
@@ -914,12 +980,15 @@ char* SSMBase::find(uInt aRowNr,     uInt aColNr,
   anIndexPtr->find(aRowNr,aBucketNr,aStartRow,anEndRow);
   char* aPtr = getBucket(aBucketNr);
   return aPtr + itsColumnOffset[aColNr];
+  */
+    return 0;
 }
 
 
 
 void SSMBase::recreate()
 {
+    /*
   delete itsCache;
   itsCache = 0;
   delete itsFile;
@@ -939,7 +1008,7 @@ void SSMBase::recreate()
   for (uInt i=0; i<aNrIdx; i++) {
     itsPtrIndex[i]->recreate();
   }
-  
+
   itsStringHandler = new SSMStringHandler(this);
   itsStringHandler->init();
 
@@ -949,6 +1018,7 @@ void SSMBase::recreate()
     itsPtrColumn[i]->doCreate(itsNrRows);
   }
   isDataChanged = True;
+  */
 }
 
 Bool SSMBase::hasMultiFileSupport() const
@@ -956,6 +1026,7 @@ Bool SSMBase::hasMultiFileSupport() const
 
 Bool SSMBase::flush (AipsIO& ios, Bool doFsync)
 {
+    /*
   //# Check if anything has changed.
   Bool changed = False;
 
@@ -979,28 +1050,31 @@ Bool SSMBase::flush (AipsIO& ios, Bool doFsync)
   if (itsIosFile != 0) {
     itsIosFile->flush(doFsync);
   }
-  
+
   ios.putstart ("SSM", 2);
   ios << itsDataManName;
   putBlock (ios, itsColumnOffset, itsColumnOffset.nelements());
   putBlock (ios, itsColIndexMap,  itsColIndexMap.nelements());
   ios.putend();
   return changed;
+  */
+    return false;
 }
 
 void SSMBase::resync (uInt aNrRows)
 {
+    /*
   itsNrRows = aNrRows;
   if (itsPtrIndex.nelements() != 0) {
     readHeader();
   }
   if (itsCache != 0) {
-    itsCache->resync (itsNrBuckets, itsFreeBucketsNr, 
+    itsCache->resync (itsNrBuckets, itsFreeBucketsNr,
 		      itsFirstFreeBucket);
   }
   if (itsPtrIndex.nelements() != 0) {
     readIndexBuckets();
-  }  
+  }
   if (itsStringHandler != 0) {
     itsStringHandler->resync();
   }
@@ -1012,25 +1086,29 @@ void SSMBase::resync (uInt aNrRows)
   for (uInt i=0; i<aNrCol; i++) {
     itsPtrColumn[i]->resync (itsNrRows);
   }
+  */
 }
 
 void SSMBase::create (uInt aNrRows)
 {
+    /*
   init();
   recreate();
   itsNrRows = 0;
   addRow (aNrRows);
+  */
 }
 
 void SSMBase::open (uInt aRowNr, AipsIO& ios)
 {
+    /*
   itsNrRows = aRowNr;
   ios.getstart ("SSM");
   ios >> itsDataManName;
   getBlock (ios,itsColumnOffset);
   getBlock (ios,itsColIndexMap);
   ios.getend();
-  
+
   itsFile = new BucketFile (fileName(), table().isWritable(),
                             0, False, multiFile());
   AlwaysAssert (itsFile != 0, AipsError);
@@ -1040,30 +1118,37 @@ void SSMBase::open (uInt aRowNr, AipsIO& ios)
   for (uInt i=0; i<aNrCol; i++) {
     itsPtrColumn[i]->getFile(itsNrRows);
   }
-  
+  */
+
 }
 
 StManArrayFile* SSMBase::openArrayFile (ByteIO::OpenOption anOpt)
 {
+    /*
   if (itsIosFile == 0) {
     itsIosFile = new StManArrayFile (fileName() + 'i', anOpt,
 				     0, asBigEndian(), 0, multiFile());
   }
   return itsIosFile;
+  */
+  return 0;
 }
 
 void SSMBase::reopenRW()
 {
+    /*
   if (itsFile != 0) {
     itsFile->setRW();
   }
   if (itsIosFile != 0) {
     itsIosFile->reopenRW();
   }
+  */
 }
 
 void SSMBase::deleteManager()
 {
+    /*
   delete itsIosFile;
   itsIosFile = 0;
   // Clear cache without flushing.
@@ -1075,14 +1160,16 @@ void SSMBase::deleteManager()
     delete itsFile;
     itsFile = 0;
   }
+  */
 }
 
 void SSMBase::init()
 {
+    /*
   // Size the blocks as needed.
   uInt nrCol = ncolumn();
-  itsColumnOffset.resize (nrCol, True);                            
-  itsColIndexMap.resize (nrCol, True);                            
+  itsColumnOffset.resize (nrCol, True);
+  itsColIndexMap.resize (nrCol, True);
   itsColIndexMap = 0;
   // Set the bucket size and get nr of rows per bucket.
   // If an advised nr of rows per bucket was given and the actual
@@ -1101,16 +1188,18 @@ void SSMBase::init()
     aTotalSize += (rowsPerBucket *
 		   itsPtrColumn[i]->getExternalSizeBits() + 7) / 8;
   }
-  
+
   // All columns are in the same bucket list, thus only one SSMIndex needed.
   itsPtrIndex.resize (1, True);
   itsPtrIndex[0] = new SSMIndex(this, rowsPerBucket);
   itsPtrIndex[0]->setNrColumns (nrCol, aTotalSize);
+  */
 }
 
 
 uInt SSMBase::setBucketSize()
 {
+    /*
   // Find nr of columns and possibly advised nr of rows per bucket.
   uInt nrCol = ncolumn();
   uInt advBucketRows = itsBucketRows;
@@ -1166,6 +1255,8 @@ uInt SSMBase::setBucketSize()
   }
   AlwaysAssert (itsBucketSize >= 128, AipsError);
   return rowsPerBucket;
+  */
+  return 0;
 }
 
 } //# NAMESPACE CASACORE - END
