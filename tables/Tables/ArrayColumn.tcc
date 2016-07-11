@@ -659,7 +659,7 @@ template<class T>
 void ArrayColumn<T>::setShape (uInt rownr, const IPosition& shape)
 {
     checkWritable();
-    TABLECOLUMNCHECKROW(rownr); 
+    TABLECOLUMNCHECKROW(rownr);
     //# Set shape if not defined yet or if changed (if possible).
     //# Throw exception if already defined with a different shape.
     if (canChangeShape_p  ||  !isDefined(rownr)) {
@@ -669,17 +669,17 @@ void ArrayColumn<T>::setShape (uInt rownr, const IPosition& shape)
 	    throw (TableInvOper
 		   ("ArrayColumn::setShape; shape cannot be changed for row " +
                     String::toString(rownr) + " column " +
-                    baseColPtr_p->columnDesc().name()));	
+                    baseColPtr_p->columnDesc().name()));
 	}
     }
 }
-	
+
 template<class T>
 void ArrayColumn<T>::setShape (uInt rownr, const IPosition& shape,
 			       const IPosition& tileShape)
 {
     checkWritable();
-    TABLECOLUMNCHECKROW(rownr); 
+    TABLECOLUMNCHECKROW(rownr);
     //# Only set shape if not defined yet.
     //# Throw exception if already defined with a different shape.
     if (canChangeShape_p  ||  !isDefined(rownr)) {
@@ -689,16 +689,17 @@ void ArrayColumn<T>::setShape (uInt rownr, const IPosition& shape,
 	    throw (TableInvOper
 		   ("ArrayColumn::setShape; shape cannot be changed for row " +
                     String::toString(rownr) + " column " +
-                    baseColPtr_p->columnDesc().name()));	
+                    baseColPtr_p->columnDesc().name()));
         }
     }
 }
-	
+
 template<class T>
 void ArrayColumn<T>::put (uInt rownr, const Array<T>& arr)
 {
+    /*
     checkWritable();
-    TABLECOLUMNCHECKROW(rownr); 
+    TABLECOLUMNCHECKROW(rownr);
     //# Define the shape if not defined yet.
     //# If defined, check if shape conforms.
     if (!isDefined(rownr)) {
@@ -714,6 +715,7 @@ void ArrayColumn<T>::put (uInt rownr, const Array<T>& arr)
 	}
     }
     baseColPtr_p->put (rownr, &arr);
+    */
 }
 
 template<class T>
@@ -721,7 +723,7 @@ void ArrayColumn<T>::putSlice (uInt rownr, const Slicer& arraySection,
 			       const Array<T>& arr)
 {
     checkWritable();
-    TABLECOLUMNCHECKROW(rownr); 
+    TABLECOLUMNCHECKROW(rownr);
     //# Check the array conformance.
     IPosition arrayShape (shape(rownr));
     IPosition blc,trc,inc;
