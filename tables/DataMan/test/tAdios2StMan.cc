@@ -257,6 +257,24 @@ void doReadArray(std::string filename, uInt rows, IPosition array_pos){
     VerifyArrayColumn<String>(casa_table, "array_String", rows, array_pos);
 }
 
+void doCopyTable(std::string inTable, std::string outTable, std::string column)
+{
+    Table tab(inTable);
+    TableDesc td("", "1", TableDesc::Scratch);
+    SetupNewTable newtab(outTable, td, Table::New);
+    Table duptab(newtab);
+    duptab.addRow(tab.nrow());
+    Adios2StMan a2stman;
+    duptab.addColumn(tab.tableDesc().columnDesc(column), a2stman);
+    TableCopy::copyColumnData(tab, column, duptab, column, false);
+}
+
+void doReadCopiedTable(std::string filename, std::string column, uInt rows, IPosition array_pos)
+{
+    Table tab(filename);
+    VerifyArrayColumn<Complex>(tab, column, rows, array_pos);
+}
+
 int main(int argc, char **argv){
 
     MPI_Init(&argc,&argv);
