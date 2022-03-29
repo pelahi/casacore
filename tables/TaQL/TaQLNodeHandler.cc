@@ -134,7 +134,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     if (node.itsCaseInsensitive) {
       str = Regex::makeCaseInsensitive(str);
     }
-    return new TaQLNodeHRValue (TableExprNode(TaqlRegex(Regex(str))));
+    return new TaQLNodeHRValue (TableExprNode(TaqlRegex(Regex(str, True))));
   }
 
   TaQLNodeResult TaQLNodeHandler::visitUnaryNode (const TaQLUnaryNodeRep& node)
@@ -533,7 +533,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
         curSel->execute (node.style().doTiming(), False, False, 0,
                          node.style().doTracing());
         hrval->setTable (curSel->getTable());
-        hrval->setNames (new Vector<String>(curSel->getColumnNames()));
+				Block<String> block = curSel->getColumnNames();
+        hrval->setNames (new Vector<String>(block.begin(), block.end()));
         hrval->setString ("select");
       } else {
         if (node.getFromExecute()) {
@@ -564,7 +565,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     TaQLNodeHRValue* hrval = new TaQLNodeHRValue();
     TaQLNodeResult res(hrval);
     hrval->setTable (curSel->getTable());
-    hrval->setNames (new Vector<String>(curSel->getColumnNames()));
+		Block<String> block = curSel->getColumnNames();
+    hrval->setNames (new Vector<String>(block.begin(), block.end()));
     hrval->setString ("update");
     popStack();
     return res;
@@ -599,7 +601,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     TaQLNodeHRValue* hrval = new TaQLNodeHRValue();
     TaQLNodeResult res(hrval);
     hrval->setTable (curSel->getTable());
-    hrval->setNames (new Vector<String>(curSel->getColumnNames()));
+		Block<String> block = curSel->getColumnNames();
+    hrval->setNames (new Vector<String>(block.begin(), block.end()));
     hrval->setString ("insert");
     popStack();
     return res;
@@ -637,7 +640,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     if (outer) {
       curSel->execute (node.style().doTiming(), False, True, 0);
       hrval->setTable (curSel->getTable());
-      hrval->setNames (new Vector<String>(curSel->getColumnNames()));
+      Block<String> block = curSel->getColumnNames();
+      hrval->setNames (new Vector<String>(block.begin(), block.end()));
       hrval->setString ("count");
     } else {
       AlwaysAssert (node.getFromExecute(), AipsError);
@@ -687,7 +691,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     TaQLNodeHRValue* hrval = new TaQLNodeHRValue();
     TaQLNodeResult res(hrval);
     hrval->setTable (curSel->getTable());
-    hrval->setNames (new Vector<String>(curSel->getColumnNames()));
+		Block<String> block = curSel->getColumnNames();
+    hrval->setNames (new Vector<String>(block.begin(), block.end()));
     hrval->setString ("cretab");
     popStack();
     return res;
@@ -1025,6 +1030,18 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     return hr;
   }
 
+  TaQLNodeResult TaQLNodeHandler::visitCopyColNode
+  (const TaQLCopyColNodeRep&)
+  {
+    throw TableInvExpr("COPY COLUMN not implemented");
+  }
+  
+  TaQLNodeResult TaQLNodeHandler::visitDropTabNode
+  (const TaQLDropTabNodeRep&)
+  {
+    throw TableInvExpr("DROP TABLE not implemented");
+  }
+  
   void TaQLNodeHandler::handleWhere (const TaQLNode& node)
   {
     if (node.isValid()) {

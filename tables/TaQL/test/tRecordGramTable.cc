@@ -30,7 +30,7 @@
 #include <casacore/tables/Tables/Table.h>
 #include <casacore/casa/Arrays/Array.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/iostream.h>
 
@@ -50,7 +50,7 @@ void doIt (const String& str)
   TableExprNode expr = RecordGram::parse (tab, str);
   cout << str << ": ";
   if (expr.isScalar()) {
-    Vector<uInt> rownrs(expr.nrow());
+    Vector<rownr_t> rownrs(expr.nrow());
     indgen (rownrs);
     switch (expr.getColumnDataType()) {
     case TpBool:
@@ -94,7 +94,7 @@ void doIt (const String& str)
     }
     cout << endl;
   } else {
-    for (uInt i=0; i<tab.nrow(); i++) {
+    for (rownr_t i=0; i<tab.nrow(); i++) {
       cout << "  row " << i << ":" << endl;
       switch (expr.dataType()) {
       case TpBool:
@@ -144,8 +144,8 @@ void docomm()
       break;
     try {
       doIt (str);
-    } catch (AipsError& x) {
-      cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+      cout << x.what() << endl;
     } 
   }
 }
@@ -158,8 +158,8 @@ int main (int argc, const char* argv[])
   }
   try {
     doIt(argv[1]);
-  } catch (AipsError& x) {
-    cout << "Unexpected exception: " << x.getMesg() << endl;
+  } catch (std::exception& x) {
+    cout << "Unexpected exception: " << x.what() << endl;
     return 1;
   } catch (...) {
     cout << "Unexpected unknown exception" << endl;

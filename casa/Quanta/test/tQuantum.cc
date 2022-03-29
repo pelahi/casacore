@@ -30,7 +30,7 @@
 #include <casacore/casa/BasicSL/Complex.h>
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/Quanta/Quantum.h>
 #include <casacore/casa/Quanta/QMath.h>
 #include <casacore/casa/Quanta/QLogical.h>
@@ -188,8 +188,8 @@ try {
     Quantum<Int> ll5(5,Quantum<Double>(7.,"mm/s"));
     cout << "Mixed Quantity/Quantum<Int>  " << ll5 << endl;
     
-} catch (AipsError& x) {
-  cout << x.getMesg() << endl;
+} catch (std::exception& x) {
+  cout << x.what() << endl;
 } 
     
     cout << endl << "--------------------------" << endl;
@@ -197,52 +197,52 @@ try {
     
     try {
 	Quantity loc(5,"KpH");
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
     
     try {
 	Quantity loc(A+D);
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
     
     try {
         // put in conditional so result is used,
         // so compiler won't emit warning of unused result
         if(A<D) {}
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
     
     try {
 	l4=pow(A,200);
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
     
     try {
 	A.convert("JY");
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
     
     try {
 	l4 = sin(A);
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
     
     try {
 	l4 = log(A);
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
     
     try {
 	l4 = sqrt(A);
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
     
     AlwaysAssert(max(A, B) == A, AipsError);
@@ -282,7 +282,7 @@ try {
     		Quantum<Double> q(1, "Hz");
     		q.getValue("K");
     	}
-    	catch (const AipsError& x) {
+    	catch (const std::exception& x) {
     		thrown = True;
     	}
     	AlwaysAssert(! thrown, AipsError);
@@ -291,7 +291,7 @@ try {
     		Quantum<Double> q(1, "Hz");
     		q.getValue("K", True);
     	}
-    	catch (const AipsError& x) {
+    	catch (const std::exception& x) {
     		thrown = True;
     	}
     	AlwaysAssert(thrown, AipsError);
@@ -307,6 +307,21 @@ try {
     	q = Quantum<Double>(3, "mm");
     	AlwaysAssert(near(q.getValue("MHz"), 99930.8, 1e-5), AipsError);
 
+    }
+
+    // Test copy construction and copy assignment with Vector does deep copying
+    {
+        // Copy constructor
+        Quantum<Vector<Int>> original({1, 2, 3}, "m");
+        Quantum<Vector<Int>> copy_constructed(original);
+        copy_constructed.getValue()[0] = 100;
+        AlwaysAssert(original.getValue()[0] == 1, AipsError);
+
+        // Copy assignment
+        Quantum<Vector<Int>> copy_assigned;
+        copy_assigned = original;
+        copy_assigned.getValue()[0] = 100;
+        AlwaysAssert(original.getValue()[0] == 1, AipsError);
     }
     cout << endl << "--------------------------" << endl;
     return 0;

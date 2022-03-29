@@ -28,6 +28,7 @@
 
 #include <casacore/images/Images/ImageOpener.h>
 #include <casacore/tables/Tables/Table.h>
+#include <casacore/tables/Tables/TableUtil.h>
 #include <casacore/tables/Tables/TableInfo.h>
 #include <casacore/images/Images/PagedImage.h>
 #include <casacore/images/Images/HDF5Image.h>
@@ -38,7 +39,7 @@
 #include <casacore/images/Images/MIRIADImage.h>
 #include <casacore/lattices/LEL/LatticeExprNode.h>
 #include <casacore/casa/HDF5/HDF5File.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/Json/JsonKVMap.h>
 #include <casacore/casa/Json/JsonParser.h>
 #include <casacore/casa/OS/File.h>
@@ -71,13 +72,13 @@ ImageOpener::ImageTypes ImageOpener::imageType (const String& name)
       return IMAGEEXPR;
     }
     if (Table::isReadable(name)) {
-      TableInfo info = Table::tableInfo (name);
+      TableInfo info = TableUtil::tableInfo (name);
       if (info.type() == TableInfo::type(TableInfo::PAGEDIMAGE)) {
 	return AIPSPP;
       }
       else if (info.type() == TableInfo::type(TableInfo::COMPONENTLIST)) {
           TableDesc tableDesc;
-          Table::getLayout(tableDesc, name);
+          TableUtil::getLayout(tableDesc, name);
           if (tableDesc.keywordSet().isDefined("coords")) {
               return COMPLISTIMAGE;
           }
@@ -252,7 +253,18 @@ LatticeBase* ImageOpener::openImage (const String& fileName,
    if (fileName.empty()) {
      return 0;
    }
+
    ImageOpener::ImageTypes type = ImageOpener::imageType(fileName);
+
+   // Override default openFunction
+   if (theirOpenFuncMap.find(type) != theirOpenFuncMap.end()) {
+     try {
+       return theirOpenFuncMap[type] (fileName, spec);
+     } catch (...) {
+       // Try default openFunction if theirOpenFunction fails
+     }
+   }
+
    // Do not require the registration of a PagedImage or HDF5Image openFunction.
    if (type == AIPSPP) {
      return openPagedImage (fileName, spec);

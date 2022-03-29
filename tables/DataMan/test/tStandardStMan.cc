@@ -38,11 +38,11 @@
 #include <casacore/tables/DataMan/StandardStManAccessor.h>
 #include <casacore/casa/BasicSL/Complex.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/Arrays/Cube.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/OS/File.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/Exceptions/Error.h>
@@ -69,7 +69,7 @@ void init (uInt aBucketSize,uInt aMode);
 void deleteRow(const uInt aRow);
 
 // reopen table, and throw away a few rows
-void deleteRows(const Vector<uInt>& aNrRows);
+void deleteRows(const Vector<rownr_t>& aNrRows);
 
 // delete a Column
 void deleteColumn(const String aColumn);
@@ -170,6 +170,7 @@ void testInd2()
 
 int main (int argc, const char* argv[])
 {
+  ///DataManager::MAXROWNR32 = 0;
     uInt aNr = 250;
     if (argc > 1) {
 	istringstream anIstr(argv[1]);
@@ -197,7 +198,7 @@ int main (int argc, const char* argv[])
 	addDirectArrays ();
 	addIndStringArray();
 	addIndArray     ();
-        Vector<uInt> aNrRows(3);
+        Vector<rownr_t> aNrRows(3);
 	for (uInt i=0; i< 3; i++) {
 	  aNrRows(i) = i+3;
 	}
@@ -205,7 +206,7 @@ int main (int argc, const char* argv[])
 	deleteColumn    ("Col-7");
        	addColumn(TpString);
 	// remove all remaining rows to check freebucket performance
-        Vector<uInt> aNewNrRows(15);
+        Vector<rownr_t> aNewNrRows(15);
 	for (uInt i=0; i< 15; i++) {
 	  aNewNrRows(i) = i;
 	}
@@ -216,8 +217,8 @@ int main (int argc, const char* argv[])
         testInd();
         testInd2();
 
-    } catch (AipsError& x) {
-	cout << "Caught an exception: " << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << "Caught an exception: " << x.what() << endl;
 	return 1;
     } 
     return 0;                           // exit with success status
@@ -379,7 +380,7 @@ void deleteRow(const uInt aRow)
   info(aTable);
 }
 
-void deleteRows(const Vector<uInt>& aNrRows)
+void deleteRows(const Vector<rownr_t>& aNrRows)
 {
   Table aTable = Table("tStandardStMan_tmp.data", Table::Update);
 

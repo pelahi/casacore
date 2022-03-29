@@ -36,7 +36,7 @@
 #include <casacore/casa/Arrays/Cube.h>
 #include <casacore/casa/Arrays/Matrix.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/BasicSL/Complex.h>
@@ -216,13 +216,13 @@ Array<T> shift(const Array<T> &input,
 template <class T, class S>
 class R2C1Deven1 {
   public:
-    static Array<T> input() {
+    static Vector<T> input() {
         Vector<T> input(8, 0.0f);
         input(0) = 1.0f;
         return input;
     }
     
-    static Array<S> expectedResult() {
+    static Vector<S> expectedResult() {
         return Vector<S>(5, Complex(1,0));
     }
 };
@@ -230,7 +230,7 @@ class R2C1Deven1 {
 template <class T, class S>
 class R2C1Deven2 {
 public:
-  static Array<T> input() {
+  static Vector<T> input() {
     Vector<T> input(8, 0.0f);
     input(0) = 1.0f;
     input(2) = -1.0f;
@@ -239,7 +239,7 @@ public:
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Vector<S> expectedResult() {
     Vector<S> expectedResult(5, Complex(0,0));
     expectedResult(2) = Complex(4,0);
     return expectedResult;
@@ -249,7 +249,7 @@ public:
 template <class T, class S>
 class R2C1Deven3 {
 public:
-  static Array<T> input() {
+  static Vector<T> input() {
     Vector<T> input(8, 0.0f);
     input(1) = 1.0f;
     input(3) = -1.0f;
@@ -258,7 +258,7 @@ public:
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Vector<S> expectedResult() {
     Vector<S> expectedResult(5, Complex(0,0));
     expectedResult(2) = Complex(0, -4);
     return expectedResult;
@@ -268,7 +268,7 @@ public:
 template <class T, class S>
 class R2C1Deven4 {
 public:
-  static Array<T> input() {
+  static Vector<T> input() {
     Vector<T> input(8, 0.0f);
     input(1) = 1.0f;
     input(3) = 1.0f;
@@ -277,7 +277,7 @@ public:
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Vector<S> expectedResult() {
     Vector<S> expectedResult(5, Complex(0,0));
     expectedResult(0) = Complex(4, 0);
     expectedResult(4) = Complex(-4, 0);
@@ -290,13 +290,13 @@ public:
 template <class T, class S>
 class R2C1Dodd1 {
 public:
-  static Array<T> input() {
+  static Vector<T> input() {
     Vector<T> input(9, 0.0f);
     input(0) = 1.0f;
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Vector<S> expectedResult() {
     return Vector<S>(5, Complex(1,0));
   }
 };
@@ -305,11 +305,11 @@ public:
 template <class T, class S>
 class R2C1Dodd2 {
 public:
-  static Array<T> input() {
+  static Vector<T> input() {
     return Vector<T>(9, 1.0f);
   }
 
-  static Array<S> expectedResult() {
+  static Vector<S> expectedResult() {
     Vector<S> expectedResult(5, Complex(0,0));
     expectedResult(0) = Complex(9,0);
     return expectedResult;
@@ -319,7 +319,7 @@ public:
 template <class T, class S>
 class R2C1Dodd3 {
 public:
-  static Array<T> input() {
+  static Vector<T> input() {
     Vector<T> input(9, 1.0f);
     input(1) = 0.0f;
     input(3) = 0.0f;
@@ -328,7 +328,7 @@ public:
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Vector<S> expectedResult() {
     Vector<S> expectedResult(5, Complex(0,0));
     expectedResult(0) = Complex(5,0);
     expectedResult(1) = Complex(0.5, 0.181985117133101);
@@ -341,25 +341,25 @@ public:
 template <class T, class S>
 class R2C2Deveneven1 {
 public:
-  static Array<T> input() {
+  static Matrix<T> input() {
     Matrix<T> input(4, 6);
     input = 0.0f;
     input(0, 0) = 1.0f;
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Matrix<S> expectedResult() {
     return Matrix<S>(3, 6, Complex(1, 0));
   }
 };
 template <class T, class S>
 class R2C2Deveneven2 {
 public:
-  static Array<T> input() {
+  static Matrix<T> input() {
     return Matrix<T>(4, 6, 1.0f);
   }
 
-  static Array<S> expectedResult() {
+  static Matrix<S> expectedResult() {
     Matrix<S> expectedResult(3, 6, Complex(0,0));
     expectedResult(0, 0) = Complex(24, 0);
     return expectedResult;
@@ -368,16 +368,15 @@ public:
 template <class T, class S>
 class R2C2Deveneven3 {
 public:
-  static Array<T> input() {
+  static Matrix<T> input() {
     Matrix<T> input(4, 6, 0.0f);
     input(1,1) = 1.0f;
     input(1,3) = 1.0f;
     input(1,5) = 1.0f;
-    
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Matrix<S> expectedResult() {
     Matrix<S> expectedResult(3, 6, Complex(0,0));
     expectedResult(0,0) = expectedResult(2,3) = Complex(3,0);
     expectedResult(0,3) = expectedResult(2,0) = Complex(-3,0);
@@ -392,13 +391,13 @@ public:
 template <class T, class S>
 class R2C2Devenodd1 {
 public:
-  static Array<T> input() {
+  static Matrix<T> input() {
     Matrix<T> input(4, 5, 0.0f);
     input(0, 0) = 1.0f;
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Matrix<S> expectedResult() {
       return Matrix<S>(3, 5, Complex(1, 0));
   }
 };
@@ -406,11 +405,11 @@ public:
 template <class T, class S>
 class R2C2Devenodd2 {
 public:
-  static Array<T> input() {
+  static Matrix<T> input() {
       return Matrix<T>(4, 5, 1.0f);
   }
 
-  static Array<S> expectedResult() {
+  static Matrix<S> expectedResult() {
       Matrix<S> expectedResult(3, 5, Complex(0,0));
       expectedResult(0,0) = Complex(20,0);
       return expectedResult;
@@ -421,13 +420,13 @@ public:
 template <class T, class S>
 class R2C2Doddeven1 {
 public:
-  static Array<T> input() {
+  static Matrix<T> input() {
     Matrix<T> input(3, 6, 0.0f);
     input(0, 0) = 1.0f;
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Matrix<S> expectedResult() {
       return Matrix<S>(2, 6, Complex(1, 0));
   }
 };
@@ -435,11 +434,11 @@ public:
 template <class T, class S>
 class R2C2Doddeven2 {
 public:
-  static Array<T> input() {
+  static Matrix<T> input() {
       return Matrix<T>(3, 6, 1.0f);
   }
 
-  static Array<S> expectedResult() {
+  static Matrix<S> expectedResult() {
       Matrix<S> expectedResult(2, 6, Complex(0,0));
       expectedResult(0,0) = Complex(18,0);
       return expectedResult;
@@ -449,13 +448,13 @@ public:
 template <class T, class S>
 class R2C2Doddodd1 {
 public:
-  static Array<T> input() {
+  static Matrix<T> input() {
     Matrix<T> input(3, 5, 0.0f);
     input(0, 0) = 1.0f;
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Matrix<S> expectedResult() {
       return Matrix<S>(2, 5, Complex(1, 0));
   }
 };
@@ -463,11 +462,11 @@ public:
 template <class T, class S>
 class R2C2Doddodd2 {
 public:
-  static Array<T> input() {
+  static Matrix<T> input() {
       return Matrix<T>(3, 5, 1.0f);
   }
 
-  static Array<S> expectedResult() {
+  static Matrix<S> expectedResult() {
       Matrix<S> expectedResult(2, 5, Complex(0,0));
       expectedResult(0,0) = Complex(15,0);
       return expectedResult;
@@ -478,24 +477,24 @@ public:
 template <class T, class S>
 class R2C3Deveneveneven1 {
 public:
-  static Array<T> input() {
+  static Cube<T> input() {
     Cube<T> input(4, 6, 8, 0.0f);
     input(0, 0, 0) = 1.0f;
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Cube<S> expectedResult() {
       return Cube<S>(3, 6, 8, Complex(1, 0));
   }
 };
 template <class T, class S>
 class R2C3Deveneveneven2 {
 public:
-  static Array<T> input() {
+  static Cube<T> input() {
       return Cube<T>(4, 6, 8, 1.0f);
   }
 
-  static Array<S> expectedResult() {
+  static Cube<S> expectedResult() {
       Cube<S> expectedResult(3, 6, 8, Complex(0,0));
       expectedResult(0, 0, 0) = Complex(4*6*8,0);
       return expectedResult;
@@ -505,13 +504,13 @@ public:
 template <class T, class S>
 class R2C3Doddoddodd1 {
 public:
-  static Array<T> input() {
+  static Cube<T> input() {
     Cube<T> input(3,5,7, 0.0f);
     input(0, 0, 0) = 1.0f;
     return input;
   }
 
-  static Array<S> expectedResult() {
+  static Cube<S> expectedResult() {
       return Cube<S>(2,5,7, Complex(1, 0));
   }
 };
@@ -519,11 +518,11 @@ public:
 template <class T, class S>
 class R2C3Doddoddodd2 {
 public:
-  static Array<T> input() {
+  static Cube<T> input() {
       return Cube<T>(3,5,7, 1.0f);
   }
 
-  static Array<S> expectedResult() {
+  static Cube<S> expectedResult() {
       Cube<S> expectedResult(2,5,7, Complex(0,0));
       expectedResult(0, 0, 0) = Complex(3*5*7,0);
       return expectedResult;
@@ -538,13 +537,13 @@ template <class T, class S>
 class R2C4Doddoddoddeven1 {
 public:
   static Array<T> input() {
-      Array<T> input(IPosition(4,3,5,7,4), 0.0f);
+      Array<T> input(IPosition(4,3,5,7,4), T(0.0));
       input(IPosition(4,0)) = 1.0f;
       return input;
   }
 
     static Array<S> expectedResult() {
-        return Array<S>(IPosition(4,2,5,7,4), Complex(1, 0));
+        return Array<S>(IPosition(4,2,5,7,4), S(1, 0));
   }
 };
 
@@ -553,12 +552,12 @@ template <class T, class S>
 class R2C4Doddoddoddeven2 {
 public:
     static Array<T> input() {
-        return Array<T> (IPosition(4,3,5,7,4), 1.0f);
+        return Array<T> (IPosition(4,3,5,7,4), T(1.0));
     }
     
     static Array<S> expectedResult() {
-        Array<S> expectedResult(IPosition(4,2,5,7,4), Complex(0, 0));
-        expectedResult(IPosition(4,0)) = Complex(3*5*7*4,0);
+        Array<S> expectedResult(IPosition(4,2,5,7,4), S(0, 0));
+        expectedResult(IPosition(4,0)) = S(3*5*7*4,0);
         return expectedResult;
     }
     
@@ -570,13 +569,13 @@ public:
 template <class S, class T>
 class C2R1Deven1 {
 public:
-  static Array<S> input() {
+  static Vector<S> input() {
     Vector<S> input(5, Complex(0, 0));
     input(0) = Complex(8, 0);
     return input;
   }
 
-  static Array<T> expectedResult() {
+  static Vector<T> expectedResult() {
       return Vector<T>(8, 1.0f);
   }
 };
@@ -584,15 +583,15 @@ public:
 template <class S, class T>
 class C2R1Deven2 {
 public:
-  static Array<S> input() {
-      Vector<S> input(5, Complex(0, 0));
-      input(0) = Complex(16.0f, 0.0f);
-      input(2) = Complex(8.0f, 0.0f);
+  static Vector<S> input() {
+      Vector<S> input(5, S(0, 0));
+      input(0) = S(16.0f, 0.0f);
+      input(2) = S(8.0f, 0.0f);
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Vector<T> expectedResult(8, 2.0f);
+  static Vector<T> expectedResult() {
+      Vector<T> expectedResult(8, T(2.0));
       expectedResult(0) = 4.0f;
       expectedResult(2) = 0.0f;
       expectedResult(4) = 4.0f;
@@ -604,15 +603,15 @@ public:
 template <class S, class T>
 class C2R1Deven3 {
 public:
-  static Array<S> input() {
-      Vector<S> input(5, Complex(0, 0));
+  static Vector<S> input() {
+      Vector<S> input(5, S(0, 0));
       input(0) = Complex(0.0f, 0.0f);
       input(2) = Complex(0.0f, 4.0f);
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Vector<T> expectedResult(8, 0.0f);
+  static Vector<T> expectedResult() {
+      Vector<T> expectedResult(8, T(0.0));
       expectedResult(1) = -1.0f;
       expectedResult(3) = 1.0f;
       expectedResult(5) = -1.0f;
@@ -623,13 +622,13 @@ public:
 template <class S, class T>
 class C2R1Deven4 {
 public:
-  static Array<S> input() {
-      Vector<S> input(5, Complex(1, 0));
+  static Vector<S> input() {
+      Vector<S> input(5, S(1, 0));
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Vector<T> expectedResult(8, 0.0f);
+  static Vector<T> expectedResult() {
+      Vector<T> expectedResult(8, T(0.0));
       expectedResult(0) = 1.0f;
       return expectedResult;
   }
@@ -637,15 +636,15 @@ public:
 template <class S, class T>
 class C2R1Deven5 {
 public:
-  static Array<S> input() {
-      Vector<S> input(5, Complex(1, 0));
+  static Vector<S> input() {
+      Vector<S> input(5, S(1, 0));
       input(1) = Complex(0,0);
       input(3) = Complex(0,0);
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Vector<T> expectedResult(8, 0.0f);
+  static Vector<T> expectedResult() {
+      Vector<T> expectedResult(8, T(0.0));
       expectedResult(0) = 0.5f;
       expectedResult(4) = 0.5f;
       return expectedResult;
@@ -656,27 +655,27 @@ public:
 template <class S, class T>
 class C2R1Dodd1 {
 public:
-  static Array<S> input() {
-    Vector<S> input(5, Complex(0, 0));
+  static Vector<S> input() {
+    Vector<S> input(5, S(0, 0));
     input(0) = Complex(9, 0);
     return input;
   }
 
-  static Array<T> expectedResult() {
-      return Vector<T>(9, 1.0f);
+  static Vector<T> expectedResult() {
+      return Vector<T>(9, T(1.0));
   }
 };
 
 template <class S, class T>
 class C2R1Dodd2 {
 public:
-  static Array<S> input() {
-      Vector<S> input(5, Complex(1, 0));
+  static Vector<S> input() {
+      Vector<S> input(5, S(1, 0));
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Vector<T> expectedResult(9, 0.0f);
+  static Vector<T> expectedResult() {
+      Vector<T> expectedResult(9, T(0.0));
       expectedResult(0) = 1.0f;
       return expectedResult;
   }
@@ -685,27 +684,27 @@ public:
 template <class S, class T>
 class C2R2Deveneven1 {
 public:
-  static Array<S> input() {
-      Matrix<S> input(3, 6, Complex(0, 0));
+  static Matrix<S> input() {
+      Matrix<S> input(3, 6, S(0, 0));
       input(0,0) = Complex(4*6,0);
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Matrix<T> expectedResult(4, 6, 1.0f);
+  static Matrix<T> expectedResult() {
+      Matrix<T> expectedResult(4, 6, T(1.0));
       return expectedResult;
   }
 };
 template <class S, class T>
 class C2R2Deveneven2 {
 public:
-  static Array<S> input() {
-      Matrix<S> input(3, 6, Complex(1, 0));
+  static Matrix<S> input() {
+      Matrix<S> input(3, 6, S(1, 0));
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Matrix<T> expectedResult(4, 6, 0.0f);
+  static Matrix<T> expectedResult() {
+      Matrix<T> expectedResult(4, 6, T(0.0));
       expectedResult(0,0) = 1.0f;
       return expectedResult;
   }
@@ -713,8 +712,8 @@ public:
 template <class S, class T>
 class C2R2Deveneven3 {
 public:
-  static Array<S> input() {
-      Matrix<S> input(3, 6, Complex(0, 0));
+  static Matrix<S> input() {
+      Matrix<S> input(3, 6, S(0, 0));
       input(0,0) = Complex(24,0);
       input(2,0) = Complex(-24,0);
       input(0,1) = Complex(-24,0);
@@ -725,8 +724,8 @@ public:
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Matrix<T> expectedResult(4, 6, 0.0f);
+  static Matrix<T> expectedResult() {
+      Matrix<T> expectedResult(4, 6, T(0.0));
       expectedResult(0,0) = expectedResult(0,1) = expectedResult(0,2) 
         = expectedResult(0,4) = expectedResult(0,5) = -1.0f;
       expectedResult(0,3) = 5.0f;
@@ -746,14 +745,14 @@ public:
 template <class S, class T>
 class C2R2Doddodd1 {
 public:
-  static Array<S> input() {
-      Matrix<S> input(2, 5, Complex(0, 0));
-      input(0, 0) = Complex(3*5, 0);
+  static Matrix<S> input() {
+      Matrix<S> input(2, 5, S(0, 0));
+      input(0, 0) = S(3*5, 0);
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Matrix<T> expectedResult(3, 5, 1.0f);
+  static Matrix<T> expectedResult() {
+      Matrix<T> expectedResult(3, 5, T(1.0));
       return expectedResult;
   }
 };
@@ -761,13 +760,13 @@ public:
 template <class S, class T>
 class C2R2Doddodd2 {
 public:
-  static Array<S> input() {
-      Matrix<S> input(2, 5, Complex(1, 0));
+  static Matrix<S> input() {
+      Matrix<S> input(2, 5, S(1, 0));
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Matrix<T> expectedResult(3, 5, 0.0f);
+  static Matrix<T> expectedResult() {
+      Matrix<T> expectedResult(3, 5, T(0.0));
       expectedResult(0,0) = 1.0f;
       return expectedResult;
   }
@@ -776,8 +775,8 @@ public:
 template <class S, class T>
 class C2R2Doddodd3 {
 public:
-  static Array<S> input() {
-      Matrix<S> input(2, 5, Complex(0, 0));
+  static Matrix<S> input() {
+      Matrix<S> input(2, 5, S(0, 0));
       input(1,0) = Complex(0,45);
       input(1,1) = Complex(0,45);
       input(1,2) = Complex(0,45);
@@ -786,8 +785,8 @@ public:
       return input;
   }
 
-  static Array<T> expectedResult() {
-      Matrix<T> expectedResult(3, 5, 0.0f);
+  static Matrix<T> expectedResult() {
+      Matrix<T> expectedResult(3, 5, T(0.0));
       expectedResult(1,0) = -25.9808f;
       expectedResult(2,0) = 25.9808f;
       return expectedResult;
@@ -798,14 +797,14 @@ public:
 template <class S, class T>
 class C2R2Devenodd1 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(3, 5, Complex(0, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(3, 5, S(0, 0));
         input(0,0) = Complex(4*5, 0);
         return input;
     }
     
-    static Array<T> expectedResult() {
-        Matrix<T> expectedResult(4, 5, 1.0f);
+    static Matrix<T> expectedResult() {
+        Matrix<T> expectedResult(4, 5, T(1.0));
         return expectedResult;
     }
 };
@@ -813,13 +812,13 @@ class C2R2Devenodd1 {
 template <class S, class T>
 class C2R2Devenodd2 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(3, 5, Complex(1, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(3, 5, S(1, 0));
         return input;
     }
     
-    static Array<T> expectedResult() {
-        Matrix<T> expectedResult(4, 5, 0.0f);
+    static Matrix<T> expectedResult() {
+        Matrix<T> expectedResult(4, 5, T(0.0));
         expectedResult(0,0) = 1.0f;
         return expectedResult;
     }
@@ -829,14 +828,14 @@ class C2R2Devenodd2 {
 template <class S, class T>
 class C2R2Doddeven1 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(2, 6, Complex(0, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(2, 6, S(0, 0));
         input(0,0) = Complex(3*6, 0);
         return input;
     }
     
-    static Array<T> expectedResult() {
-        Matrix<T> expectedResult(3, 6, 1.0f);
+    static Matrix<T> expectedResult() {
+        Matrix<T> expectedResult(3, 6, T(1.0));
         return expectedResult;
     }
 };
@@ -844,13 +843,13 @@ class C2R2Doddeven1 {
 template <class S, class T>
 class C2R2Doddeven2 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(2, 6, Complex(1, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(2, 6, S(1, 0));
         return input;
     }
     
-    static Array<T> expectedResult() {
-        Matrix<T> expectedResult(3, 6, 0.0f);
+    static Matrix<T> expectedResult() {
+        Matrix<T> expectedResult(3, 6, T(0.0));
         expectedResult(0,0) = 1.0f;
         return expectedResult;
     }
@@ -859,27 +858,27 @@ class C2R2Doddeven2 {
 template <class S, class T>
 class C2R3Deveneveneven1 {
   public:
-    static Array<S> input() {
-        Cube<S> input(3, 6, 2, Complex(0, 0));
+    static Cube<S> input() {
+        Cube<S> input(3, 6, 2, S(0, 0));
         input(0,0,0) = Complex(4*6*2,0);
         return input;
     }
     
-    static Array<T> expectedResult() {
-        Cube<T> expectedResult(4, 6, 2, 1.0f);
+    static Cube<T> expectedResult() {
+        Cube<T> expectedResult(4, 6, 2, T(1.0));
         return expectedResult;
     }
 };
 template <class S, class T>
 class C2R3Deveneveneven2 {
   public:
-    static Array<S> input() {
-        Cube<S> input(3, 6, 2, Complex(1, 0));
+    static Cube<S> input() {
+        Cube<S> input(3, 6, 2, S(1, 0));
         return input;
     }
     
-    static Array<T> expectedResult() {
-        Cube<T> expectedResult(4, 6, 2, 0.0f);
+    static Cube<T> expectedResult() {
+        Cube<T> expectedResult(4, 6, 2, T(0.0));
         expectedResult(0,0,0) = 1.0f;
         return expectedResult;
     }
@@ -888,27 +887,27 @@ class C2R3Deveneveneven2 {
 template <class S, class T>
 class C2R3Doddoddodd1 {
   public:
-    static Array<S> input() {
-        Cube<S> input(2, 5, 7, Complex(0, 0));
+    static Cube<S> input() {
+        Cube<S> input(2, 5, 7, S(0, 0));
         input(0,0,0) = Complex(3*5*7,0);
         return input;
     }
     
-    static Array<T> expectedResult() {
-        Cube<T> expectedResult(3, 5, 7, 1.0f);
+    static Cube<T> expectedResult() {
+        Cube<T> expectedResult(3, 5, 7, T(1.0));
         return expectedResult;
     }
 };
 template <class S, class T>
 class C2R3Doddoddodd2 {
   public:
-    static Array<S> input() {
-        Cube<S> input(2, 5, 7, Complex(1, 0));
+    static Cube<S> input() {
+        Cube<S> input(2, 5, 7, S(1, 0));
         return input;
     }
     
-    static Array<T> expectedResult() {
-        Cube<T> expectedResult(3, 5, 7, 0.0f);
+    static Cube<T> expectedResult() {
+        Cube<T> expectedResult(3, 5, 7, T(0.0));
         expectedResult(0,0,0) = 1.0f;
         return expectedResult;
     }
@@ -921,9 +920,9 @@ class C2R4Doddoddoddeven1 {
     static Array<S> input() {
 #if PERFORMANCE_TEST
       // Useful to test how the use of threads effects CPU usage
-      Array<S> input(IPosition(4,20,500,70,20), Complex(0, 0));
+      Array<S> input(IPosition(4,20,500,70,20), S(0, 0));
 #else
-      Array<S> input(IPosition(4,2,5,7,2), Complex(0, 0));
+      Array<S> input(IPosition(4,2,5,7,2), S(0, 0));
 #endif
       input(IPosition(4,0)) = Complex(3*5*7*2,0);
       return input;
@@ -933,7 +932,7 @@ class C2R4Doddoddoddeven1 {
 #if PERFORMANCE_TEST
       Array<T> expectedResult(IPosition(4, 38, 500, 70, 20));
 #else
-      Array<T> expectedResult(IPosition(4,3,5,7,2), 1.0f);
+      Array<T> expectedResult(IPosition(4,3,5,7,2), T(1.0));
 #endif
         expectedResult = 1.0f;
         return expectedResult;
@@ -944,12 +943,12 @@ template <class S, class T>
 class C2R4Doddoddoddeven2 {
   public:
     static Array<S> input() {
-        Array<S> input(IPosition(4,2,5,7,2), Complex(1, 0));
+        Array<S> input(IPosition(4,2,5,7,2), S(1, 0));
         return input;
     }
     
     static Array<T> expectedResult() {
-        Array<T> expectedResult(IPosition(4,3,5,7,2), 0.0f);
+        Array<T> expectedResult(IPosition(4,3,5,7,2), T(0.0));
         expectedResult = 0.0f;
         expectedResult(IPosition(4,0)) = 1.0f;
         return expectedResult;
@@ -960,14 +959,14 @@ class C2R4Doddoddoddeven2 {
 template <class S>
 class C2C1Deven1 {
   public:
-    static Array<S> input() {
-        Vector<S> input(8, Complex(0, 0));
+    static Vector<S> input() {
+        Vector<S> input(8, S(0, 0));
         input(0) = Complex(1.0f, 0.0f);
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Vector<S> expectedResult(8, Complex(1, 0));
+    static Vector<S> expectedResult() {
+        Vector<S> expectedResult(8, S(1, 0));
         return expectedResult;
     }
 };
@@ -975,13 +974,13 @@ class C2C1Deven1 {
 template <class S>
 class C2C1Deven2 {
   public:
-    static Array<S> input() {
-        Vector<S> input(8, Complex(1, 0));
+    static Vector<S> input() {
+        Vector<S> input(8, S(1, 0));
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Vector<S> expectedResult(8, Complex(0, 0));
+    static Vector<S> expectedResult() {
+        Vector<S> expectedResult(8, S(0, 0));
         expectedResult(0) = Complex(8,0);
         return expectedResult;
     }
@@ -990,8 +989,8 @@ class C2C1Deven2 {
 template <class S>
 class C2C1Deven3 {
   public:
-    static Array<S> input() {
-        Vector<S> input(8, Complex(-1, 0));
+    static Vector<S> input() {
+        Vector<S> input(8, S(-1, 0));
         input(0) = Complex(1, 0);
         input(2) = Complex(1, 0);
         input(4) = Complex(1, 0);
@@ -999,8 +998,8 @@ class C2C1Deven3 {
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Vector<S> expectedResult(8, Complex(0, 0));
+    static Vector<S> expectedResult() {
+        Vector<S> expectedResult(8, S(0, 0));
         expectedResult(4) = Complex(8,0);
         return expectedResult;
     }
@@ -1009,8 +1008,8 @@ class C2C1Deven3 {
 template <class S>
 class C2C1Deven4 {
   public:
-    static Array<S> input() {
-        Vector<S> input(8, Complex(0, 0));
+    static Vector<S> input() {
+        Vector<S> input(8, S(0, 0));
         input(1) = Complex(1, 0);
         input(3) = Complex(-1,0);
         input(5) = Complex(1, 0);
@@ -1018,8 +1017,8 @@ class C2C1Deven4 {
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Vector<S> expectedResult(8, Complex(0, 0));
+    static Vector<S> expectedResult() {
+        Vector<S> expectedResult(8, S(0, 0));
         expectedResult(2) = Complex(0,-4);
         expectedResult(6) = Complex(0,4);
         return expectedResult;
@@ -1031,14 +1030,14 @@ class C2C1Deven4 {
 template <class S>
 class C2C1Dodd1 {
   public:
-    static Array<S> input() {
-        Vector<S> input(7, Complex(0, 0));
+    static Vector<S> input() {
+        Vector<S> input(7, S(0, 0));
         input(0) = Complex(1.0f, 0.0f);
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Vector<S> expectedResult(7, Complex(1, 0));
+    static Vector<S> expectedResult() {
+        Vector<S> expectedResult(7, S(1, 0));
         return expectedResult;
     }
 };
@@ -1046,13 +1045,13 @@ class C2C1Dodd1 {
 template <class S>
 class C2C1Dodd2 {
   public:
-    static Array<S> input() {
-        Vector<S> input(7, Complex(1, 0));
+    static Vector<S> input() {
+        Vector<S> input(7, S(1, 0));
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Vector<S> expectedResult(7, Complex(0, 0));
+    static Vector<S> expectedResult() {
+        Vector<S> expectedResult(7, S(0, 0));
         expectedResult(0) = Complex(7,0);
         return expectedResult;
     }
@@ -1061,27 +1060,27 @@ class C2C1Dodd2 {
 template <class S>
 class C2C2Deveneven1 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(4, 6, Complex(0, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(4, 6, S(0, 0));
         input(0,0) = Complex(1,0);
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Matrix<S> expectedResult(4, 6, Complex(1, 0));
+    static Matrix<S> expectedResult() {
+        Matrix<S> expectedResult(4, 6, S(1, 0));
         return expectedResult;
     }
 };
 template <class S>
 class C2C2Deveneven2 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(4, 6, Complex(1, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(4, 6, S(1, 0));
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Matrix<S> expectedResult(4, 6, Complex(0, 0));
+    static Matrix<S> expectedResult() {
+        Matrix<S> expectedResult(4, 6, S(0, 0));
         expectedResult(0,0) = Complex(24,0);
         return expectedResult;
     }
@@ -1089,16 +1088,15 @@ class C2C2Deveneven2 {
 template <class S>
 class C2C2Deveneven3 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(4, 6, Complex(0, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(4, 6, S(0, 0));
         input(1,1) = Complex(1,1);
         input(1,3) = Complex(1,1);
         input(1,5) = Complex(1,1);
-        return input;
-    }
+        return input;    }
 
-    static Array<S> expectedResult() {
-        Matrix<S> expectedResult(4, 6, Complex(0, 0));
+    static Matrix<S> expectedResult() {
+        Matrix<S> expectedResult(4, 6, S(0, 0));
         expectedResult(0,0) = expectedResult(2,3) = Complex(3,3);
         expectedResult(0,3) = expectedResult(2,0) = Complex(-3,-3);
         expectedResult(1,3) = expectedResult(3,0) = Complex(-3,3);
@@ -1111,27 +1109,27 @@ class C2C2Deveneven3 {
 template <class S>
 class C2C2Doddodd1 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(3, 5, Complex(0, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(3, 5, S(0, 0));
         input(0,0) = Complex(1,0);
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Matrix<S> expectedResult(3, 5, Complex(1, 0));
+    static Matrix<S> expectedResult() {
+        Matrix<S> expectedResult(3, 5, S(1, 0));
         return expectedResult;
     }
 };
 template <class S>
 class C2C2Doddodd2 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(3, 5, Complex(1, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(3, 5, S(1, 0));
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Matrix<S> expectedResult(3, 5, Complex(0, 0));
+    static Matrix<S> expectedResult() {
+        Matrix<S> expectedResult(3, 5, S(0, 0));
         expectedResult(0,0) = Complex(15,0);
         return expectedResult;
     }
@@ -1140,27 +1138,27 @@ class C2C2Doddodd2 {
 template <class S>
 class C2C2Devenodd1 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(4, 5, Complex(0, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(4, 5, S(0, 0));
         input(0,0) = Complex(1,0);
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Matrix<S> expectedResult(4, 5, Complex(1, 0));
+    static Matrix<S> expectedResult() {
+        Matrix<S> expectedResult(4, 5, S(1, 0));
         return expectedResult;
     }
 };
 template <class S>
 class C2C2Devenodd2 {
   public:
-    static Array<S> input() {
-        Matrix<S> input(4, 5, Complex(1, 0));
+    static Matrix<S> input() {
+        Matrix<S> input(4, 5, S(1, 0));
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Matrix<S> expectedResult(4, 5, Complex(0, 0));
+    static Matrix<S> expectedResult() {
+        Matrix<S> expectedResult(4, 5, S(0, 0));
         expectedResult(0,0) = Complex(20,0);
         return expectedResult;
     }
@@ -1169,13 +1167,13 @@ class C2C2Devenodd2 {
 template <class S>
 class C2C2Doddeven1 {
   public:
-    static Array<S> input() {
+    static Matrix<S> input() {
         Matrix<S> input(3, 6, Complex(0, 0));
         input(0,0) = Complex(1,0);
         return input;
     }
 
-    static Array<S> expectedResult() {
+    static Matrix<S> expectedResult() {
         Matrix<S> expectedResult(3, 6, Complex(1, 0));
         return expectedResult;
     }
@@ -1183,12 +1181,12 @@ class C2C2Doddeven1 {
 template <class S>
 class C2C2Doddeven2 {
   public:
-    static Array<S> input() {
+    static Matrix<S> input() {
         Matrix<S> input(3, 6, Complex(1, 0));
         return input;
     }
 
-    static Array<S> expectedResult() {
+    static Matrix<S> expectedResult() {
         Matrix<S> expectedResult(3, 6, Complex(0, 0));
         expectedResult(0,0) = Complex(18,0);
         return expectedResult;
@@ -1198,13 +1196,13 @@ class C2C2Doddeven2 {
 template <class S>
 class C2C3Doddeveneven1 {
   public:
-    static Array<S> input() {
+    static Cube<S> input() {
         Cube<S> input(4, 6, 8, Complex(0, 0));
         input(0,0,0) = Complex(1,0);
         return input;
     }
 
-    static Array<S> expectedResult() {
+    static Cube<S> expectedResult() {
         Cube<S> expectedResult(4, 6, 8, Complex(1, 0));
         return expectedResult;
     }
@@ -1212,13 +1210,13 @@ class C2C3Doddeveneven1 {
 template <class S>
 class C2C3Doddeveneven2 {
   public:
-    static Array<S> input() {
-        Cube<S> input(4, 6, 8, Complex(1, 0));
+    static Cube<S> input() {
+        Cube<S> input(4, 6, 8, S(1, 0));
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Cube<S> expectedResult(4, 6, 8, Complex(0, 0));
+    static Cube<S> expectedResult() {
+        Cube<S> expectedResult(4, 6, 8, S(0, 0));
         expectedResult(0,0,0) = Complex(4*6*8,0);
         return expectedResult;
     }
@@ -1227,27 +1225,27 @@ class C2C3Doddeveneven2 {
 template <class S>
 class C2C3Doddoddodd1 {
   public:
-    static Array<S> input() {
-        Cube<S> input(3, 5, 7, Complex(0, 0));
+    static Cube<S> input() {
+        Cube<S> input(3, 5, 7, S(0, 0));
         input(0,0,0) = Complex(1,0);
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Cube<S> expectedResult(3, 5, 7, Complex(1, 0));
+    static Cube<S> expectedResult() {
+        Cube<S> expectedResult(3, 5, 7, S(1, 0));
         return expectedResult;
     }
 };
 template <class S>
 class C2C3Doddoddodd2 {
   public:
-    static Array<S> input() {
-        Cube<S> input(3, 5, 7, Complex(1, 0));
+    static Cube<S> input() {
+        Cube<S> input(3, 5, 7, S(1, 0));
         return input;
     }
 
-    static Array<S> expectedResult() {
-        Cube<S> expectedResult(3, 5, 7, Complex(0, 0));
+    static Cube<S> expectedResult() {
+        Cube<S> expectedResult(3, 5, 7, S(0, 0));
         expectedResult(0,0,0) = Complex(3*5*7,0);
         return expectedResult;
     }
@@ -2304,8 +2302,8 @@ int main()
       run_tests<Double, DComplex>();
 
   }
-  catch (AipsError& x) {
-    cerr << x.getMesg() << endl;
+  catch (std::exception& x) {
+    cerr << x.what() << endl;
     cout << "FAIL" << endl;
     return 1;
   } 

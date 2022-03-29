@@ -29,6 +29,7 @@
 #define MS_MSMAINCOLUMNS_H
 
 #include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/measures/Measures/MEpoch.h>
 #include <casacore/measures/Measures/Muvw.h>
 #include <casacore/measures/Measures/MCEpoch.h>
@@ -43,8 +44,6 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 class MeasurementSet;
 class String;
-template <class T> class Vector;
-
 
 // <summary>
 // A class for easy access to MeasurementSet main table columns
@@ -252,7 +251,7 @@ public:
   // </group>
 
   // Convenience function that returns the number of rows in any of the columns
-  uInt nrow() const {return antenna1_p.nrow();}
+  rownr_t nrow() const {return antenna1_p.nrow();}
   
   // Returns the category labels for the FLAG_CATEGORY column.
   Vector<String> flagCategories() const;

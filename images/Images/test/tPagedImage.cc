@@ -33,7 +33,7 @@
 #include <casacore/lattices/Lattices/LatticeIterator.h>
 
 #include <casacore/casa/Arrays/Array.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
 #include <casacore/casa/Arrays/Vector.h>
@@ -45,6 +45,7 @@
 #include <casacore/tables/Tables/TableDesc.h>
 #include <casacore/tables/Tables/SetupNewTab.h>
 #include <casacore/tables/Tables/Table.h>
+#include <casacore/tables/Tables/TableUtil.h>
 #include <casacore/tables/Tables/TableRecord.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/Utilities/DataType.h>
@@ -164,7 +165,7 @@ int main()
                              String("tPagedImage_tmp.img3"),
                              TableLock(TableLock::AutoLocking));
     }
-    Table::deleteTable(String("tPagedImage_tmp.img3"));
+    TableUtil::deleteTable(String("tPagedImage_tmp.img3"));
     {
        Table table = makeScrTable(String("tPagedImage_tmp.img4"));
        PagedImage<Float> pIm(tiledShape, cSys, table);
@@ -284,8 +285,8 @@ int main()
        Bool ok = False;
        try {
           pIm.resize(shape0);
-       } catch (AipsError& x) {
-//          cout << "Caught error " << x.getMesg() << endl;
+       } catch (std::exception& x) {
+//          cout << "Caught error " << x.what() << endl;
           ok = True;
        } 
        if (!ok) {
@@ -343,7 +344,7 @@ int main()
        AlwaysAssert(info.restoringBeam().getMinor()==a2, AipsError);
        AlwaysAssert(info.restoringBeam().getPA()==a3, AipsError);
      }
-     Table::deleteTable(String("tPagedImage_tmp.img5"));
+     TableUtil::deleteTable(String("tPagedImage_tmp.img5"));
 //
 // do{Put,Get}Slice tests
 //
@@ -524,8 +525,8 @@ int main()
 		   temp.setImageInfo(info);
 		   ok = False;
 	   }
-	   catch (AipsError& x) {
-		   cout << "Exception thrown as expected: " << x.getMesg() << endl;
+	   catch (std::exception& x) {
+		   cout << "Exception thrown as expected: " << x.what() << endl;
 	   }
 	   AlwaysAssert(ok, AipsError);
 	   info.setBeam(0, 0, maj, min, pa);
@@ -533,7 +534,7 @@ int main()
 		   temp.setImageInfo(info);
 		   ok = False;
 	   }
-	   catch (AipsError& x) {}
+	   catch (std::exception& x) {}
 	   AlwaysAssert(ok, AipsError);
 	   for (uInt i=0; i<4; i++) {
 		   for (uInt j=0; j<16; j++) {
@@ -547,8 +548,8 @@ int main()
              GaussianBeam beam = temp.imageInfo().restoringBeam();
              ok = False;
 	   }
-	   catch (AipsError& x) {
-             cout << "Exception thrown as expected: " << x.getMesg() << endl;
+	   catch (std::exception& x) {
+             cout << "Exception thrown as expected: " << x.what() << endl;
 	   }
 	   AlwaysAssert(ok, AipsError);
 	   // AlwaysAssert(beam.size() == 0, AipsError);
@@ -567,8 +568,8 @@ int main()
    testTempCloseDelete();
 
    cout<< "ok"<< endl;
-  } catch (AipsError& x) {
-    cerr << "Exception caught: " << x.getMesg() << endl;
+  } catch (std::exception& x) {
+    cerr << "Exception caught: " << x.what() << endl;
     return 1;
   } 
 

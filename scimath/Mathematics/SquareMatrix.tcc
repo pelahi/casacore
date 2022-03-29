@@ -32,7 +32,7 @@
 #include <casacore/scimath/Mathematics/SquareMatrix.h>
 #include <casacore/scimath/Mathematics/MatrixMathLA.h>
 #include <casacore/casa/BasicSL/Complex.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/iostream.h>
 
@@ -168,6 +168,7 @@ SquareMatrix<T,n>& SquareMatrix<T,n>::operator*=(const SquareMatrix<T,n>& other)
 		return *this;
 	    }
 	}
+	CASACORE_FALLTHROUGH;
     case Diagonal: 
 	switch (other.type_p) {
 	    case ScalarId: {
@@ -191,6 +192,7 @@ SquareMatrix<T,n>& SquareMatrix<T,n>::operator*=(const SquareMatrix<T,n>& other)
 		return *this;
 	    }
 	}
+	CASACORE_FALLTHROUGH;
     case General: 
 	switch (other.type_p) {
 	    case ScalarId: {

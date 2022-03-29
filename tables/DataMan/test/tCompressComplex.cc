@@ -32,13 +32,14 @@
 #include <casacore/tables/Tables/ArrColDesc.h>
 #include <casacore/tables/DataMan/CompressComplex.h>
 #include <casacore/tables/DataMan/TiledShapeStMan.h>
+#include <casacore/tables/DataMan/TiledStManAccessor.h>
 #include <casacore/tables/Tables/ArrayColumn.h>
 #include <casacore/tables/Tables/ScalarColumn.h>
 #include <casacore/casa/Arrays/Cube.h>
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/Arrays/Slicer.h>
 #include <casacore/casa/Arrays/Slice.h>
 #include <casacore/casa/Arrays/ArrayUtil.h>
@@ -121,6 +122,11 @@ void writeData (Bool isSD, Bool autoScale)
     source1.putSlice (5, Slicer(IPosition(3,0,i,0), IPosition(3,2,1,4)),
 		      arrf(IPosition(3,0,i,0), IPosition(3,1,i,3)));
   }
+  {
+    tab.flush();
+    ROTiledStManAccessor acc(tab, "tileddata");
+    acc.showCacheStatistics (cout);
+  }
 
   //# Do an erroneous thing.
   //# However, this fails to run on Linux (so outcommented).
@@ -128,8 +134,8 @@ void writeData (Bool isSD, Bool autoScale)
   ///  newtab2.bindColumn ("source2", engine1);
   ///  try {
   ///    Table tab2(newtab2, 10);                // bound to incorrect column
-  ///  } catch (AipsError x) {
-  ///    cout << x.getMesg() << endl;
+  ///  } catch (std::exception x) {
+  ///    cout << x.what() << endl;
   ///  } 
 }
 
@@ -487,8 +493,8 @@ int main ()
     writeData (True, True);
     if (!checkDataSD (True)) sts=1;
     testSpeed();
-  } catch (AipsError& x) {
-    cout << "Caught an exception: " << x.getMesg() << endl;
+  } catch (std::exception& x) {
+    cout << "Caught an exception: " << x.what() << endl;
     return 1;
   } 
   return sts;

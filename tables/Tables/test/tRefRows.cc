@@ -27,7 +27,7 @@
 
 #include <casacore/tables/Tables/RefRows.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/OS/Timer.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/iostream.h>
@@ -40,7 +40,7 @@
 
 void doIt()
 {
-    Vector<uInt> vec(18);
+    Vector<rownr_t> vec(18);
     vec(0) = 1;
     vec(1) = 1;
     vec(2) = 2;
@@ -108,8 +108,8 @@ void doIt()
 	}
     }
     {
-	Vector<uInt> rows(18);
-	indgen (rows, uInt(1));
+	Vector<rownr_t> rows(18);
+	indgen (rows, rownr_t(1));
 	rows(17) = 0;
 	RefRows ref(rows);
 	AlwaysAssertExit (ref.nrows() == 18);
@@ -117,8 +117,8 @@ void doIt()
 	cout << ref.convert(vec) << endl;
     }
     {
-	Vector<uInt> rows(18);
-	indgen (rows, uInt(1));
+	Vector<rownr_t> rows(18);
+	indgen (rows, rownr_t(1));
 	rows(17) = 0;
 	RefRows ref(rows, False, True);
 	AlwaysAssertExit (ref.nrows() == 18);
@@ -137,8 +137,8 @@ int main()
 {
     try {
 	doIt();
-    } catch (AipsError& x) {
-	cout << "\nCaught an exception: " << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << "\nCaught an exception: " << x.what() << endl;
         return 1;
     } 
     return 0;               // successfully executed

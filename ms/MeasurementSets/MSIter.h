@@ -69,21 +69,21 @@ private:
     mutable Double offset_p;
 };
 
-// <summary> 
+// <summary>
 // An iterator class for MeasurementSets
 // </summary>
- 
+
 // <use visibility=export>
- 
+
 // <prerequisite>
-//   <li> <linkto class="MeasurementSet:description">MeasurementSet</linkto> 
+//   <li> <linkto class="MeasurementSet:description">MeasurementSet</linkto>
 // </prerequisite>
 //
 // <etymology>
 // MSIter stands for the MeasurementSet Iterator class.
 // </etymology>
 //
-// <synopsis> 
+// <synopsis>
 // An MSIter is a class to traverse a MeasurementSet in various orders.  It
 // automatically adds four predefined sort columns to your selection of sort
 // columns (see constructor) so that it can keep track of changes in frequency
@@ -92,14 +92,14 @@ private:
 // examples below.  MSIter implements iteration by time interval for the use of
 // e.g., calibration tasks that want to calculate solutions over some interval
 // of time.  You can iterate over multiple MeasurementSets with this class.
-// </synopsis> 
+// </synopsis>
 //
 // <example>
 // <srcblock>
 // // The following code iterates by by ARRAY_ID, FIELD_ID, DATA_DESC_ID and
 // // TIME (all implicitly added columns) and then by baseline (antenna pair),
 // // in 3000s intervals.
-// MeasurementSet ms("3C273XC1.ms"); 
+// MeasurementSet ms("3C273XC1.ms");
 // Block<int> sort(2);
 //        sort[0] = MS::ANTENNA1;
 //        sort[1] = MS::ANTENNA2;
@@ -115,7 +115,7 @@ private:
 //    process(msIter.table()); // process the data in the current iteration
 // }
 // // Output shows only 1 row at a time because the table is sorted on TIME
-// // first and ANTENNA1, ANTENNA2 next and each baseline occurs only once per 
+// // first and ANTENNA1, ANTENNA2 next and each baseline occurs only once per
 // // TIME stamp. The interval has no effect in this case.
 // </srcblock>
 // </example>
@@ -125,7 +125,7 @@ private:
 // // The following code iterates by baseline (antenna pair), TIME, and,
 // // implicitly, by ARRAY_ID, FIELD_ID and DATA_DESC_ID in 3000s
 // // intervals.
-// MeasurementSet ms("3C273XC1.ms"); 
+// MeasurementSet ms("3C273XC1.ms");
 // Block<int> sort(3);
 //        sort[0] = MS::ANTENNA1;
 //        sort[1] = MS::ANTENNA2;
@@ -147,7 +147,7 @@ private:
 // </example>
 //
 // <motivation>
-// This class was originally part of the VisibilityIterator class, but that 
+// This class was originally part of the VisibilityIterator class, but that
 // class was getting too large and complicated. By splitting out the toplevel
 // iteration into this class the code is much easier to understand. It is now
 // also available through the ms tool.
@@ -172,7 +172,7 @@ public:
   // Use of other member functions on this object is likely to dump core.
   MSIter();
 
-  // Construct from MS and a Block of MS column enums specifying the 
+  // Construct from MS and a Block of MS column enums specifying the
   // iteration order, if none are specified, ARRAY_ID, FIELD_ID, DATA_DESC_ID,
   // and TIME iteration is implicit (unless addDefaultSortColumns=False)
   // These columns will be added first if they are not specified.
@@ -190,14 +190,34 @@ public:
   // false then the SORTED_TABLE is constructed and used in memory which keeps
   // concurrent readers from interfering with each other.
 
-  MSIter(const MeasurementSet& ms, const Block<Int>& sortColumns, 
-	 Double timeInterval=0, Bool addDefaultSortColumns=True,
-	 Bool storeSorted=True);
+  MSIter(const MeasurementSet& ms, const Block<Int>& sortColumns,
+         Double timeInterval=0, Bool addDefaultSortColumns=True,
+         Bool storeSorted=True);
 
   // Same as above with multiple MSs as input.
-  MSIter(const Block<MeasurementSet>& mss, const Block<Int>& sortColumns, 
-	 Double timeInterval=0, Bool addDefaultSortColumns=True,
-	 Bool storeSorted=True);
+  MSIter(const Block<MeasurementSet>& mss, const Block<Int>& sortColumns,
+         Double timeInterval=0, Bool addDefaultSortColumns=True,
+         Bool storeSorted=True);
+
+  // This constructor is similar to the previous ones but the comparison
+  // functions used to group the iterations are given explicitly, making
+  // the constructor more generic. Also, the column is specified as a string,
+  // to support sorting by columns not part of the standard MS definition.
+  // Note that with this constructor TIME is not treated in any special way and
+  // there are no default sorting columns, i.e., the sorting needs have to be
+  // set explicitly.
+  // The last element in vector sortColumns will be the column that will change
+  // faster in the iteration loop, whereas the first element will be the slower.
+  // For instance, if sortColumns[0].first = "DATA_DESC_ID" nad
+  // sortColumns[1].first = "ANTENNA1" then the first iterations will go through
+  // all possible values of ANTENNA1 for the first DDId, then it will start
+  // the iterations for the second DDId and so on.
+  MSIter(const MeasurementSet& ms,
+         const std::vector<std::pair<String, CountedPtr<BaseCompare>>>& sortColumns);
+
+  // Same as above with multiple MSs as input.
+  MSIter(const Block<MeasurementSet>& mss,
+         const std::vector<std::pair<String, CountedPtr<BaseCompare>>>& sortColumns);
 
   // Copy construct. This calls the assigment operator.
   MSIter(const MSIter & other);
@@ -206,20 +226,20 @@ public:
 
   // Destructor
   virtual ~MSIter();
-  
+
   // Assigment. This will reset the iterator to the origin.
   MSIter & operator=(const MSIter &other);
 
   //# Members
- 
+
   // Set or reset the time interval to use for iteration.
-  // You should call origin() to reset the iteration after 
+  // You should call origin() to reset the iteration after
   // calling this.
   void setInterval(Double timeInterval);
- 
+
   // Reset iterator to start of data
   virtual void origin();
- 
+
   // Return False if there is no more data
   virtual Bool more() const;
 
@@ -239,51 +259,72 @@ public:
   // Return reference to the current MSColumns
   const MSColumns& msColumns() const;
 
-  // Return the current MS Id (according to the order in which 
+  // Return the current MS Id (according to the order in which
   // they appeared in the constructor)
-  Int msId() const;
+  size_t msId() const;
 
   // Return true if msId has changed since last iteration
   Bool newMS() const;
 
-  // Return the current ArrayId
+  // Return the current ArrayIds for all rows in this iteration
+  const ScalarColumn<Int>& colArrayIds() const;
+
+  // Return the current FieldIds for all rows in this iteration
+  const ScalarColumn<Int>& colFieldIds() const;
+
+  // Return the current DataDescriptionIds for all rows in this iteration
+  const ScalarColumn<Int>& colDataDescriptionIds() const;
+
+  // Return the ArrayId of the first element in this iteration
   Int arrayId() const;
 
   // Return True if ArrayId has changed since last iteration
+  // Note that if MS_ARRAY is not part of the sorting columns this
+  // will always be true.
   Bool newArray() const;
 
-  // Return the current FieldId
+  // Return the FieldId of the first element in this iteration
   Int fieldId() const;
 
   // Return True if FieldId/Source has changed since last iteration
+  // Note that if MS_FIELD_ID is not part of the sorting columns this
+  // will always be true.
   Bool newField() const;
 
-  // Return current SpectralWindow
+  // Return SpectralWindow of the first element in this iteration
   Int spectralWindowId() const;
 
   // Return True if SpectralWindow has changed since last iteration
+  // Note that if MS_DATA_DESC_ID is not part of the sorting columns this
+  // will always be true.
   Bool newSpectralWindow() const;
 
-  // Return current DataDescriptionId
+  // Return DataDescriptionId of the first element in this iteration
   Int dataDescriptionId() const;
 
   // Return True if DataDescriptionId has changed since last iteration
+  // Note that if MS_DATA_DESC_ID is not part of the sorting columns this
+  // will always be true.
   Bool newDataDescriptionId() const;
 
-  // Return current PolarizationId
+  // Return PolarizationId of the first element in this iteration
   Int polarizationId() const;
 
   // Return True if polarization has changed since last iteration
+  // Note that if MS_DATA_DESC_ID is not part of the sorting columns this
+  // will always be true.
   Bool newPolarizationId() const;
 
 
-  // Return frame for polarization (returns PolFrame enum)
+  // Return frame for polarization of the first element in this iteration
+  // @returns PolFrame enum
   Int polFrame() const;
 
   // Return the frequencies corresponding to the DATA matrix.
   const Vector<Double>& frequency() const;
 
-  // Return frequency of first channel with reference frame as a Measure.
+  // Return frequency of first channel of the first element in iteration
+  // with reference frame as a Measure.
   // The reference frame Epoch is that of the first row, reset it as needed
   // for each row.
   // The reference frame Position is the average of the antenna positions.
@@ -292,7 +333,7 @@ public:
   // Return the rest frequency of the specified line as a Measure
   const MFrequency& restFrequency(Int line=0) const;
 
-  // Return the telescope position (if a known telescope) or the 
+  // Return the telescope position (if a known telescope) or the
   // position of the first antenna (if unknown)
   const MPosition& telescopePosition() const;
 
@@ -320,112 +361,143 @@ public:
   const Vector<String>& antennaMounts() const;
 
   // Return a cube containing pairs of coordinate offset for each receptor
-  // of each feed (values are in radians, coordinate system is fixed with 
-  // antenna and is the same as used to define the BEAM_OFFSET parameter 
-  // in the feed table). The cube axes are receptor, antenna, feed. 
+  // of each feed (values are in radians, coordinate system is fixed with
+  // antenna and is the same as used to define the BEAM_OFFSET parameter
+  // in the feed table). The cube axes are receptor, antenna, feed.
   const Cube<RigidVector<Double, 2> >& getBeamOffsets() const;
 
   // True if all elements of the cube returned by getBeamOffsets are zero
   Bool allBeamOffsetsZero() const;
 
-  // Get the spw, start  and nchan for all the ms's is this msiter that 
+  // Get the spw, start  and nchan for all the ms's is this msiter that
   // match the frequecy "freqstart-freqStep" and "freqEnd+freqStep" range
-  
-  void getSpwInFreqRange(Block<Vector<Int> >& spw, 
-			 Block<Vector<Int> >& start, 
-			 Block<Vector<Int> >& nchan, 
-			 Double freqStart, Double freqEnd, 
+
+  void getSpwInFreqRange(Block<Vector<Int> >& spw,
+			 Block<Vector<Int> >& start,
+			 Block<Vector<Int> >& nchan,
+			 Double freqStart, Double freqEnd,
 			 Double freqStep);
 
   //Get the number of actual ms's associated wth this iterator
-  Int numMS() const;
+  size_t numMS() const;
 
-  //Get a reference to the nth ms in the list of ms associated with this 
+  //Get a reference to the nth ms in the list of ms associated with this
   // iterator. If larger than the list of ms's current ms is returned
   // So better check wth numMS() before making the call
-  const MS& ms(const uInt n) const;
+  const MS& ms(const size_t n) const;
 
   //Returns the phasecenter for the first time stamp of the iteration
-  //The time is important for field tables that have polynomial or ephemerides 
+  //The time is important for field tables that have polynomial or ephemerides
   //phasecenters, i.e time varying for a given field_id..
-  //If the iterator is set so as one iteration has more that 1 time stamp 
+  //If the iterator is set so as one iteration has more that 1 time stamp
   //then this version is correct only for fixed phasecenters
-  const MDirection& phaseCenter() const ;
+  const MDirection& phaseCenter() const;
 
-  //If the iterator is set so as one iteration has more that 1 value of time stamp 
-  // or fieldid 
+  //If the iterator is set so as one iteration has more that 1 value of time stamp
+  // or fieldid
   //then the caller should use the phasecenter with field id and time explicitly
   const MDirection phaseCenter(const Int fldID, const Double timeStamp) const ;
-  
+
   //return FIELD table associated current fieldname and sourcename respectively
-  const String& fieldName() const; 
-  const String& sourceName() const; 
+  const String& fieldName() const;
+  const String& sourceName() const;
 
 protected:
   // handle the construction details
   void construct(const Block<Int>& sortColumns, Bool addDefaultSortColumns);
+  // handle the construction details using explicit comparison functions
+  void construct(const std::vector<std::pair<String, CountedPtr<BaseCompare>>>& sortColumns);
   // advance the iteration
   void advance();
   // set the iteration state
   virtual void setState();
   void setMSInfo();
   void setArrayInfo();
-  void setFeedInfo();
-  void setDataDescInfo();
-  void setFieldInfo();
+  void setFeedInfo() const;
+  // Store the current DD, SPW, Pol ID.
+  // It can be called in logically const objects although it modifies
+  // caching (mutable) variables for performance reasons.
+  void cacheCurrentDDInfo() const;
+  // Store extra info related to the DD.
+  // It can be called in logically const objects although it modifies
+  // caching (mutable) variables for performance reasons.
+  void cacheExtraDDInfo() const;
+  void setFieldInfo() const;
 
 // Determine if the numbers in r1 are a sorted subset of those in r2
-  Bool isSubSet(const Vector<uInt>& r1, const Vector<uInt>& r2);
+  Bool isSubSet(const Vector<rownr_t>& r1, const Vector<rownr_t>& r2);
 
   MSIter* This;
   Block<MeasurementSet> bms_p;
   PtrBlock<TableIterator* > tabIter_p;
   Block<Bool> tabIterAtStart_p;
 
-  Int nMS_p;
+  // This booleans determine if given columns are part of the sorting
+  Bool timeInSort_p, arrayInSort_p, ddInSort_p, fieldInSort_p;
+
+  size_t nMS_p, curMS_p;
+  ssize_t lastMS_p;
   CountedPtr<MSColumns> msc_p;
   Table curTable_p;
-  Int curMS_p, lastMS_p, curArray_p, lastArray_p, curSource_p;
-  String curFieldName_p, curSourceName_p;
-  Int curField_p, lastField_p, curSpectralWindow_p, lastSpectralWindow_p;
-  Int curPolarizationId_p, lastPolarizationId_p;
-  Int curDataDescId_p, lastDataDescId_p;
-  Bool more_p, newMS_p, newArray_p, newField_p, newSpectralWindow_p, 
-    newPolarizationId_p, newDataDescId_p, 
-    timeDepFeed_p, spwDepFeed_p, checkFeed_p;
+  Int curArrayIdFirst_p, lastArrayId_p, curSourceIdFirst_p;
+  mutable String curFieldNameFirst_p;
+  String curSourceNameFirst_p;
+  mutable Int curFieldIdFirst_p;
+  Int lastFieldId_p;
+  // These variables point to the current (as in this iteration)
+  // DD, SPW and polarization IDs. They are mutable since they are
+  // evaluated in a lazy way, i.e., only when needed. If the DDId is
+  // part of the sorting columns then it is always computed when calling
+  // next(), otherwise it is only computed when some accesor of
+  // metadata that depends on them is called by the application.
+  mutable Int curDataDescIdFirst_p, curSpectralWindowIdFirst_p,
+    curPolarizationIdFirst_p;
+  // These variables point to the IDs of the previous iteration.
+  Int lastDataDescId_p, lastSpectralWindowId_p, lastPolarizationId_p;
+  Bool more_p, newMS_p, newArrayId_p, newFieldId_p, newSpectralWindowId_p,
+    newPolarizationId_p, newDataDescId_p;
+  mutable bool spwDepFeed_p, checkFeed_p;
+
+  // Variable to know whether the feed info is already computed
+  mutable bool feedInfoCached_p;
+
 
   // Globally control disk storage of SORTED_TABLE
   Bool storeSorted_p;
 
   // time selection
   Double interval_p;
-  
-  // columns
-  ScalarColumn<Int> colArray_p, colDataDesc_p, colField_p;
-  
-  MDirection phaseCenter_p;
-  Double prevFirstTimeStamp_p;
+
+  // This column is mutable since it is only attached when it is
+  // neccesary to read the DD Ids. That might happen when calling
+  // a const accesor like dataDescriptionId().
+  mutable ScalarColumn<Int> colDataDesc_p, colField_p;
+  ScalarColumn<Int> colArray_p;
+
+  mutable MDirection phaseCenter_p;
+  mutable Double prevFirstTimeStamp_p;
   //cache for access functions
-  Matrix<Double> receptorAnglesFeed0_p; // former receptorAngle_p,
+  mutable Matrix<Double> receptorAnglesFeed0_p; // former receptorAngle_p,
                                    // temporary retained for compatibility
                                    // contain actually a reference to the
 				   // first plane of receptorAngles_p
-  Cube<Double> receptorAngles_p;
-  Vector<SquareMatrix<Complex,2> > CJonesFeed0_p; // a temporary reference
+  mutable Cube<Double> receptorAngles_p;
+  mutable Vector<SquareMatrix<Complex,2> > CJonesFeed0_p; // a temporary reference
                                    // similar to receptorAngle_p
-  Matrix<SquareMatrix<Complex,2> > CJones_p;
+  mutable Matrix<SquareMatrix<Complex,2> > CJones_p;
   Vector<String>  antennaMounts_p; // a string mount identifier for each
                                    // antenna (e.g. EQUATORIAL, ALT-AZ,...)
-  Cube<RigidVector<Double, 2> > beamOffsets_p;// angular offsets (two values for
-                                   // each element of the cube in radians) 
-				   // in the antenna coordinate system. 
+  mutable Cube<RigidVector<Double, 2> > beamOffsets_p;// angular offsets (two values for
+                                   // each element of the cube in radians)
+				   // in the antenna coordinate system.
 				   // Cube axes are: receptor, antenna, feed.
-  Bool allBeamOffsetsZero_p;       // True if all elements of beamOffsets_p
-                                   // are zero (to speed things up in a 
-				   // single beam case)
-  PolFrame polFrame_p;
-  Bool freqCacheOK_p;
-  Vector<Double> frequency_p;
+  mutable Bool allBeamOffsetsZero_p; // True if all elements of beamOffsets_p
+                                     // are zero (to speed things up in a
+				     // single beam case)
+  mutable PolFrame polFrame_p;     // polarization Frame. It is lazily cached,
+                                   // hence mutable. See cacheExtraDDInfo()
+  mutable Bool freqCacheOK_p;      // signal that the frequency cache is fine
+  mutable Vector<Double> frequency_p;
   MFrequency frequency0_p;
   MFrequency restFrequency_p;
   MPosition telescopePosition_p;
@@ -439,36 +511,51 @@ inline Table MSIter::table() const {return curTable_p;}
 inline const MS& MSIter::ms() const {return bms_p[curMS_p];}
 inline const MSColumns& MSIter::msColumns() const { return *msc_p;}
 inline Bool MSIter::newMS() const { return newMS_p;}
-inline Bool MSIter::newArray() const {return newArray_p;}
-inline Bool MSIter::newField() const { return newField_p;}
+inline Bool MSIter::newArray() const {return newArrayId_p;}
+inline Bool MSIter::newField() const { return newFieldId_p;}
 inline Bool MSIter::newSpectralWindow() const 
-{ return newSpectralWindow_p;}
-inline Int MSIter::msId() const { return curMS_p;}
-inline Int MSIter::numMS() const { return nMS_p;}
-inline Int MSIter::arrayId() const {return curArray_p;}
-inline Int MSIter::fieldId() const { return curField_p;}
-inline Int MSIter::spectralWindowId() const 
-{ return curSpectralWindow_p;}
-inline Int MSIter::polarizationId() const {return curPolarizationId_p;}
-inline Int MSIter::dataDescriptionId() const {return curDataDescId_p;}
+{ return newSpectralWindowId_p;}
+inline size_t MSIter::msId() const { return curMS_p;}
+inline size_t MSIter::numMS() const { return nMS_p;}
+inline const ScalarColumn<Int>& MSIter::colArrayIds() const
+{ return colArray_p;}
+inline const ScalarColumn<Int>& MSIter::colFieldIds() const
+{ return colField_p;}
+inline const ScalarColumn<Int>& MSIter::colDataDescriptionIds() const
+{if(curDataDescIdFirst_p==-1) {cacheCurrentDDInfo(); cacheExtraDDInfo();}
+  return colDataDesc_p;}
+inline Int MSIter::arrayId() const {return curArrayIdFirst_p;}
+inline Int MSIter::fieldId() const {if(curFieldIdFirst_p==-1) setFieldInfo(); return curFieldIdFirst_p;}
+inline Int MSIter::spectralWindowId() const
+{if(curSpectralWindowIdFirst_p==-1) {cacheCurrentDDInfo(); cacheExtraDDInfo();}
+  return curSpectralWindowIdFirst_p;}
+inline Int MSIter::polarizationId() const
+{if(curPolarizationIdFirst_p==-1) {cacheCurrentDDInfo(); cacheExtraDDInfo();}
+  return curPolarizationIdFirst_p;}
+inline Int MSIter::dataDescriptionId() const
+{if(curDataDescIdFirst_p==-1) {cacheCurrentDDInfo(); cacheExtraDDInfo();}
+  return curDataDescIdFirst_p;}
 inline Bool MSIter::newPolarizationId() const { return newPolarizationId_p;}
 inline Bool MSIter::newDataDescriptionId() const { return newDataDescId_p;}
-inline Int MSIter::polFrame() const { return polFrame_p;}
+inline Int MSIter::polFrame() const
+{if(curPolarizationIdFirst_p==-1) {cacheCurrentDDInfo(); cacheExtraDDInfo();}
+  return polFrame_p;}
 inline const MPosition& MSIter::telescopePosition() const
 { return telescopePosition_p;}
-inline const Vector<SquareMatrix<Complex,2> >& MSIter::CJones() const  
-{ return CJonesFeed0_p;}
+inline const Vector<SquareMatrix<Complex,2> >& MSIter::CJones() const
+{if(!feedInfoCached_p)  setFeedInfo();  return CJonesFeed0_p;}
 inline const Matrix<SquareMatrix<Complex,2> >& MSIter::CJonesAll() const
-{ return CJones_p;}
-inline const Matrix<Double>& MSIter::receptorAngle() const 
-{return receptorAnglesFeed0_p;}
+{if(!feedInfoCached_p)  setFeedInfo();  return CJones_p;}
+inline const Matrix<Double>& MSIter::receptorAngle() const
+{if(!feedInfoCached_p)  setFeedInfo();  return receptorAnglesFeed0_p;}
 inline const Cube<Double>& MSIter::receptorAngles() const
-{return receptorAngles_p;}
+{if(!feedInfoCached_p)  setFeedInfo();  return receptorAngles_p;}
 inline const Vector<String>& MSIter::antennaMounts() const
 {return antennaMounts_p;}
 inline const Cube<RigidVector<Double, 2> >& MSIter::getBeamOffsets() const
-{return beamOffsets_p;}
-inline Bool MSIter::allBeamOffsetsZero() const {return allBeamOffsetsZero_p;}
+{if(!feedInfoCached_p)  setFeedInfo();  return beamOffsets_p;}
+inline Bool MSIter::allBeamOffsetsZero() const 
+{if(!feedInfoCached_p)  setFeedInfo();  return allBeamOffsetsZero_p;}
 
 } //# NAMESPACE CASACORE - END
 

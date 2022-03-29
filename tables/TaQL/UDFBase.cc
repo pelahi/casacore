@@ -36,7 +36,7 @@ namespace casacore {
   // Use a recursive mutex, because loading from a shared library can cause
   // a nested lock.
   map<String,UDFBase::MakeUDFObject*> UDFBase::theirRegistry;
-  Mutex UDFBase::theirMutex(Mutex::Recursive);
+  std::recursive_mutex UDFBase::theirMutex;
 
 
   UDFBase::UDFBase()
@@ -151,10 +151,10 @@ namespace casacore {
   MArray<MVTime>  UDFBase:: getArrayDate     (const TableExprId&)
     { throw TableInvExpr ("UDFBase::getArrayDate not implemented"); }
 
-  void UDFBase::recreateColumnObjects (const Vector<uInt>&)
+  void UDFBase::recreateColumnObjects (const Vector<rownr_t>&)
   {}
 
-  void UDFBase::applySelection (const Vector<uInt>& rownrs)
+  void UDFBase::applySelection (const Vector<rownr_t>& rownrs)
   {
     if (itsApplySelection) {
       recreateColumnObjects (rownrs);
@@ -167,8 +167,15 @@ namespace casacore {
   {
     String fname(name);
     fname.downcase();
-
-    ScopedMutexLock lock(theirMutex);
+    // The library name is the first part.
+    Int j = fname.index('.');
+    String libname;
+    if (j > 0  &&  j < Int(fname.size())-1) {
+      libname = fname.substr(0,j);
+    } else {
+      throw TableInvExpr("UDF " + name + " has an invalid name (no dot)");
+    }
+    std::lock_guard<std::recursive_mutex> lock(theirMutex);
     map<String,MakeUDFObject*>::iterator iter = theirRegistry.find (fname);
     if (iter == theirRegistry.end()) {
       theirRegistry[fname] = func;
@@ -179,6 +186,13 @@ namespace casacore {
                             " already exists");
       }
     }
+    // Also register the library with null pointer (if not done yet).
+    // Note that a libname is different from a function name because
+    // it does not contain dots.
+    iter = theirRegistry.find (libname);
+    if (iter == theirRegistry.end()) {
+      theirRegistry[libname] = 0;
+    }
   }
 
   UDFBase* UDFBase::createUDF (const String& name, const TaQLStyle& style)
@@ -187,7 +201,7 @@ namespace casacore {
     fname.downcase();
     map<String,MakeUDFObject*>::iterator iter;
     {
-      ScopedMutexLock lock(theirMutex);
+      std::lock_guard<std::recursive_mutex> lock(theirMutex);
       // Try to find the function.
       iter = theirRegistry.find (fname);
       if (iter != theirRegistry.end()) {
@@ -204,8 +218,13 @@ namespace casacore {
       libname = fname.substr(0,j);
       libname = style.findSynonym (libname);
       fname   = libname + fname.substr(j);
+      // Try to find the function with the synonym.
+      iter = theirRegistry.find (fname);
+      if (iter != theirRegistry.end()) {
+        return iter->second (fname);
+      }
 
-      ScopedMutexLock lock(theirMutex);
+      std::lock_guard<std::recursive_mutex> lock(theirMutex);
       // See if the library is already loaded.
       iter = theirRegistry.find (libname);
       if (iter == theirRegistry.end()) {
@@ -214,18 +233,11 @@ namespace casacore {
                   "register_"+libname, False);
         if (dl.getHandle()) {
           // Add to map to indicate library has been loaded.
-          // Note that a libname is different from a function name because
-          // it does not contain dots.
           theirRegistry[libname] = 0;
         }
       }
       // Try to find the function.
       iter = theirRegistry.find (fname);
-      if (iter != theirRegistry.end()) {
-        return iter->second (fname);
-      }
-      // Look up 'libname.*' to see if the UDF supports any function.
-      iter = theirRegistry.find (libname + ".*");
       if (iter != theirRegistry.end()) {
         return iter->second (fname);
       }

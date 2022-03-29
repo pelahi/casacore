@@ -138,8 +138,8 @@ void doIt (Bool doExcp, Bool& success)
       Bool ok = True;
 	try {
             Path("/a/b").resolvedName();
-	} catch (AipsError& x) {
-            cout << ">>> " << x.getMesg() << endl << "<<<" << endl;
+	} catch (std::exception& x) {
+            cout << ">>> " << x.what() << endl << "<<<" << endl;
             ok = False;
 	}
         AlwaysAssertExit (!ok);
@@ -159,7 +159,8 @@ void doIt (Bool doExcp, Bool& success)
     AlwaysAssertExit (test3.originalName() == test2.originalName());
     AlwaysAssertExit (test3.expandedName() == test2.expandedName());
     AlwaysAssertExit (test3.absoluteName() == test2.absoluteName());
-    test3 = test3;
+    const Path& test3ref(test3);
+    test3 = test3ref;
     AlwaysAssertExit (test3.originalName() == test2.originalName());
     AlwaysAssertExit (test3.expandedName() == test2.expandedName());
     AlwaysAssertExit (test3.absoluteName() == test2.absoluteName());
@@ -171,8 +172,8 @@ void doIt (Bool doExcp, Bool& success)
     if (doExcp) {
 	try {
 	    test1.expandedName ();
-	} catch (AipsError& x) {
-	    cout << x.getMesg () << endl;
+	} catch (std::exception& x) {
+	    cout << x.what() << endl;
 	} 
     }
 	
@@ -262,8 +263,8 @@ int main (int argc, const char*[])
     Bool success = True;
     try {
 	doIt ( (argc<2), success);
-    } catch (AipsError& x) {
-	cout << "Caught an exception: " << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << "Caught an exception: " << x.what() << endl;
 	return 1;
     } 
     if (success) {

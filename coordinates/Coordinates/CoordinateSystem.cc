@@ -67,7 +67,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 const String CoordinateSystem::_class = "CoordinateSystem";
 
-Mutex CoordinateSystem::_mapInitMutex;
+std::mutex CoordinateSystem::_mapInitMutex;
 map<String, String> CoordinateSystem::_friendlyAxisMap = map<String, String>();
 
 
@@ -2685,11 +2685,11 @@ Bool CoordinateSystem::save(RecordInterface &container,
 	String name = basename + num;
 	coordinates_p[i]->save(subrec, name);
 	name = String("worldmap") + num;
-	subrec.define(name, Vector<Int>(*world_maps_p[i]));
+	subrec.define(name, Vector<Int>(world_maps_p[i]->begin(), world_maps_p[i]->end()));
 	name = String("worldreplace") + num;
 	subrec.define(name, Vector<Double>(*world_replacement_values_p[i]));
 	name = String("pixelmap") + num;
-	subrec.define(name, Vector<Int>(*pixel_maps_p[i]));
+	subrec.define(name, Vector<Int>(pixel_maps_p[i]->begin(), pixel_maps_p[i]->end()));
 	name = String("pixelreplace") + num;
 	subrec.define(name, Vector<Double>(*pixel_replacement_values_p[i]));
     }
@@ -2783,12 +2783,12 @@ CoordinateSystem* CoordinateSystem::restore(const RecordInterface &container,
 	String num(onum), name;
 	name = String("worldmap") + num;
 	subrec.get(name, dummy);
-	dummy.toBlock(*(retval->world_maps_p[i]));
+	*(retval->world_maps_p[i]) = makeBlock(dummy);
 	name = String("worldreplace") + num;
 	subrec.get(name, *(retval->world_replacement_values_p[i]));
 	name = String("pixelmap") + num;
 	subrec.get(name, dummy);
-	dummy.toBlock(*(retval->pixel_maps_p[i]));
+	*(retval->pixel_maps_p[i]) = makeBlock(dummy);
 	name = String("pixelreplace") + num;
 	subrec.get(name, *(retval->pixel_replacement_values_p[i]));
     }
@@ -3113,7 +3113,7 @@ Vector<String> CoordinateSystem::list (LogIO& os,
    MEpoch defEpoch = ObsInfo::defaultObsDate();
    if (epoch.getValue().getDay() != defEpoch.getValue().getDay()) { 
       MVTime time = MVTime(epoch.getValue());
-      os << "Date observation    : " << time.string(MVTime::YMD) << endl;
+      os << "Date observation    : " << time.string(MVTime::YMD, 12) << endl;
    } else {
       os << "Date observation    : " << "UNKNOWN" << endl;
    }
@@ -4653,7 +4653,7 @@ Vector<Int> CoordinateSystem::linearAxesNumbers() const {
 }
 
 void CoordinateSystem::_initFriendlyAxisMap() {
-        ScopedMutexLock lock(_mapInitMutex);
+        std::lock_guard<std::mutex> lock(_mapInitMutex);
 	if (_friendlyAxisMap.size() == 0) {
 		_friendlyAxisMap["velocity"] = "spectral";
 		_friendlyAxisMap["frequency"] = "spectral";

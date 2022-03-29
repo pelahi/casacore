@@ -39,7 +39,7 @@
 #include <casacore/measures/Measures/MBaseline.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/iostream.h>
 
 #include <casacore/casa/namespace.h>
@@ -177,7 +177,6 @@ int main()
 	  cout << "nearAbs:        " << x.nearAbs(x2) << endl;
 	  cout << "!=:             " << (x != x2) << endl;
 	  cout << "==:             " << (x == x2) << endl;
-	  cout << "type:           " << x.type() << endl;
 
 	  cout << "All MVBaseline functions: ok" << endl;
 	  cout << "----------------------------" << endl;
@@ -205,16 +204,14 @@ int main()
 	  cout << "getAngle:       " << mb.getAngle("deg") << endl;
 	  cout << "getDefaultType: " << mb.getDefaultType() << endl;
 	  cout << "getRefString:   " << mb.getRefString() << endl;
-	  cout << "myType:         " << mb.myType() << endl;
-	  cout << "type:           " << mb.type() << endl;
 
 	  cout << "All MBaseline functions: ok" << endl;
 	  cout << "---------------------------" << endl;
 	  delete mbc;
 	}
       
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
 
     return 0;

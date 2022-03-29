@@ -34,13 +34,12 @@
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/BasicSL/Complex.h>
 #include <casacore/tables/DataMan/RetypedArraySetGet.h>
+#include <casacore/casa/Arrays/ArrayFwd.h>
 
 #include <casacore/casa/namespace.h>
 //# Forward Declarations
 namespace casacore {
 class TableRecord;
-template<class T> class Array;
-template<class T> class Vector;
 }
 
 // <summary>
@@ -70,7 +69,6 @@ class RetypedArrayEx1
 public:
     RetypedArrayEx1(): x_p(0), y_p(0) {}
     RetypedArrayEx1(float x, float y) : x_p(x), y_p(y) {}
-    RetypedArrayEx1(const RetypedArrayEx1& that): x_p(that.x_p), y_p(that.y_p) {}
     static String dataTypeId()
         { return "RetypedArrayEx1"; }
     static IPosition shape()

@@ -31,13 +31,15 @@
 
 //# Includes
 #include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/measures/Measures/MeasBase.h>
 #include <casacore/measures/Measures/MeasRef.h>
 #include <casacore/measures/Measures/MCBase.h>
 #include <casacore/measures/Measures/MConvertBase.h>
 #include <casacore/measures/Measures/MDirection.h>
 #include <casacore/measures/Measures/MeasMath.h>
-#include <casacore/casa/OS/Mutex.h>
+
+#include <mutex>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -45,8 +47,6 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 class MCDirection;
 class MVPosition;
 class String;
-
-template <class T> class Vector;
 
 //# Typedefs
 
@@ -195,7 +195,7 @@ private:
   // Transition matrix
   static uInt FromTo_p[MDirection::N_Types][MDirection::N_Types];
   // Object to ensure safe multi-threaded lazy single initialization
-  static CallOnce0 theirInitOnce;
+  static std::once_flag theirInitOnceFlag;
 
   //# Constructors
   // Copy constructor (not implemented)

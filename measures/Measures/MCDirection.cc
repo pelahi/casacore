@@ -91,13 +91,13 @@ uInt MCDirection::ToRef_p[N_Routes][3] = {
   {MDirection::ICRS,		MDirection::J2000,	0},
   {MDirection::J2000,		MDirection::ICRS,	0} };
 uInt MCDirection::FromTo_p[MDirection::N_Types][MDirection::N_Types];
-CallOnce0 MCDirection::theirInitOnce;
+std::once_flag MCDirection::theirInitOnceFlag;
 
 //# Constructors
 MCDirection::MCDirection() :
   MVPOS1(0), MVPOS2(0), MVPOS3(0),
   VEC61(0), VEC62(0), VEC63(0), measMath() {
-    theirInitOnce(doFillState);
+    std::call_once(theirInitOnceFlag, doFillState);
 }
 
 //# Destructor
@@ -445,6 +445,7 @@ void MCDirection::doConvert(MVDirection &in,
     
     case R_COMET:
       if (comID == MDirection::APP) break;
+      CASACORE_FALLTHROUGH;
     case TOPO_APP: 
       measMath.deapplyAPPtoTOPO(in, lengthP);
       break;
@@ -526,7 +527,21 @@ void MCDirection::doConvert(MVDirection &in,
 	  log((g2+lengthE+g1)/(g2-lengthE+g1));
 	lengthE /= MeasTable::Planetary(MeasTable::CAU);
       } while (abs(g3-lengthE) > 1e-9*lengthE);
+
+      // MVDirections have default 0,0,1, we do not want to apply
+      // a shift with 90 degrees in latitude (shifts should be
+      // smaller than a few degrees).
+      bool doShift = (in(2)!=1.);
+      Quantity shift_long;
+      Quantity shift_lat;
+      if (doShift) {
+        shift_long = in.getLong();
+        shift_lat = in.getLat();
+      }
       in = *MVPOS1; in.adjust();
+      if (doShift) {
+        in.shift(shift_long, shift_lat);
+      }
       // Correct for light deflection
       // Check if near sun
       if (planID != MeasTable::SUN &&
@@ -602,7 +617,7 @@ void MCDirection::doConvert(MVDirection &in,
 }
 
 String MCDirection::showState() {
-  theirInitOnce(doFillState);
+  std::call_once(theirInitOnceFlag, doFillState);
   return MCBase::showState(MCDirection::FromTo_p[0],
 			   MDirection::N_Types, MCDirection::N_Routes,
 			   MCDirection::ToRef_p);

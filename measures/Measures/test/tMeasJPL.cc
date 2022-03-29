@@ -29,7 +29,7 @@
 #include <casacore/casa/aips.h>
 #include <casacore/casa/iomanip.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/measures/Measures.h>
 #include <casacore/measures/Measures/MeasJPL.h>
 #include <casacore/casa/Quanta/MVEpoch.h>
@@ -159,8 +159,8 @@ int main()
       MeasJPL::get(val, MeasJPL::DE405, MeasJPL::LIBRATION, dat);
       os << "Libration:  " << val << endl;
     }
-  } catch (const AipsError& x) {
-    cout << x.getMesg() << endl;
+  } catch (const std::exception& x) {
+    cout << x.what() << endl;
   } 
   
   try {
@@ -189,8 +189,27 @@ int main()
     cout << "Moon  APP:  " << mc2() << endl;
     cout << "Moon  APP:  " << mc2().getValue().getAngle("deg") << endl;
 
-  } catch (const AipsError& x) {
-    cout << x.getMesg() << endl;
+    MDirection ven_offset(Quantity(1, "deg"), Quantity(0.5, "deg"), venr);
+    MDirection sn_offset(Quantity(1, "deg"), Quantity(0.5, "deg"), sunr);
+    MDirection mon_offset(Quantity(1, "deg"), Quantity(0.5, "deg"),moonr);
+    MDirection::Convert vc1_offset(ven_offset, MDirection::Ref(MDirection::JNAT));
+    MDirection::Convert vc2_offset(ven_offset, MDirection::Ref(MDirection::APP));
+    MDirection::Convert sc1_offset(sn_offset, MDirection::Ref(MDirection::JNAT));
+    MDirection::Convert sc2_offset(sn_offset, MDirection::Ref(MDirection::APP));
+    MDirection::Convert mc1_offset(mon_offset, MDirection::Ref(MDirection::JNAT));
+    MDirection::Convert mc2_offset(mon_offset, MDirection::Ref(MDirection::APP));
+
+    cout << "Venus offset JNAT: " << vc1_offset() << endl;
+    cout << "Venus offset APP:  " << vc2_offset() << endl;
+    cout << "Sun offset   JNAT: " << sc1_offset() << endl;
+    cout << "Sun offset   APP:  " << sc2_offset() << endl;
+    cout << "Sun offset   APP:  " << sc2_offset().getValue().getAngle("deg") << endl;
+    cout << "Moon offset  JNAT: " << mc1_offset() << endl;
+    cout << "Moon offset  APP:  " << mc2_offset() << endl;
+    cout << "Moon offset  APP:  " << mc2_offset().getValue().getAngle("deg") << endl;
+
+  } catch (const std::exception& x) {
+    cout << x.what() << endl;
   } 
   
   return 0;

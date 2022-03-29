@@ -8,12 +8,12 @@ RecordGram
 TableGram
 )
 
- 
+
 foreach (src ${parser_inputs})
     BISON_TARGET (${src} TaQL/${src}.yy ${CMAKE_CURRENT_BINARY_DIR}/${src}.ycc COMPILE_FLAGS "-y -p ${src}")
     FLEX_TARGET (${src} TaQL/${src}.ll ${CMAKE_CURRENT_BINARY_DIR}/${src}.lcc COMPILE_FLAGS "-P${src}")
 endforeach (src)
- 
+
 
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
@@ -28,8 +28,18 @@ if (ADIOS2_FOUND)
   set(ADIOS2_HEADERS DataMan/Adios2StMan.h DataMan/Adios2StManColumn.h)
 endif (ADIOS2_FOUND)
 
+if(BUILD_DYSCO)
+  add_subdirectory(Dysco)
+else(BUILD_DYSCO)
+  set(DYSCOSTMAN_SOURCES)
+  set(DYSCOSTMAN_LIBRARIES)
+endif(BUILD_DYSCO)
+
 add_library (casa_tables
+Tables/ArrayColumnBase.cc
 Tables/ArrayColumn_tmpl.cc
+Tables/ArrColData.cc
+Tables/ArrColDesc.cc
 Tables/ArrColDesc_tmpl.cc
 Tables/BaseColDesc.cc
 Tables/BaseColumn.cc
@@ -54,6 +64,7 @@ Tables/RefColumn.cc
 Tables/RefRows.cc
 Tables/RefTable.cc
 Tables/RowCopier.cc
+Tables/RowNumbers.cc
 Tables/ScaColDesc_tmpl.cc
 Tables/ScalarColumn_tmpl.cc
 Tables/ScaRecordColData.cc
@@ -84,6 +95,7 @@ Tables/TableRow.cc
 Tables/TableRowProxy.cc
 Tables/TableSyncData.cc
 Tables/TableTrace.cc
+Tables/TableUtil.cc
 DataMan/BitFlagsEngine.cc
 DataMan/CompressComplex.cc
 DataMan/CompressFloat.cc
@@ -91,6 +103,7 @@ DataMan/DataManAccessor.cc
 DataMan/DataManError.cc
 DataMan/DataManInfo.cc
 DataMan/DataManager.cc
+DataMan/DataManagerColumn.cc
 DataMan/ForwardCol.cc
 DataMan/ForwardColRow.cc
 DataMan/ISMBase.cc
@@ -118,6 +131,7 @@ DataMan/StIndArrAIO.cc
 DataMan/StIndArray.cc
 DataMan/StManAipsIO.cc
 DataMan/StManColumn.cc
+DataMan/StManColumnBase.cc
 DataMan/StandardStMan.cc
 DataMan/StandardStManAccessor.cc
 DataMan/TSMColumn.cc
@@ -139,6 +153,8 @@ DataMan/TiledFileHelper.cc
 DataMan/TiledShapeStMan.cc
 DataMan/TiledStMan.cc
 DataMan/TiledStManAccessor.cc
+DataMan/VirtArrCol.cc
+DataMan/VirtScaCol.cc
 DataMan/VirtColEng.cc
 DataMan/VirtualTaQLColumn.cc
 TaQL/ExprAggrNode.cc
@@ -191,9 +207,10 @@ ${FLEX_RecordGram_OUTPUTS}
 ${BISON_TableGram_OUTPUTS}
 ${FLEX_TableGram_OUTPUTS}
 ${ADIOS2_SOURCES}
+${DYSCOSTMAN_SOURCES}
 )
 
-target_link_libraries (casa_tables casa_casa ${CASACORE_ARCH_LIBS})
+target_link_libraries (casa_tables casa_casa ${CASACORE_ARCH_LIBS} ${DYSCOSTMAN_LIBRARIES})
 if(MPI_FOUND)
     target_link_libraries(casa_tables ${MPI_C_LIBRARIES})
     if(ADIOS2_FOUND)
@@ -212,11 +229,11 @@ LIBRARY PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUT
 
 install (FILES
 Tables/ArrColData.h
-Tables/ArrColData.tcc
 Tables/ArrColDesc.h
 Tables/ArrColDesc.tcc
 Tables/ArrayColumn.h
 Tables/ArrayColumn.tcc
+Tables/ArrayColumnBase.h
 Tables/ArrayColumnFunc.h
 Tables/BaseColDesc.h
 Tables/BaseColumn.h
@@ -243,6 +260,7 @@ Tables/RefColumn.h
 Tables/RefRows.h
 Tables/RefTable.h
 Tables/RowCopier.h
+Tables/RowNumbers.h
 Tables/ScaColData.h
 Tables/ScaColData.tcc
 Tables/ScaColDesc.h
@@ -292,6 +310,7 @@ Tables/TableRow.h
 Tables/TableRowProxy.h
 Tables/TableSyncData.h
 Tables/TableTrace.h
+Tables/TableUtil.h
 Tables/TableVector.h
 Tables/TableVector.tcc
 DESTINATION include/casacore/tables/Tables
@@ -308,6 +327,7 @@ DataMan/DataManAccessor.h
 DataMan/DataManError.h
 DataMan/DataManInfo.h
 DataMan/DataManager.h
+DataMan/DataManagerColumn.h
 DataMan/ForwardCol.h
 DataMan/ForwardColRow.h
 DataMan/ISMBase.h
@@ -345,6 +365,7 @@ DataMan/StIndArrAIO.h
 DataMan/StIndArray.h
 DataMan/StManAipsIO.h
 DataMan/StManColumn.h
+DataMan/StManColumnBase.h
 DataMan/StandardStMan.h
 DataMan/StandardStManAccessor.h
 DataMan/TSMColumn.h
@@ -366,6 +387,8 @@ DataMan/TiledFileHelper.h
 DataMan/TiledShapeStMan.h
 DataMan/TiledStMan.h
 DataMan/TiledStManAccessor.h
+DataMan/VACEngine.h
+DataMan/VACEngine.tcc
 DataMan/VSCEngine.h
 DataMan/VSCEngine.tcc
 DataMan/VirtArrCol.h

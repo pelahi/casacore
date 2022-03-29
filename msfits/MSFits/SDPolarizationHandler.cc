@@ -103,7 +103,7 @@ void SDPolarizationHandler::fill(const Record &, const Vector<Int> &stokes)
     if (msPol_p) {
 	*numCorrKey_p = stokes.nelements();
 	Bool found = False;
-	Vector<uInt> foundRows = index_p->getRowNumbers();
+	Vector<rownr_t> foundRows = index_p->getRowNumbers();
 	uInt whichOne = 0;
 	while (!found && whichOne<foundRows.nelements()) {
 	    if (allEQ(stokes, msPolCols_p->corrType()(foundRows(whichOne))) &&
@@ -296,6 +296,7 @@ void SDPolarizationHandler::stokesKeys(Int stokesValue, Int &key1, Int &key2)
     case Stokes::QP:
 	key1 = Stokes::QQ;
 	key2 = Stokes::PP;
+	break;
     default:
 	// the two keys are identical to each other and to the stokes type
 	key1 = key2 = stokesValue;

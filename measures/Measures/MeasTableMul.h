@@ -33,7 +33,9 @@
 #include <casacore/casa/aips.h>
 #include <casacore/scimath/Functionals/Polynomial.h>
 #include <casacore/casa/Arrays/Matrix.h>
-#include <casacore/casa/OS/Mutex.h>
+#include <casacore/casa/Utilities/CountedPtr.h>
+
+#include <mutex>
 #include <vector>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
@@ -96,11 +98,11 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     virtual void init() = 0;
     virtual void calc(Matrix<Double>&, Double time) = 0;
   protected:
-    Mutex itsMutex;
+    std::mutex itsMutex;
     Int64 itsLastUsed;
-    vector<Int64> itsUsed;
-    vector<Double> itsTimes;
-    vector<CountedPtr<Matrix<Double> > > itsArrays;
+    std::vector<Int64> itsUsed;
+    std::vector<Double> itsTimes;
+    std::vector<CountedPtr<Matrix<Double> > > itsArrays;
     Matrix<Double> itsDefArray;
   };
 

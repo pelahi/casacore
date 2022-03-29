@@ -30,7 +30,7 @@
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/measures/Measures.h>
 #include <casacore/casa/Quanta/MVDirection.h>
 #include <casacore/casa/Quanta/MVPosition.h>
@@ -182,15 +182,15 @@ int main()
 	cout << "Length in dam:        " << pdc3.getLength("dam") << endl;
 
 
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
 
     try {
 	cout << "Euler(10 deg, 20 m): ";
 	cout << Euler(Quantity(10,"deg"), Quantity(20,"m")) << endl;
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
 
     try {
@@ -199,8 +199,8 @@ int main()
 	MVDirection dc10(Quantity(10,"deg"),Quantity(20,"deg"));
 	cout << "Rotate (10,20 deg) over 0,0,30 deg: " 
 	    << (rot10*dc10).getAngle("deg") << endl;
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
 
     try {
@@ -247,10 +247,10 @@ int main()
 	cout << " equation of equinoxes 45882.5: " <<
 	    nt1.getEqoxAngle(45882,"''") << endl;
 	cout << " equation at 45882.5 from derivative at 45882.7: " <<
-	    nt1.getEqoxAngle(45882.2,"''") - (const Double) 0.2 *
+	    nt1.getEqoxAngle(45882.2,"''") -  0.2 *
 		Quantity(nt1.derivativeEqox(45882.2)/C::arcsec,"''") << endl;
 	cout << " equation at 45882.5 from derivative at 45882.54: " <<
-	    nt1.getEqoxAngle(45882.04,"''") - (const Double) 0.04 *
+	    nt1.getEqoxAngle(45882.04,"''") -  0.04 *
 		Quantity(nt1.derivativeEqox(45882.04)/C::arcsec,"''") << endl;
 	cout << "J2000 nutation: " << endl;
 	Double eq;
@@ -335,8 +335,8 @@ int main()
 		mypcd << endl;
 	}
 
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
 
     try {
@@ -346,8 +346,8 @@ int main()
 	cout << "5.3 + 10.9: " << MVEpoch(5.3)+MVEpoch(10.9) << endl;
 	cout << "1.123 years: " << MVEpoch(Quantity(1.123,"a")) << endl;
 
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
 
     try {
@@ -366,8 +366,8 @@ int main()
       cout << "Near 0.01 \" (0.1,0.2) and (0.1000001, 0.2): " <<
 	dc1.near(dc3, Quantity(0.01, "arcsec")) << endl;
 
-    } catch (AipsError& x) {
-	cout << x.getMesg() << endl;
+    } catch (std::exception& x) {
+	cout << x.what() << endl;
     } 
 
     return(0);

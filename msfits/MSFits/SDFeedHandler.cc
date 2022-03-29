@@ -34,7 +34,7 @@
 #include <casacore/ms/MeasurementSets/MSFeed.h>
 #include <casacore/casa/Containers/Record.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/tables/Tables/ArrayColumn.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/Exceptions/Error.h>
@@ -122,7 +122,7 @@ void SDFeedHandler::fill(const Record &, Int antennaId, Int spwinId, const Vecto
 	nrecpt_p = *numRecpKey_p;
 	Bool found = False;
 	feedId_p = -1;
-	Vector<uInt> foundRows = index_p->getRowNumbers();
+	Vector<rownr_t> foundRows = index_p->getRowNumbers();
 	uInt whichOne = 0;
 	// this is True if the row has probably come from a MS AND FEED1 == FEED2
 	// When true, fill will try and reuse the same feed number if possible

@@ -29,7 +29,7 @@
 #include <casacore/msfits/MSFits/MSFitsIDI.h>
 #include <casacore/msfits/MSFits/FitsIDItoMS.h>
 #include <casacore/fits/FITS/fitsio.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/Utilities/Regex.h>
 #include <casacore/casa/Logging/LogIO.h>
 #include <casacore/casa/OS/File.h>
@@ -42,6 +42,7 @@
 #include <casacore/tables/DataMan/TiledColumnStMan.h>
 #include <casacore/tables/DataMan/TiledShapeStMan.h>
 #include <casacore/tables/Tables/SetupNewTab.h>
+#include <casacore/tables/Tables/TableUtil.h>
 
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
@@ -151,7 +152,7 @@ Bool MSFitsIDI::fillMS()
   
   // Delete the MS if it already exits and overwrite selected
   if (itsMSExists){
-      Table::deleteTable(itsMSOut);
+      TableUtil::deleteTable(itsMSOut);
   }
 
   // new MS will be created within readFITSFile
@@ -341,7 +342,7 @@ void MSFitsIDI::readFITSFile(Bool& atEnd)
 	  }
 	}
 	else{ // ignore this subtable
-	  if (infits.datasize() > 0)
+	  if (infits.currsize() > 0)
 	    infits.skip_all(FITS::BinaryTableHDU);
 	}
       }
@@ -408,6 +409,11 @@ void MSFitsIDI::readFITSFile(Bool& atEnd)
       Table mssub(itsMSOut+"_tmp/"+subTableName(isub)+"/WEATHER",Table::Update);
       mssub.rename (itsMSOut+"/WEATHER",Table::New);
       msmain.rwKeywordSet().defineTable("WEATHER",mssub);
+    }
+    if (subTableName(isub)=="GAIN_CURVE") {
+      Table mssub(itsMSOut+"_tmp/"+subTableName(isub)+"/GAIN_CURVE",Table::Update);
+      mssub.rename (itsMSOut+"/GAIN_CURVE",Table::New);
+      msmain.rwKeywordSet().defineTable("GAIN_CURVE",mssub);
     }
     //if (subTableName(isub)=="INTERFEROMETER_MODEL") {
     //  Table mssub(itsMSOut+"_tmp/"+subTableName(isub)+"/IDI_CORRELATOR_MODEL",Table::Update);

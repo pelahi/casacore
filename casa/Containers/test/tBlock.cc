@@ -254,17 +254,17 @@ void doit()
       try {
         ba.replaceStorage(20, p, True);
         AlwaysAssertExit(False);
-      } catch (AipsError const &) {
+      } catch (std::exception const &) {
       }
       try {
         ba.replaceStorage(20, p, False);
         AlwaysAssertExit(False);
-      } catch (AipsError const &) {
+      } catch (std::exception const &) {
       }
       ba.permitChangingAllocator();
       try {
         ba.replaceStorage(20, p, True);
-      } catch (AipsError const &) {
+      } catch (std::exception const &) {
         AlwaysAssertExit(False);
       }
       AlwaysAssertExit(0 == p);
@@ -273,7 +273,7 @@ void doit()
       p = DefaultAllocator<Int>::type().allocate(20);
       try {
         ba.replaceStorage(20, p, True, AllocSpec<DefaultAllocator<Int> >::value);
-      } catch (AipsError const &) {
+      } catch (std::exception const &) {
         AlwaysAssertExit(False);
       }
       AlwaysAssertExit(0 == p);
@@ -299,7 +299,8 @@ void doit()
     for(i=0; i < 200; i++) {
 	AlwaysAssertExit(bi2[i] == 5);
     }
-    bi2 = bi2;
+    const Block<Int>& bi2ref(bi2);         // Use ref in self-assigment
+    bi2 = bi2ref;                          // to avoid compiler warning
     AlwaysAssertExit(bi2.nelements() == 200);
     for(i=0; i < 200; i++) {
 	AlwaysAssertExit(bi2[i] == 5);

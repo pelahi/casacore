@@ -27,6 +27,7 @@
 //# $Id$
 
 #include <casacore/tables/LogTables/NewFile.h>
+#include <casacore/tables/Tables/TableUtil.h>
 #include <casacore/casa/System/Choice.h>
 
 #include <casacore/casa/OS/File.h>
@@ -102,14 +103,14 @@ Bool NewFile::valueOK(const String &value, String &error) const
 			extra_error = "Table is not writable!";
 		    } else {
 			removed = False;
-			if (Table::canDeleteTable(extra_error, value)) {
+			if (TableUtil::canDeleteTable(extra_error, value)) {
 			    try {
-				Table::deleteTable(value);
+				TableUtil::deleteTable(value);
 				removed = True;
-			    } catch (AipsError& xxx) {
+			    } catch (std::exception& xxx) {
 				removed = False;
 				extra_error = String("Error deleting table ")
-				    + value + ":" + xxx.getMesg();
+				    + value + ":" + xxx.what();
 			    } 
 			}
 		    }
@@ -118,8 +119,8 @@ Bool NewFile::valueOK(const String &value, String &error) const
 		    sfile.remove();
 		    removed = True;
 		}
-	    } catch (AipsError& x) {
-		extra_error = x.getMesg();
+	    } catch (std::exception& x) {
+		extra_error = x.what();
 		removed = False;
 	    } 
 	    if (!removed) {

@@ -34,13 +34,14 @@
 #include <casacore/tables/TaQL/ExprNodeArray.h>
 #include <casacore/casa/Containers/ValueHolder.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/casa/Quanta/MVPosition.h>
 #include <casacore/casa/Quanta/MVAngle.h>
 #include <casacore/casa/BasicSL/Complex.h>
 #include <casacore/casa/BasicMath/Math.h>
 #include <casacore/casa/OS/Path.h>
 #include <casacore/casa/Utilities/Assert.h>
+#include <casacore/casa/Utilities/GenSort.h>
 #include <casacore/casa/OS/EnvVar.h>
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/version.h>
@@ -49,6 +50,7 @@
 #include <fstream>
 #include <casacore/casa/iostream.h>
 #include <casacore/casa/iomanip.h>
+#include <unistd.h>
 
 #ifdef HAVE_READLINE
 # include <readline/readline.h>
@@ -96,7 +98,7 @@ struct Options
   Bool printHeader;
   Bool printCommand;
   Bool printNRows;
-  uInt maxNRows;
+  rownr_t maxNRows;
   String separator;
   String fname;
   String style;
@@ -265,7 +267,7 @@ Bool readLine (String& line, const String& prompt)
 }
 #endif
 
-// Read a line until a non-empty line is read. 
+// Read a line until a non-empty line or ^D or quit is read. 
 Bool readLineSkip (String& line, const String& prompt)
 {
   Bool fnd = False;
@@ -441,8 +443,7 @@ void showTable (const Table& tab, const Vector<String>& colnam,
   Block<Vector<String> > dirUnit(colnam.nelements());
   Block<String> colUnits(colnam.nelements());
   Bool hasUnits = False;
-  uInt i;
-  for (i=0; i<colnam.nelements(); i++) {
+  for (uInt i=0; i<colnam.nelements(); i++) {
     if (! tab.tableDesc().isColumn (colnam(i))) {
       os << "Column " << colnam(i) << " does not exist" << endl;
     }else{
@@ -500,7 +501,7 @@ void showTable (const Table& tab, const Vector<String>& colnam,
   }
   // Use TableProxy, so we can be type-agnostic.
   TableProxy proxy(tab);
-  for (i=0; i<tab.nrow(); i++) {
+  for (rownr_t i=0; i<tab.nrow(); i++) {
     for (uInt j=0; j<nrcol; j++) {
       if (j > 0) {
         os << separator;
@@ -530,7 +531,7 @@ void showTable (const Table& tab, const Vector<String>& colnam,
     os << endl;
   }
   
-  for (i=0; i<nrcol; i++) {
+  for (uInt i=0; i<nrcol; i++) {
     delete tableColumns[i];
   }
 }
@@ -557,7 +558,7 @@ void showExpr(const TableExprNode& expr, ostream& os)
   if (! unit.empty()) {
     os << "Unit: " << unit.getName() << endl;
   }
-  Vector<uInt> rownrs (expr.nrow());
+  Vector<rownr_t> rownrs (expr.nrow());
   indgen (rownrs);
   if (expr.isScalar()) {
     switch (expr.getColumnDataType()) {
@@ -603,7 +604,7 @@ void showExpr(const TableExprNode& expr, ostream& os)
                       AipsError);
         MVTime time;
         if (expr.nrow() != 1) os << '[';
-        for (uInt i=0; i<expr.nrow(); i++) {
+        for (rownr_t i=0; i<expr.nrow(); i++) {
           if (i > 0) os << ", ";
           expr.get (i, time);
           showTime (time, os);
@@ -616,7 +617,7 @@ void showExpr(const TableExprNode& expr, ostream& os)
     }
     os << endl;
   } else {
-    for (uInt i=0; i<expr.nrow(); i++) {
+    for (rownr_t i=0; i<expr.nrow(); i++) {
       if (expr.nrow() > 1) {
         os << "  row " << i << ":  ";
       }
@@ -662,7 +663,7 @@ void showParseError (const TableParseError& x)
   //# Background color codes:
   //# 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
   // cerr has fd 2 (per C++ standard)
-  const String& msg(x.getMesg());
+  const String& msg(x.what());
   if (isatty(2)  &&  x.pos() >= 0) {
     // Cater for leading part of the message.
     int errLen = x.token().size();
@@ -698,7 +699,7 @@ Table taqlCommand (const Options& options, const String& varName,
   Bool printCommand = options.printCommand;
   Bool printNRows   = options.printNRows;
   Bool printHeader  = options.printHeader;
-  uInt maxNRows     = options.maxNRows;
+  rownr_t maxNRows  = options.maxNRows;
   ostream& os = *(options.stream);
   String::size_type spos = command.find_first_not_of (' ');
   if (spos != String::npos) {
@@ -712,7 +713,8 @@ Table taqlCommand (const Options& options, const String& varName,
     addComm = !(s=="with" || s=="select" || s=="update" || s=="insert" ||
                 s=="calc" || s=="delete" || s=="count"  || 
                 s=="create" || s=="createtable" ||
-                s=="alter" || s=="altertable" ||
+                s=="drop"   || s=="droptable"   ||
+                s=="alter"  || s=="altertable"  ||
                 s=="using"  || s=="usingstyle"  || s=="time" ||
                 showHelp);
   }
@@ -770,7 +772,7 @@ Table taqlCommand (const Options& options, const String& varName,
         Bool showSubset = False;
         if (!printSelect && printAuto && tabp.nrow() > maxNRows) {
           showSubset = True;
-          Vector<uInt> rownrs(maxNRows);
+          Vector<rownr_t> rownrs(maxNRows);
           indgen (rownrs);
           tabc = tabp(rownrs);
         }
@@ -1074,8 +1076,8 @@ Bool execCommand (const String& command, TableMap& tableMap,
     }
   } catch (const TableParseError& x) {
     showParseError (x);
-  } catch (const AipsError& x) {
-    cerr << x.getMesg() << endl;
+  } catch (const std::exception& x) {
+    cerr << x.what() << endl;
   }
   return True;
 }
@@ -1189,7 +1191,7 @@ Bool parseArgs (const vector<String>& args, uInt& st, Options& options, Bool rem
     } else if (arg == "-m") {
       if (st < args.size()-1) {
         st++;
-        options.maxNRows = atoi(args[st].c_str());
+        options.maxNRows = atol(args[st].c_str());
       } else {
         throw AipsError("No value given after -m");
       }
@@ -1328,8 +1330,8 @@ int main (int argc, const char* argv[])
       args.push_back (argv[i]);
     }
     executeArgs (args, True, tableMap, options);
-  } catch (const AipsError& x) {
-    cerr << "\nCaught an exception: " << x.getMesg() << endl;
+  } catch (const std::exception& x) {
+    cerr << "\nCaught an exception: " << x.what() << endl;
     return 1;
   } 
   return 0;               // successfully executed

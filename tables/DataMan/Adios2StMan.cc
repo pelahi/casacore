@@ -35,25 +35,30 @@ namespace casacore
 {
 
 // Static objects in impl class
-std::string Adios2StMan::impl::itsAdiosEngineType;
-adios2::Params Adios2StMan::impl::itsAdiosEngineParams;
-std::vector<adios2::Params> Adios2StMan::impl::itsAdiosTransportParamsVec;
 MPI_Comm Adios2StMan::impl::itsMpiComm = MPI_COMM_WORLD;
+
+constexpr const char *Adios2StMan::impl::SPEC_FIELD_XML_FILE;
+constexpr const char *Adios2StMan::impl::SPEC_FIELD_ENGINE_TYPE;
+constexpr const char *Adios2StMan::impl::SPEC_FIELD_ENGINE_PARAMS;
+constexpr const char *Adios2StMan::impl::SPEC_FIELD_TRANSPORT_PARAMS;
+constexpr const char *Adios2StMan::impl::SPEC_FIELD_OPERATOR_PARAMS;
 
 //
 // Adios2StMan implementation in terms of the impl class
 //
-Adios2StMan::Adios2StMan(MPI_Comm mpiComm)
-    : DataManager(),
-    pimpl(std::unique_ptr<impl>(new impl(*this, mpiComm)))
-{
-}
 
 Adios2StMan::Adios2StMan(MPI_Comm mpiComm, std::string engineType,
     std::map<std::string, std::string> engineParams,
-    std::vector<std::map<std::string, std::string>> transportParams)
+    std::vector<std::map<std::string, std::string>> transportParams,
+    std::vector<std::map<std::string, std::string>> operatorParams)
     : DataManager(),
-    pimpl(std::unique_ptr<impl>(new impl(*this, mpiComm, engineType, engineParams, transportParams)))
+    pimpl(std::unique_ptr<impl>(new impl(*this, mpiComm, engineType, engineParams, transportParams, operatorParams)))
+{
+}
+
+Adios2StMan::Adios2StMan(std::string xmlFile, MPI_Comm mpiComm)
+    : DataManager(),
+    pimpl(std::unique_ptr<impl>(new impl(*this, xmlFile, mpiComm)))
 {
 }
 
@@ -61,76 +66,81 @@ Adios2StMan::~Adios2StMan() = default;
 
 DataManager *Adios2StMan::clone() const
 {
-	return pimpl->clone();
+    return pimpl->clone();
 }
 
 String Adios2StMan::dataManagerType() const
 {
-	return pimpl->dataManagerType();
+    return pimpl->dataManagerType();
 }
 
 String Adios2StMan::dataManagerName() const
 {
-	return pimpl->dataManagerName();
+    return pimpl->dataManagerName();
 }
 
-void Adios2StMan::create(uInt aNrRows)
+void Adios2StMan::create64(rownr_t aNrRows)
 {
-	pimpl->create(aNrRows);
+    pimpl->create64(aNrRows);
 }
 
-void Adios2StMan::open(uInt aRowNr, AipsIO &ios)
+rownr_t Adios2StMan::open64(rownr_t aRowNr, AipsIO &ios)
 {
-	pimpl->open(aRowNr, ios);
+    return pimpl->open64(aRowNr, ios);
 }
 
-void Adios2StMan::resync(uInt aRowNr)
+rownr_t Adios2StMan::resync64(rownr_t aRowNr)
 {
-	pimpl->resync(aRowNr);
+    return pimpl->resync64(aRowNr);
 }
 
 Bool Adios2StMan::flush(AipsIO &ios, Bool doFsync)
 {
-	return pimpl->flush(ios, doFsync);
+    return pimpl->flush(ios, doFsync);
 }
 
 DataManagerColumn *Adios2StMan::makeScalarColumn(
-    const String &aName, int aDataType, const String &aDataTypeID)
+        const String &aName, int aDataType, const String &aDataTypeID)
 {
-	return pimpl->makeScalarColumn(aName, aDataType, aDataTypeID);
+    return pimpl->makeScalarColumn(aName, aDataType, aDataTypeID);
 }
 
 DataManagerColumn *Adios2StMan::makeDirArrColumn(
-    const String &aName, int aDataType, const String &aDataTypeID)
+        const String &aName, int aDataType, const String &aDataTypeID)
 {
-	return pimpl->makeDirArrColumn(aName, aDataType, aDataTypeID);
+    return pimpl->makeDirArrColumn(aName, aDataType, aDataTypeID);
 }
 
 DataManagerColumn *Adios2StMan::makeIndArrColumn(
-    const String &aName, int aDataType, const String &aDataTypeID)
+        const String &aName, int aDataType, const String &aDataTypeID)
 {
-	return pimpl->makeIndArrColumn(aName, aDataType, aDataTypeID);
+    return pimpl->makeIndArrColumn(aName, aDataType, aDataTypeID);
 }
 
 void Adios2StMan::deleteManager()
 {
-	pimpl->deleteManager();
+    pimpl->deleteManager();
 }
 
-void Adios2StMan::addRow(uInt aNrRows)
+void Adios2StMan::addRow64(rownr_t aNrRows)
 {
-	return pimpl->addRow(aNrRows);
+    return pimpl->addRow64(aNrRows);
 }
 
 DataManager *Adios2StMan::makeObject(
-    const String &aDataManType, const Record &spec)
+        const String &aDataManType, const Record &spec)
 {
-	return impl::makeObject(aDataManType, spec);
+    return impl::makeObject(aDataManType, spec);
 }
 
-uInt Adios2StMan::getNrRows()
+Record Adios2StMan::dataManagerSpec() const
 {
-	return pimpl->getNrRows();
+    return pimpl->dataManagerSpec();
+}
+
+rownr_t Adios2StMan::getNrRows()
+{
+    return pimpl->getNrRows();
 }
 
 
@@ -138,27 +148,9 @@ uInt Adios2StMan::getNrRows()
 //
 // impl class implementation using ADIOS2
 //
-Adios2StMan::impl::impl(Adios2StMan &parent, MPI_Comm mpiComm)
-    : parent(parent)
-{
-    itsMpiComm = mpiComm;
-    std::string engineType;
-    adios2::Params engineParams;
-    std::vector<adios2::Params> transportParams;
-    Adios2StMan(mpiComm, engineType, engineParams, transportParams);
-}
 
-Adios2StMan::impl::impl(
-        Adios2StMan &parent, MPI_Comm mpiComm, std::string engineType,
-        std::map<std::string, std::string> engineParams,
-        std::vector<std::map<std::string, std::string>> transportParams)
-    : parent(parent)
+void Adios2StMan::impl::checkMPI() const
 {
-    itsMpiComm = mpiComm;
-    itsAdiosEngineType = engineType;
-    itsAdiosEngineParams = engineParams;
-    itsAdiosTransportParamsVec = transportParams;
-
     int mpi_finalized;
     MPI_Finalized(&mpi_finalized);
     if(mpi_finalized)
@@ -185,9 +177,37 @@ Adios2StMan::impl::impl(
 #endif
         }
     }
+}
 
-    itsAdios = std::make_shared<adios2::ADIOS>(itsMpiComm, true);
+Adios2StMan::impl::impl(
+        Adios2StMan &parent,
+        std::string xmlFile,
+        MPI_Comm mpiComm)
+    : parent(parent),
+      itsAdiosXmlFile(xmlFile)
+{
+    itsMpiComm = mpiComm;
+    checkMPI();
+    itsAdios = std::make_shared<adios2::ADIOS>(xmlFile, itsMpiComm);
+    itsAdiosIO = std::make_shared<adios2::IO>(itsAdios->DeclareIO("Adios2StMan"));
+}
 
+Adios2StMan::impl::impl(
+        Adios2StMan &parent,
+        MPI_Comm mpiComm,
+        std::string engineType,
+        std::map<std::string, std::string> engineParams,
+        std::vector<std::map<std::string, std::string>> transportParams,
+        std::vector<std::map<std::string, std::string>> operatorParams)
+    : parent(parent),
+      itsAdiosEngineType(std::move(engineType)),
+      itsAdiosEngineParams(std::move(engineParams)),
+      itsAdiosTransportParamsVec(std::move(transportParams)),
+      itsAdiosOperatorParamsVec(std::move(operatorParams))
+{
+    itsMpiComm = mpiComm;
+    checkMPI();
+    itsAdios = std::make_shared<adios2::ADIOS>(itsMpiComm);
     itsAdiosIO = std::make_shared<adios2::IO>(itsAdios->DeclareIO("Adios2StMan"));
 
     if (itsAdiosEngineType.empty() == false)
@@ -198,15 +218,33 @@ Adios2StMan::impl::impl(
     {
         itsAdiosIO->SetParameters(itsAdiosEngineParams);
     }
-    for (size_t i = 0; i < itsAdiosTransportParamsVec.size(); ++i)
+
+    // transport is valid only when it has a valid ADIOS2 transport name
+    // invalid transport name may cause an exception
+    for (const auto &param: itsAdiosTransportParamsVec)
     {
-        std::string transportName = std::to_string(i);
-        auto j = itsAdiosTransportParamsVec[i].find("Name");
-        if (j != itsAdiosTransportParamsVec[i].end())
-        {
-            transportName = j->second;
-        }
-        itsAdiosIO->AddTransport(transportName, itsAdiosTransportParamsVec[i]);
+        auto itName = param.find("Name");
+        if(itName==param.end()) continue;
+        itsAdiosIO->AddTransport(itName->second, param);
+    }
+
+    // auto param intended as it should not modify itsAdiosOperatorParamsVec
+    for(auto param : itsAdiosOperatorParamsVec)
+    {
+        std::string var,op;
+
+        auto itVar = param.find("Variable");
+        if(itVar==param.end())  continue;
+        else  var = itVar->second;
+
+        auto itOp = param.find("Operator");
+        if(itOp==param.end())  continue;
+        else  op=itOp->second;
+
+        param.erase(itVar);
+        param.erase(itOp);
+
+        itsAdiosIO->AddOperation(var, op, param);
     }
 }
 
@@ -217,32 +255,142 @@ Adios2StMan::impl::~impl()
         itsAdiosEngine->EndStep();
         itsAdiosEngine->Close();
     }
-    for (uInt i=0; i<ncolumn(); ++i) {
-      delete itsColumnPtrBlk[i];
+    for (uInt i = 0; i < ncolumn(); ++i)
+    {
+        delete itsColumnPtrBlk[i];
     }
 }
 
-DataManager *Adios2StMan::impl::makeObject(const String &/*aDataManType*/,
-                                     const Record &/*spec*/)
+static adios2::Params to_adios2_params(const Record &record)
 {
-    return new Adios2StMan(itsMpiComm, itsAdiosEngineType,
-                               itsAdiosEngineParams,
-                               itsAdiosTransportParamsVec);
+    adios2::Params params;
+    for (Int i = 0; i != Int(record.size()); i++)
+    {
+        params[record.name(i)] = record.asString(i);
+    }
+    return params;
+}
+
+static Record to_record(const adios2::Params &params)
+{
+    Record record;
+    for (auto &kv : params)
+    {
+        record.define(kv.first, kv.second);
+    }
+    return record;
+}
+
+DataManager *Adios2StMan::impl::makeObject(const String &/*aDataManType*/,
+                                     const Record &spec)
+{
+    std::string xmlFile;
+    std::string engine;
+    adios2::Params engine_params;
+    std::vector<adios2::Params> transport_params;
+    std::vector<adios2::Params> operator_params;
+    if (spec.isDefined(SPEC_FIELD_XML_FILE)) {
+        xmlFile = spec.asString(SPEC_FIELD_XML_FILE);
+    }
+    if (spec.isDefined(SPEC_FIELD_ENGINE_TYPE)) {
+        engine = spec.asString(SPEC_FIELD_ENGINE_TYPE);
+    }
+    if (spec.isDefined(SPEC_FIELD_ENGINE_PARAMS)) {
+        engine_params = to_adios2_params(spec.asRecord(SPEC_FIELD_ENGINE_PARAMS));
+    }
+    if (spec.isDefined(SPEC_FIELD_TRANSPORT_PARAMS)) {
+        auto &record = spec.asRecord(SPEC_FIELD_TRANSPORT_PARAMS);
+        for (Int i = 0; i != Int(record.size()); i++) {
+            auto name = record.name(i);
+            auto params = to_adios2_params(record.asRecord(i));
+            params["Name"] = name;
+            transport_params.emplace_back(std::move(params));
+        }
+    }
+    if (spec.isDefined(SPEC_FIELD_OPERATOR_PARAMS)) {
+        auto &record = spec.asRecord(SPEC_FIELD_OPERATOR_PARAMS);
+        for (Int i = 0; i != Int(record.size()); i++) {
+            auto variable = record.name(i);
+            auto params = to_adios2_params(record.asRecord(i));
+            params["Variable"] = variable;
+            operator_params.emplace_back(std::move(params));
+        }
+    }
+    if(xmlFile.empty()) {
+        return new Adios2StMan(itsMpiComm, engine, engine_params,
+                transport_params, operator_params);
+    }
+    else{
+        return new Adios2StMan(xmlFile, itsMpiComm);
+    }
+}
+
+Record Adios2StMan::impl::dataManagerSpec() const
+{
+    Record record;
+    if (!itsAdiosXmlFile.empty()) {
+        record.define(SPEC_FIELD_XML_FILE, itsAdiosXmlFile);
+    }
+    if (!itsAdiosEngineType.empty()) {
+        record.define(SPEC_FIELD_ENGINE_TYPE, itsAdiosEngineType);
+    }
+    if (!itsAdiosEngineParams.empty()) {
+        record.defineRecord(SPEC_FIELD_ENGINE_PARAMS, to_record(itsAdiosEngineParams));
+    }
+    if (!itsAdiosTransportParamsVec.empty()) {
+        Record transport_params_record;
+        for (const auto &params : itsAdiosTransportParamsVec) {
+            auto itName = params.find("Name");
+            if (itName == params.end()) {
+                continue;
+            }
+            transport_params_record.defineRecord(itName->second, to_record(params));
+        }
+        record.defineRecord(SPEC_FIELD_TRANSPORT_PARAMS, transport_params_record);
+    }
+    if (!itsAdiosOperatorParamsVec.empty()) {
+        Record operator_params_record;
+        for (const auto &params : itsAdiosOperatorParamsVec) {
+            auto itVar = params.find("Variable");
+            if (itVar == params.end()) {
+                continue;
+            }
+            auto itOper = params.find("Operator");
+            if (itOper == params.end()) {
+                continue;
+            }
+            operator_params_record.defineRecord(itVar->second, to_record(params));
+        }
+        record.defineRecord(SPEC_FIELD_TRANSPORT_PARAMS, operator_params_record);
+    }
+    return record;
 }
 
 DataManager *Adios2StMan::impl::clone() const
 {
-    return makeObject(itsDataManName, Record());
+    if(itsAdiosXmlFile.empty()){
+        return new Adios2StMan(itsMpiComm,
+                itsAdiosEngineType,
+                itsAdiosEngineParams,
+                itsAdiosTransportParamsVec,
+                itsAdiosOperatorParamsVec);
+    }
+    else{
+        return new Adios2StMan(itsAdiosXmlFile, itsMpiComm);
+    }
 }
 
-String Adios2StMan::impl::dataManagerType() const { return itsDataManName; }
+String Adios2StMan::impl::dataManagerType() const
+{
+    return DATA_MANAGER_TYPE;
+}
 
-void Adios2StMan::impl::addRow(uInt aNrRows)
+void Adios2StMan::impl::addRow64(rownr_t aNrRows)
 {
     itsRows += aNrRows;
 }
 
-void Adios2StMan::impl::create(uInt aNrRows)
+void Adios2StMan::impl::create64(rownr_t  aNrRows)
 {
     itsRows = aNrRows;
     itsAdiosEngine = std::make_shared<adios2::Engine>(
@@ -254,7 +402,7 @@ void Adios2StMan::impl::create(uInt aNrRows)
     itsAdiosEngine->BeginStep();
 }
 
-void Adios2StMan::impl::open(uInt aNrRows, AipsIO &ios)
+rownr_t Adios2StMan::impl::open64(rownr_t aNrRows, AipsIO &ios)
 {
     itsRows = aNrRows;
     itsAdiosEngine = std::make_shared<adios2::Engine>(
@@ -265,11 +413,16 @@ void Adios2StMan::impl::open(uInt aNrRows, AipsIO &ios)
     }
     itsAdiosEngine->BeginStep();
 
-    ios.getstart(itsDataManName);
+    ios.getstart(DATA_MANAGER_TYPE);
     ios >> itsDataManName;
-    ios >> itsStManColumnType;
+    {
+      // see comment on flush()
+      int dummy;
+      ios >> dummy;
+    }
     ios.getend();
     itsRows = aNrRows;
+    return itsRows;
 }
 
 void Adios2StMan::impl::deleteManager() {}
@@ -356,7 +509,7 @@ DataManagerColumn *Adios2StMan::impl::makeColumnCommon(const String &name,
             break;
         case TpString:
         case TpArrayString:
-            aColumn = new Adios2StManColumnT<std::string>(this, aDataType, name, itsAdiosIO);
+            aColumn = new Adios2StManColumnString(this, aDataType, name, itsAdiosIO);
             break;
         default:
             throw (DataManInvDT (name));
@@ -365,15 +518,18 @@ DataManagerColumn *Adios2StMan::impl::makeColumnCommon(const String &name,
     return aColumn;
 }
 
-uInt Adios2StMan::impl::getNrRows() { return itsRows; }
+rownr_t Adios2StMan::impl::getNrRows() { return itsRows; }
 
-void Adios2StMan::impl::resync(uInt /*aNrRows*/) {}
+rownr_t Adios2StMan::impl::resync64(rownr_t /*aNrRows*/) { return itsRows; }
 
 Bool Adios2StMan::impl::flush(AipsIO &ios, Bool /*doFsync*/)
 {
-    ios.putstart(itsDataManName, 2);
+    ios.putstart(DATA_MANAGER_TYPE, 2);
     ios << itsDataManName;
-    ios << itsStManColumnType;
+    // Here we used to write itsStManColumnType (int), but that was an otherwise
+    // unused member, so we are writing a dummy 0 instead to preserve backwards
+    // compatibility
+    ios << 0;
     ios.putend();
     return true;
 }
