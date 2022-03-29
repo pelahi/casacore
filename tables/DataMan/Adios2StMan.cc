@@ -40,6 +40,11 @@ adios2::Params Adios2StMan::impl::itsAdiosEngineParams;
 std::vector<adios2::Params> Adios2StMan::impl::itsAdiosTransportParamsVec;
 MPI_Comm Adios2StMan::impl::itsMpiComm = MPI_COMM_WORLD;
 
+constexpr const char *Adios2StMan::impl::SPEC_FIELD_ENGINE_TYPE;
+constexpr const char *Adios2StMan::impl::SPEC_FIELD_ENGINE_PARAMS;
+constexpr const char *Adios2StMan::impl::SPEC_FIELD_TRANSPORT_PARAMS;
+constexpr const char *Adios2StMan::impl::SPEC_FIELD_OPERATOR_PARAMS;
+
 //
 // Adios2StMan implementation in terms of the impl class
 //
@@ -198,7 +203,10 @@ Adios2StMan::impl::impl(
     {
         itsAdiosIO->SetParameters(itsAdiosEngineParams);
     }
-    for (size_t i = 0; i < itsAdiosTransportParamsVec.size(); ++i)
+
+    // transport is valid only when it has a valid ADIOS2 transport name
+    // invalid transport name may cause an exception
+    for (const auto &param: itsAdiosTransportParamsVec)
     {
         std::string transportName = std::to_string(i);
         auto j = itsAdiosTransportParamsVec[i].find("Name");
@@ -207,6 +215,25 @@ Adios2StMan::impl::impl(
             transportName = j->second;
         }
         itsAdiosIO->AddTransport(transportName, itsAdiosTransportParamsVec[i]);
+    }
+
+    // auto param intended as it should not modify itsAdiosOperatorParamsVec
+    for(auto param : itsAdiosOperatorParamsVec)
+    {
+        std::string var,op;
+
+        auto itVar = param.find("Variable");
+        if(itVar==param.end())  continue;
+        else  var = itVar->second;
+
+        auto itOp = param.find("Operator");
+        if(itOp==param.end())  continue;
+        else  op=itOp->second;
+
+        param.erase(itVar);
+        param.erase(itOp);
+
+        itsAdiosIO->AddOperation(var, op, param);
     }
 }
 
@@ -225,9 +252,73 @@ Adios2StMan::impl::~impl()
 DataManager *Adios2StMan::impl::makeObject(const String &/*aDataManType*/,
                                      const Record &/*spec*/)
 {
-    return new Adios2StMan(itsMpiComm, itsAdiosEngineType,
-                               itsAdiosEngineParams,
-                               itsAdiosTransportParamsVec);
+    std::string engine;
+    adios2::Params engine_params;
+    std::vector<adios2::Params> transport_params;
+    std::vector<adios2::Params> operator_params;
+    if (spec.isDefined(SPEC_FIELD_ENGINE_TYPE)) {
+        engine = spec.asString(SPEC_FIELD_ENGINE_TYPE);
+    }
+    if (spec.isDefined(SPEC_FIELD_ENGINE_PARAMS)) {
+        engine_params = to_adios2_params(spec.asRecord(SPEC_FIELD_ENGINE_PARAMS));
+    }
+    if (spec.isDefined(SPEC_FIELD_TRANSPORT_PARAMS)) {
+        auto &record = spec.asRecord(SPEC_FIELD_TRANSPORT_PARAMS);
+        for (Int i = 0; i != Int(record.size()); i++) {
+            auto name = record.name(i);
+            auto params = to_adios2_params(record.asRecord(i));
+            params["Name"] = name;
+            transport_params.emplace_back(std::move(params));
+        }
+    }
+    if (spec.isDefined(SPEC_FIELD_OPERATOR_PARAMS)) {
+        auto &record = spec.asRecord(SPEC_FIELD_OPERATOR_PARAMS);
+        for (Int i = 0; i != Int(record.size()); i++) {
+            auto variable = record.name(i);
+            auto params = to_adios2_params(record.asRecord(i));
+            params["Variable"] = variable;
+            operator_params.emplace_back(std::move(params));
+        }
+    }
+    return new Adios2StMan(itsMpiComm, engine, engine_params, transport_params, operator_params);
+}
+
+Record Adios2StMan::impl::dataManagerSpec() const
+{
+    Record record;
+    if (!itsAdiosEngineType.empty()) {
+        record.define(SPEC_FIELD_ENGINE_TYPE, itsAdiosEngineType);
+    }
+    if (!itsAdiosEngineParams.empty()) {
+        record.defineRecord(SPEC_FIELD_ENGINE_PARAMS, to_record(itsAdiosEngineParams));
+    }
+    if (!itsAdiosTransportParamsVec.empty()) {
+        Record transport_params_record;
+        for (const auto &params : itsAdiosTransportParamsVec) {
+            auto itName = params.find("Name");
+            if (itName == params.end()) {
+                continue;
+            }
+            transport_params_record.defineRecord(itName->second, to_record(params));
+        }
+        record.defineRecord(SPEC_FIELD_TRANSPORT_PARAMS, transport_params_record);
+    }
+    if (!itsAdiosOperatorParamsVec.empty()) {
+        Record operator_params_record;
+        for (const auto &params : itsAdiosOperatorParamsVec) {
+            auto itVar = params.find("Variable");
+            if (itVar == params.end()) {
+                continue;
+            }
+            auto itOper = params.find("Operator");
+            if (itOper == params.end()) {
+                continue;
+            }
+            operator_params_record.defineRecord(itVar->second, to_record(params));
+        }
+        record.defineRecord(SPEC_FIELD_TRANSPORT_PARAMS, operator_params_record);
+    }
+    return record;
 }
 
 DataManager *Adios2StMan::impl::clone() const

@@ -89,6 +89,17 @@ private:
 
     static MPI_Comm itsMpiComm;
 
+    // The type of this storage manager
+    static constexpr const char *DATA_MANAGER_TYPE = "Adios2StMan";
+    // The name of the specification field for the I/O engine type
+    static constexpr const char *SPEC_FIELD_ENGINE_TYPE = "ENGINETYPE";
+    // The name of the specification field for the I/O engine parameters
+    static constexpr const char *SPEC_FIELD_ENGINE_PARAMS = "ENGINEPARAMS";
+    // The name of the specification field for the transport parameters
+    static constexpr const char *SPEC_FIELD_TRANSPORT_PARAMS = "TRANSPORTPARAMS";
+    // The name of the specification field for the transport parameters
+    static constexpr const char *SPEC_FIELD_OPERATOR_PARAMS = "OPERATORPARAMS";
+
     uInt ncolumn() const { return parent.ncolumn(); }
     String fileName() const { return parent.fileName(); }
 };
