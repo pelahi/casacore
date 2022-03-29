@@ -39,7 +39,7 @@ Arrays/AxesMapping.cc
 Arrays/AxesSpecifier.cc
 Arrays/ExtendSpecifier.cc
 Arrays/IPosition.cc
-#Arrays/IPosition2.cc
+Arrays/IPosition2.cc
 Arrays/MaskArrMath2.cc
 Arrays/Matrix2Math.cc
 Arrays/Matrix_tmpl.cc
@@ -52,6 +52,7 @@ BasicMath/Random.cc
 BasicSL/Complex.cc
 BasicSL/Constants.cc
 BasicSL/IComplex.cc
+BasicSL/RegexBase.cc
 BasicSL/STLMath.cc
 BasicSL/String.cc
 Containers/Allocator.cc
@@ -97,7 +98,6 @@ IO/ConversionIO.cc
 IO/FilebufIO.cc
 IO/FiledesIO.cc
 IO/FileLocker.cc
-IO/IPositionIO.cc
 IO/LECanonicalIO.cc
 IO/LockFile.cc
 IO/MemoryIO.cc
@@ -149,6 +149,7 @@ OS/Memory.cc
 OS/MemoryTrace.cc
 OS/ModcompConversion.cc
 OS/ModcompDataConversion.cc
+OS/Mutex.cc
 OS/OMP.cc
 OS/Path.cc
 OS/PrecTimer.cc
@@ -211,6 +212,7 @@ Utilities/CountedPtr2.cc
 Utilities/Compare.cc
 Utilities/CompositeNumber.cc
 Utilities/Copy2.cc
+Utilities/cregex.cc
 Utilities/DataType.cc
 Utilities/DynBuffer.cc
 Utilities/Fallible2.cc
@@ -219,6 +221,7 @@ Utilities/Notice.cc
 Utilities/Precision.cc
 Utilities/RecordTransformable.cc
 Utilities/Regex.cc
+Utilities/RegSequence.cc
 Utilities/Sequence2.cc
 Utilities/Sort.cc
 Utilities/SortError.cc
@@ -274,7 +277,8 @@ Arrays/ArrayBase.h
 Arrays/ArrayError.h
 Arrays/Array.h
 Arrays/Array.tcc
-Arrays/ArrayFwd.h
+Arrays/ArrayIO.h
+Arrays/ArrayIO.tcc
 Arrays/ArrayIter.h
 Arrays/ArrayIter.tcc
 Arrays/ArrayLogical.h
@@ -287,17 +291,15 @@ Arrays/ArrayOpsDiffShapes.tcc
 Arrays/ArrayPartMath.h
 Arrays/ArrayPartMath.tcc
 Arrays/ArrayPosIter.h
-Arrays/ArrayStr.h
-Arrays/ArrayStr.tcc
 Arrays/ArrayUtil.h
 Arrays/ArrayUtil.tcc
 Arrays/AxesMapping.h
 Arrays/AxesSpecifier.h
 Arrays/Cube.h
 Arrays/Cube.tcc
-Arrays/ElementFunctions.h
 Arrays/ExtendSpecifier.h
 Arrays/IPosition.h
+Arrays/LogiArrayFwd.h
 Arrays/LogiArray.h
 Arrays/LogiCube.h
 Arrays/LogiMatrix.h
@@ -318,10 +320,8 @@ Arrays/MatrixIter.h
 Arrays/MatrixIter.tcc
 Arrays/MatrixMath.h
 Arrays/MatrixMath.tcc
-Arrays/Memory.h
 Arrays/Slice.h
 Arrays/Slicer.h
-Arrays/Storage.h
 Arrays/Vector.h
 Arrays/Vector.tcc
 Arrays/Vector2.tcc
@@ -348,6 +348,7 @@ BasicSL/Complexfwd.h
 BasicSL/Complex.h
 BasicSL/Constants.h
 BasicSL/IComplex.h
+BasicSL/RegexBase.h
 BasicSL/String.h
 BasicSL/STLMath.h
 BasicSL/STLIO.h
@@ -446,8 +447,6 @@ install (FILES
 IO/AipsIOCarray.h
 IO/AipsIOCarray.tcc
 IO/AipsIO.h
-IO/ArrayIO.h
-IO/ArrayIO.tcc
 IO/BaseSinkSource.h
 IO/BucketBase.h
 IO/BucketBuffered.h
@@ -618,6 +617,7 @@ Utilities/CountedPtr.h
 Utilities/CountedPtr.tcc
 Utilities/COWPtr.h
 Utilities/COWPtr.tcc
+Utilities/cregex.h
 Utilities/DataType.h
 Utilities/DefaultValue.h
 Utilities/DynBuffer.h
@@ -634,6 +634,9 @@ Utilities/PtrHolder.h
 Utilities/PtrHolder.tcc
 Utilities/RecordTransformable.h
 Utilities/Regex.h
+Utilities/Register.h
+Utilities/Register.tcc
+Utilities/RegSequence.h
 Utilities/Sequence.h
 Utilities/Sequence.tcc
 Utilities/SortError.h

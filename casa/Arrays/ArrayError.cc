@@ -27,30 +27,30 @@
 
 // .SUMMARY General, Indexing, and Conformace errors thrown by Array classes.
 
-#include "ArrayError.h"
+#include <casacore/casa/Arrays/ArrayError.h>
 
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
-ArrayError::ArrayError() : std::runtime_error("ArrayError") {}
+ArrayError::ArrayError(Category c) : AipsError("ArrayError",c) {}
 
-ArrayError::ArrayError(const char *m) : std::runtime_error(m) {}
+ArrayError::ArrayError(const Char *m,Category c) : AipsError(m,c) {}
 
-ArrayError::ArrayError(const std::string &m) : std::runtime_error(m) {}
+ArrayError::ArrayError(const String &m,Category c) : AipsError(m,c) {}
 
 ArrayError::~ArrayError() noexcept{}
 
 
 
-ArrayIndexError::ArrayIndexError() : ArrayError("ArrayIndexError") {}
+ArrayIndexError::ArrayIndexError(Category c) : ArrayError("ArrayIndexError",c) {}
 
-ArrayIndexError::ArrayIndexError(const char* m) : ArrayError(m) {}
+ArrayIndexError::ArrayIndexError(const Char *m,Category c) : ArrayError(m,c) {}
 
-ArrayIndexError::ArrayIndexError(const std::string &m) : ArrayError(m) {}
+ArrayIndexError::ArrayIndexError(const String &m,Category c) : ArrayError(m,c) {}
 
 ArrayIndexError::ArrayIndexError(const IPosition &in, 
-				 const IPosition &sh, const char* m)
-: ArrayError(m),
+				 const IPosition &sh, const Char *m,Category c)
+: ArrayError(m,c),
   i(in),
   l(sh)
 {
@@ -69,37 +69,32 @@ IPosition ArrayIndexError::shape() const
     return l;
 }
 
-ArrayConformanceError::ArrayConformanceError() 
-: ArrayError("ArrayConformanceError") 
+
+
+ArrayConformanceError::ArrayConformanceError(Category c) 
+: ArrayError("ArrayConformanceError",c) 
 {
     // Nothing
 }
 
-ArrayConformanceError::ArrayConformanceError(const char* m) : ArrayError(m) {}
+ArrayConformanceError::ArrayConformanceError(const Char *m,Category c) : ArrayError(m,c) {}
 
-ArrayConformanceError::ArrayConformanceError(const std::string &m) : ArrayError(m) {}
+ArrayConformanceError::ArrayConformanceError(const String &m,Category c) : ArrayError(m,c) {}
 
 ArrayConformanceError::~ArrayConformanceError() noexcept{}
 
 
 
-ArrayNDimError::ArrayNDimError(int ndim1, int ndim2, const char* m)
-: ArrayConformanceError(m + std::string(" -- ndim ") + std::to_string(ndim1)
-                        + " differs from " + std::to_string(ndim2)),
-  r1(ndim1),
-  r2(ndim2)
-{}
-
-ArrayNDimError::ArrayNDimError(int ndim1, int ndim2, const std::string& m)
-: ArrayConformanceError(m + std::string(" -- ndim ") + std::to_string(ndim1)
-                        + " differs from " + std::to_string(ndim2)),
+ArrayNDimError::ArrayNDimError(Int ndim1, Int ndim2, const Char *m,Category c)
+: ArrayConformanceError(m + String(" ndim ") + String::toString(ndim1)
+                        + " differs from " + String::toString(ndim2), c),
   r1(ndim1),
   r2(ndim2)
 {}
 
 ArrayNDimError::~ArrayNDimError() noexcept{}
 
-void ArrayNDimError::ndims(int &ndim1, int &ndim2) const
+void ArrayNDimError::ndims(Int &ndim1, Int &ndim2) const
 {
     ndim1 = r1; 
     ndim2 = r2;
@@ -108,9 +103,9 @@ void ArrayNDimError::ndims(int &ndim1, int &ndim2) const
 
 
 ArrayShapeError::ArrayShapeError(const IPosition &s1, const IPosition & s2,
-				 const char* m)
-: ArrayConformanceError(m + std::string(" shape ") + s1.toString()
-                        + " differs from " + s2.toString()),
+				 const Char *m,Category c)
+: ArrayConformanceError(m + String(" shape ") + s1.toString()
+                        + " differs from " + s2.toString(), c),
   sh1(s1), sh2(s2)
 {
     // Nothing
@@ -125,20 +120,20 @@ void ArrayShapeError::shapes(IPosition &shape1, IPosition &shape2) const
 
 
 
-ArrayIteratorError::ArrayIteratorError() : ArrayError("ArrayIteratorError") {}
+ArrayIteratorError::ArrayIteratorError(Category c) : ArrayError("ArrayIteratorError",c) {}
 
-ArrayIteratorError::ArrayIteratorError(const char* m) : ArrayError(m) {}
+ArrayIteratorError::ArrayIteratorError(const Char *m,Category c) : ArrayError(m,c) {}
 
-ArrayIteratorError::ArrayIteratorError(const std::string &m) : ArrayError(m) {}
+ArrayIteratorError::ArrayIteratorError(const String &m,Category c) : ArrayError(m,c) {}
 
 ArrayIteratorError::~ArrayIteratorError() noexcept{}
 
 
 
-ArraySlicerError::ArraySlicerError() : ArrayError("Slicer error") {}
+ArraySlicerError::ArraySlicerError(Category c) : ArrayError("Slicer error",c) {}
 
-ArraySlicerError::ArraySlicerError(const std::string &m)
-: ArrayError("Slicer error:" + m) {}
+ArraySlicerError::ArraySlicerError(const String &m,Category c)
+: ArrayError("Slicer error:" + m,c) {}
 
 ArraySlicerError::~ArraySlicerError() noexcept{}
 

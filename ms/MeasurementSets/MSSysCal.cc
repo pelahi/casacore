@@ -64,14 +64,14 @@ MSSysCal::MSSysCal(const String& tableName, const String &tableDescName,
 			 "table is not a valid MSSysCal"));
 }
 
-MSSysCal::MSSysCal(SetupNewTable &newTab, rownr_t nrrow,
+MSSysCal::MSSysCal(SetupNewTable &newTab, uInt nrrow,
 			       Bool initialize)
     : MSTable<MSSysCalEnums>(newTab, nrrow, initialize), 
       hasBeenDestroyed_p(False)
 {
     // verify that the now opened table is valid
     if (! validate(this->tableDesc()))
-	throw (AipsError("MSSysCal(SetupNewTable &, rownr_t, Bool) - "
+	throw (AipsError("MSSysCal(SetupNewTable &, uInt, Bool) - "
 			 "table is not a valid MSSysCal"));
 }
 

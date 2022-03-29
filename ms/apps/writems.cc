@@ -1193,7 +1193,7 @@ void MSCreateCasa::updateTimes()
     Vector<Double> timeRange(2);
     timeRange(0) = itsStartTime;
     timeRange(1) = itsStartTime + itsNrTimes*itsStepTime;
-    for (rownr_t i=0; i<msobs.nrow(); i++) {
+    for (uInt i=0; i<msobs.nrow(); i++) {
       msobsCol.timeRange().put (i, timeRange);
     }
   }
@@ -1201,7 +1201,7 @@ void MSCreateCasa::updateTimes()
 
 void MSCreateCasa::addRows (int nbasel, int nfield)
 {
-  rownr_t nrow = rownr_t(nbasel)*nfield*itsNSpw;
+  int nrow = nbasel*nfield*itsNSpw;
   itsMS.addRow (nrow);
 }
 
@@ -1509,7 +1509,7 @@ void MSCreateHDF5::makeMetaType()
 
 void MSCreateHDF5::addRows (int nbasel, int nfield)
 {
-  rownr_t nrow = rownr_t(nbasel)*nfield;
+  int nrow = nbasel*nfield;
   for (int band=itsSpw; band<itsSpw+itsNSpw; ++band) {
     // Define the new shape of the data arrays.
     IPosition newShape3(3, itsNPol[band], itsNFreq[band], itsNrRow+nrow);
@@ -1881,10 +1881,8 @@ bool readParms (int argc, char* argv[])
   myFirstBand  = parmInt (params, "firstspw", vars);
   myTotalNBand = parmInt (params, "totalspw", vars);
   AlwaysAssertExit (myTotalNBand >= myNBand);
-  Block<int> nchanBlock = params.getIntArray ("nchan");
-  myNChan = Vector<Int> (nchanBlock.begin(), nchanBlock.end());
-  Block<int> npolBlock = params.getIntArray ("npol");
-  myNPol  = Vector<Int> (npolBlock.begin(), npolBlock.end());
+  myNChan = Vector<Int> (params.getIntArray ("nchan"));
+  myNPol  = Vector<Int> (params.getIntArray ("npol"));
   myNTime = params.getInt ("ntime");
   myNTimeField = params.getInt ("ntimefield");
   // Determine possible tile size. Default is no tiling.
@@ -1962,7 +1960,7 @@ bool readParms (int argc, char* argv[])
     if (nant == 0  ||  nant >= tab.nrow()) {
       nant = tab.nrow();
     } else {
-      RowNumbers rows(nant);
+      Vector<uInt> rows(nant);
       indgen (rows);
       tab = tab(rows);
     }

@@ -39,8 +39,8 @@ int main() {
     	auto idx = sh.getIndex(-0.0014156261458992958069);
     	AlwaysAssert(idx == 1565404, AipsError);
     }
-    catch (const std::exception& x) {
-        cout << x.what() << endl;
+    catch (const AipsError& x) {
+        cout << x.getMesg() << endl;
         return 1;
     } 
     return 0;

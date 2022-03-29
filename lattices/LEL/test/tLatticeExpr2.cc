@@ -270,8 +270,8 @@ int main(int argc, const char* argv[])
       timer.show ("as lattice");
     }
 
-  } catch (std::exception& x) {
-    cerr << "aipserror: error " << x.what() << endl;
+  } catch (AipsError& x) {
+    cerr << "aipserror: error " << x.getMesg() << endl;
     return 1;
   } 
  

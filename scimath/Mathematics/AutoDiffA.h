@@ -31,10 +31,12 @@
 
 //# Includes
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/scimath/Mathematics/AutoDiff.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
+
+//# Forward declarations
+template <class T> class Vector;
 
 // <summary>
 // Class that computes partial derivatives by automatic differentiation.

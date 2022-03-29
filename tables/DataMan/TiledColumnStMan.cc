@@ -38,8 +38,8 @@
 #include <casacore/casa/BasicSL/String.h>
 #include <casacore/casa/Utilities/BinarySearch.h>
 #include <casacore/casa/IO/AipsIO.h>
-#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/tables/DataMan/DataManError.h>
+
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -55,7 +55,7 @@ TiledColumnStMan::TiledColumnStMan ()
 
 TiledColumnStMan::TiledColumnStMan (const String& hypercolumnName,
 				    const IPosition& tileShape,
-				    uInt64 maximumCacheSize)
+				    uInt maximumCacheSize)
 : TiledStMan  (hypercolumnName, maximumCacheSize),
   tileShape_p (tileShape)
 {}
@@ -68,7 +68,7 @@ TiledColumnStMan::TiledColumnStMan (const String& hypercolumnName,
         tileShape_p = IPosition (spec.toArrayInt ("DEFAULTTILESHAPE"));
     }
     if (spec.isDefined ("MAXIMUMCACHESIZE")) {
-        setPersMaxCacheSize (spec.asInt64 ("MAXIMUMCACHESIZE"));
+        setPersMaxCacheSize (spec.asInt ("MAXIMUMCACHESIZE"));
     }
 }
 
@@ -95,13 +95,14 @@ String TiledColumnStMan::dataManagerType() const
     return "TiledColumnStMan";
 }
 
-Bool TiledColumnStMan::canAccessColumn () const
+Bool TiledColumnStMan::canAccessColumn (Bool& reask) const
 {
+    reask = False;
     return True;
 }
 
 
-void TiledColumnStMan::create64 (rownr_t nrrow)
+void TiledColumnStMan::create (uInt nrrow)
 {
     // Set up the various things.
     setup(1);
@@ -121,7 +122,7 @@ void TiledColumnStMan::create64 (rownr_t nrrow)
     cubeSet_p[0] = makeTSMCube (fileSet_p[0],
 				cubeShape, tileShape_p, emptyRecord);
     // Add the rows for the given number of rows.
-    addRow64 (nrrow);
+    addRow (nrrow);
 }
 	    
 
@@ -143,7 +144,7 @@ Bool TiledColumnStMan::flush (AipsIO&, Bool fsync)
     return True;
 }
 
-void TiledColumnStMan::readHeader (rownr_t tabNrrow, Bool firstTime)
+void TiledColumnStMan::readHeader (uInt tabNrrow, Bool firstTime)
 {
     // Open the header file and read data from it.
     AipsIO* headerFile = headerFileOpen();
@@ -197,7 +198,7 @@ IPosition TiledColumnStMan::defaultTileShape() const
     return tileShape_p;
 }
 
-void TiledColumnStMan::addRow64 (rownr_t nrow)
+void TiledColumnStMan::addRow (uInt nrow)
 {
     cubeSet_p[0]->extend (nrow, emptyRecord, coordColSet_p[nrdim_p - 1]);
     nrrow_p += nrow;
@@ -205,7 +206,7 @@ void TiledColumnStMan::addRow64 (rownr_t nrow)
 }
 
 
-TSMCube* TiledColumnStMan::getHypercube (rownr_t rownr)
+TSMCube* TiledColumnStMan::getHypercube (uInt rownr)
 {
     // Check if the row number is correct.
     if (rownr >= nrrow_p) {
@@ -213,7 +214,7 @@ TSMCube* TiledColumnStMan::getHypercube (rownr_t rownr)
     }
     return cubeSet_p[0];
 }
-TSMCube* TiledColumnStMan::getHypercube (rownr_t rownr, IPosition& position)
+TSMCube* TiledColumnStMan::getHypercube (uInt rownr, IPosition& position)
 {
     // Check if the row number is correct.
     if (rownr >= nrrow_p) {

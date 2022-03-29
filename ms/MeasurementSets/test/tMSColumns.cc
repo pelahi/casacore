@@ -187,8 +187,8 @@ int main() {
       ms.markForDelete();
     }
     return 0;  
-  } catch (std::exception& x) {
-    cerr << x.what() <<endl;
+  } catch (AipsError& x) {
+    cerr << x.getMesg() <<endl;
     return 1;
   } 
 }

@@ -28,7 +28,6 @@
 #include <casacore/images/Images/PagedImage.h>
 #include <casacore/tables/Tables/TableDesc.h>
 #include <casacore/tables/Tables/Table.h>
-#include <casacore/tables/Tables/TableUtil.h>
 #include <casacore/tables/Tables/ColumnDesc.h>
 #include <casacore/casa/Exceptions/Error.h>
 
@@ -40,10 +39,10 @@ DataType imagePixelType(const String &fileName)
     if (Table::isReadable(fileName)) {
 	try {
 	    TableDesc desc;
-	    TableUtil::getLayout(desc, fileName);
+	    Table::getLayout(desc, fileName);
 	    ColumnDesc cdesc = desc["map"];
 	    retval = cdesc.dataType();
-	} catch (std::exception& x) {
+	} catch (AipsError& x) {
 	    // Nothing
 	} 
     }

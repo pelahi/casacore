@@ -43,6 +43,7 @@
 namespace casacore { // begin namespace casa
 
 //# Forward declarations
+template <class T> class Array;
 template <class T, class U> class Function;
 
 // <summary> Generic base class for least-squares fit.

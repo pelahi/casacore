@@ -313,8 +313,8 @@ int main()
 						      ignore));
 	AlwaysAssertExit(myNewKeywords.nfields()==0);
 
-    } catch (std::exception& x) {
-	cerr << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cerr << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     }
     return 0;

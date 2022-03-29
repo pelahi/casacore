@@ -23,14 +23,13 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: StIndArrAIO.cc 21051 2011-04-20 11:46:29Z gervandiepen $
+//# $Id$
 
 #include <casacore/tables/DataMan/StIndArrAIO.h>
 #include <casacore/tables/DataMan/StArrayFile.h>
 #include <casacore/tables/DataMan/StIndArray.h>
 #include <casacore/casa/Utilities/DataType.h>
 #include <casacore/casa/IO/AipsIO.h>
-#include <casacore/casa/Arrays/Array.h>
 #include <casacore/casa/BasicSL/Complex.h>
 #include <casacore/casa/BasicSL/String.h>
 #include <casacore/tables/DataMan/DataManError.h>
@@ -49,7 +48,6 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 StManColumnIndArrayAipsIO::StManColumnIndArrayAipsIO (StManAipsIO* smptr,
 						      int dataType)
 : StManColumnAipsIO (smptr, dataType, True),
-  staioPtr_p    (smptr),
   seqnr_p       (smptr->uniqueNr()),
   shapeIsFixed_p(False),
   version_p     (2),
@@ -59,8 +57,8 @@ StManColumnIndArrayAipsIO::StManColumnIndArrayAipsIO (StManAipsIO* smptr,
 //# Delete all objects created.
 StManColumnIndArrayAipsIO::~StManColumnIndArrayAipsIO()
 {
-    rownr_t nr = stmanPtr_p->nrow();
-    for (rownr_t i=0; i<nr; i++) {
+    uInt nr = stmanPtr_p->nrow();
+    for (uInt i=0; i<nr; i++) {
 	deleteArray (i);
     }
     if (version_p <= 1) {
@@ -73,7 +71,7 @@ StManColumnIndArrayAipsIO::~StManColumnIndArrayAipsIO()
 //# Compose the file name from the mother file name extended with
 //# the unique column sequence nr.
 //# Create the given nr of rows in it.
-void StManColumnIndArrayAipsIO::doCreate (rownr_t nrrow)
+void StManColumnIndArrayAipsIO::doCreate (uInt nrrow)
 {
     //# Create the file.
     openFile (ByteIO::New);
@@ -86,7 +84,7 @@ void StManColumnIndArrayAipsIO::openFile (ByteIO::OpenOption opt)
     //# For newer versions one file is maintained by the parent
     //# for all indirect columns.
     if (version_p > 1) {
-        iosfile_p = staioPtr_p->openArrayFile (opt);
+        iosfile_p = stmanPtr_p->openArrayFile (opt);
     } else {
         //# Open/create the file holding the arrays in the column.
         if (iosfile_p == 0) {
@@ -112,7 +110,7 @@ void StManColumnIndArrayAipsIO::setShapeColumn (const IPosition& shape)
 }
 
 
-void StManColumnIndArrayAipsIO::addRow (rownr_t nrnew, rownr_t nrold)
+void StManColumnIndArrayAipsIO::addRow (uInt nrnew, uInt nrold)
 {
     //# Extend data blocks if needed.
     StManColumnAipsIO::addRow (nrnew, nrold);
@@ -125,7 +123,7 @@ void StManColumnIndArrayAipsIO::addRow (rownr_t nrnew, rownr_t nrold)
 }
 
 
-void StManColumnIndArrayAipsIO::setShape (rownr_t rownr, const IPosition& shape)
+void StManColumnIndArrayAipsIO::setShape (uInt rownr, const IPosition& shape)
 {
     StIndArray* ptr = STMANINDGETBLOCK(rownr);
     if (ptr == 0) {
@@ -133,14 +131,14 @@ void StManColumnIndArrayAipsIO::setShape (rownr_t rownr, const IPosition& shape)
     }
     //# Put the new shape (if changed).
     //# When changed, put the file offset.
-    if (ptr->setShape (*iosfile_p, dtype(), shape)) {
+    if (ptr->setShape (*iosfile_p, dtype_p, shape)) {
 	putArrayPtr (rownr, ptr);
     }
 }
 
 //# Get the shape for the array (if any) in the given row.
 //# Read shape if not read yet.
-StIndArray* StManColumnIndArrayAipsIO::getShape (rownr_t rownr)
+StIndArray* StManColumnIndArrayAipsIO::getShape (uInt rownr)
 {
     StIndArray* ptr = STMANINDGETBLOCK(rownr);
     if (ptr == 0) {
@@ -152,50 +150,91 @@ StIndArray* StManColumnIndArrayAipsIO::getShape (rownr_t rownr)
     return ptr;
 }
 
-Bool StManColumnIndArrayAipsIO::isShapeDefined (rownr_t rownr)
+Bool StManColumnIndArrayAipsIO::isShapeDefined (uInt rownr)
     { return (STMANINDGETBLOCK(rownr) == 0  ?  False : True); }
 
-uInt StManColumnIndArrayAipsIO::ndim (rownr_t rownr)
+uInt StManColumnIndArrayAipsIO::ndim (uInt rownr)
     { return getShape(rownr)->shape().nelements(); }
 
-IPosition StManColumnIndArrayAipsIO::shape (rownr_t rownr)
+IPosition StManColumnIndArrayAipsIO::shape (uInt rownr)
     { return getShape(rownr)->shape(); }
 
 Bool StManColumnIndArrayAipsIO::canChangeShape() const
     { return (shapeIsFixed_p  ?  False : True); }
 
 
-void StManColumnIndArrayAipsIO::getArrayV (rownr_t rownr, ArrayBase& arr)
+Bool StManColumnIndArrayAipsIO::canAccessSlice (Bool& reask) const
 {
-  StIndArray* sia = getShape (rownr);
-  sia->getArrayV (*iosfile_p, arr, dtype());
-}
-
-void StManColumnIndArrayAipsIO::putArrayV (rownr_t rownr,
-                                           const ArrayBase& arr)
-{
-  StIndArray* sia = getShape (rownr);
-  sia->putArrayV (*iosfile_p, arr, dtype());
-  stmanPtr_p->setHasPut();
-}
-
-void StManColumnIndArrayAipsIO::getSliceV (rownr_t rownr, const Slicer& ns,
-                                           ArrayBase& arr)
-{
-  StIndArray* sia = getShape (rownr);
-  sia->getSliceV (*iosfile_p, ns, arr, dtype());
-}
-
-void StManColumnIndArrayAipsIO::putSliceV (rownr_t rownr, const Slicer& ns,
-                                           const ArrayBase& arr)
-{
-  StIndArray* sia = getShape (rownr);
-  sia->putSliceV (*iosfile_p, ns, arr, dtype());
-  stmanPtr_p->setHasPut();
+    reask = False;
+    return True;
 }
 
 
-  void StManColumnIndArrayAipsIO::remove (rownr_t rownr)
+void StManColumnIndArrayAipsIO::getArrayfloatV (uInt rownr, Array<float>* arr)
+{
+    getShape(rownr)->getArrayfloatV (*iosfile_p, arr);
+}
+
+void StManColumnIndArrayAipsIO::putArrayfloatV (uInt rownr,
+						const Array<float>* arr)
+{
+    getShape(rownr)->putArrayfloatV (*iosfile_p, arr);
+    stmanPtr_p->setHasPut();
+}
+
+void StManColumnIndArrayAipsIO::getSlicefloatV (uInt rownr, const Slicer& ns,
+						Array<float>* arr)
+{
+    getShape(rownr)->getSlicefloatV (*iosfile_p, ns, arr);
+}
+
+void StManColumnIndArrayAipsIO::putSlicefloatV (uInt rownr, const Slicer& ns,
+						const Array<float>* arr)
+{
+    getShape(rownr)->putSlicefloatV (*iosfile_p, ns, arr);
+    stmanPtr_p->setHasPut();
+}
+    
+
+#define STMANCOLUMNINDARRAYAIPSIO_GETPUT(T,NM) \
+void StManColumnIndArrayAipsIO::aips_name2(getArray,NM) (uInt rownr, \
+							 Array<T>* arr) \
+{ \
+    getShape(rownr)->aips_name2(getArray,NM) (*iosfile_p, arr); \
+} \
+void StManColumnIndArrayAipsIO::aips_name2(putArray,NM) (uInt rownr, \
+						         const Array<T>* arr) \
+{ \
+    getShape(rownr)->aips_name2(putArray,NM) (*iosfile_p, arr); \
+    stmanPtr_p->setHasPut(); \
+} \
+void StManColumnIndArrayAipsIO::aips_name2(getSlice,NM) \
+                             (uInt rownr, const Slicer& ns, Array<T>* arr) \
+{ \
+    getShape(rownr)->aips_name2(getSlice,NM) (*iosfile_p, ns, arr); \
+} \
+void StManColumnIndArrayAipsIO::aips_name2(putSlice,NM) \
+                        (uInt rownr, const Slicer& ns, const Array<T>* arr) \
+{ \
+    getShape(rownr)->aips_name2(putSlice,NM) (*iosfile_p, ns, arr); \
+    stmanPtr_p->setHasPut(); \
+}
+
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(Bool,BoolV)
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(uChar,uCharV)
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(Short,ShortV)
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(uShort,uShortV)
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(Int,IntV)
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(uInt,uIntV)
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(Int64,Int64V)
+//#//STMANCOLUMNINDARRAYAIPSIO_GETPUT(float,floatV)
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(double,doubleV)
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(Complex,ComplexV)
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(DComplex,DComplexV)
+STMANCOLUMNINDARRAYAIPSIO_GETPUT(String,StringV)
+
+
+void StManColumnIndArrayAipsIO::remove (uInt rownr)
 {
     deleteArray (rownr);
     StManColumnAipsIO::remove (rownr);
@@ -208,17 +247,17 @@ Bool StManColumnIndArrayAipsIO::ok() const
 }
 
 
-void StManColumnIndArrayAipsIO::deleteArray (rownr_t rownr)
+void StManColumnIndArrayAipsIO::deleteArray (uInt rownr)
 {
     delete STMANINDGETBLOCK(rownr);
 }
 
 
 //# Write all data into AipsIO.
-void StManColumnIndArrayAipsIO::putFile (rownr_t nrval, AipsIO& ios)
+void StManColumnIndArrayAipsIO::putFile (uInt nrval, AipsIO& ios)
 {
     ios.putstart ("StManColumnIndArrayAipsIO", version_p);
-    ios << dtype();                    // for backward compatibility
+    ios << dtype_p;                    // for backward compatibility
     ios << seqnr_p;
     StManColumnAipsIO::putFile (nrval, ios);
     ios.putend();
@@ -246,7 +285,7 @@ void StManColumnIndArrayAipsIO::putData (void* dp, uInt nrval, AipsIO& ios)
 
 
 //# Read all data from AipsIO.
-void StManColumnIndArrayAipsIO::getFile (rownr_t nrval, AipsIO& ios)
+void StManColumnIndArrayAipsIO::getFile (uInt nrval, AipsIO& ios)
 {
     int dtype;
     version_p = ios.getstart ("StManColumnIndArrayAipsIO");

@@ -85,7 +85,7 @@ public:
 
   // Create the table in memory using the definitions in the
   // SetupNewTable object.
-  MemoryTable (SetupNewTable&, rownr_t nrrow, Bool initialize);
+  MemoryTable (SetupNewTable&, uInt nrrow, Bool initialize);
 
   // The destructor deletes all data.
   virtual ~MemoryTable();
@@ -179,13 +179,13 @@ public:
 
   // Add one or more rows and possibly initialize them.
   // This will fail for tables not supporting addition of rows.
-  virtual void addRow (rownr_t nrrow = 1, Bool initialize = True);
+  virtual void addRow (uInt nrrow = 1, Bool initialize = True);
 
   // Test if it is possible to remove a row from this table (yes).
   virtual Bool canRemoveRow() const;
 
   // Remove the given row.
-  virtual void removeRow (rownr_t rownr);
+  virtual void removeRow (uInt rownr);
 
   // Add a column to the table.
   // If the DataManager is not a virtual engine, MemoryStMan will be used.
@@ -225,7 +225,7 @@ public:
 
 
 private:
-  CountedPtr<ColumnSet> colSetPtr_p;        //# pointer to set of columns
+  ColumnSet*     colSetPtr_p;        //# pointer to set of columns
   TableLockData* lockPtr_p;          //# pointer to lock object
 
   // Copy constructor is forbidden, because copying a table requires

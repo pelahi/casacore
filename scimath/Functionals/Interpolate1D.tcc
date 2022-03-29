@@ -252,13 +252,13 @@ setMethod(uInt newMethod) {
 
 template <class Domain, class Range> Vector<Domain> Interpolate1D<Domain, Range>::
 getX() const{
-  Vector<Domain> x(xValues.begin(), xValues.begin()+nElements);
+  Vector<Domain> x(xValues, nElements);
   return x;
 }
 
 template <class Domain, class Range> Vector<Range> Interpolate1D<Domain, Range>::
 getY() const {
-  Vector<Range> y(yValues.begin(), yValues.begin()+nElements);
+  Vector<Range> y(yValues, nElements);
   return y;
 }
 

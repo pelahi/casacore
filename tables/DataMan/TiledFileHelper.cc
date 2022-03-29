@@ -115,21 +115,21 @@ Bool TiledFileHelper::flush (AipsIO&, Bool)
   throw AipsError ("TileFileHelper::flush - not implemented");
   return False;
 }
-void TiledFileHelper::create64 (rownr_t)
+void TiledFileHelper::create (uInt)
 {
-  throw AipsError ("TileFileHelper::create64 - not implemented");
+  throw AipsError ("TileFileHelper::create - not implemented");
 }
-TSMCube* TiledFileHelper::getHypercube (rownr_t)
+TSMCube* TiledFileHelper::getHypercube (uInt)
 {
   throw AipsError ("TileFileHelper::getHypercube - not implemented");
   return 0;
 }
-TSMCube* TiledFileHelper::getHypercube (rownr_t, IPosition&)
+TSMCube* TiledFileHelper::getHypercube (uInt, IPosition&)
 {
   throw AipsError ("TileFileHelper:getHypercube: - not implemented");
   return 0;
 }
-void TiledFileHelper::readHeader (rownr_t, Bool)
+void TiledFileHelper::readHeader (uInt, Bool)
 {
   throw AipsError ("TileFileHelper::readHeader - not implemented");
 }

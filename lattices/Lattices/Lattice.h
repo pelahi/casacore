@@ -31,7 +31,6 @@
 
 //# Includes
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/lattices/Lattices/LatticeBase.h>
 #include <casacore/casa/Arrays/Slicer.h>
 
@@ -40,6 +39,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 //# Forward Declarations
 class IPosition;
 class LatticeNavigator;
+template <class T> class Array;
 template <class T> class COWPtr;
 template <class Domain, class Range> class Functional;
 template <class T> class LatticeIterInterface;

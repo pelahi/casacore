@@ -32,11 +32,10 @@
 #include <casacore/casa/aips.h>
 #include <casacore/tables/TaQL/TaQLNodeRep.h>
 #include <casacore/tables/TaQL/TaQLStyle.h>
-
-#include <iostream>
-#include <mutex>
+#include <casacore/casa/Utilities/CountedPtr.h>
+#include <casacore/casa/OS/Mutex.h>
 #include <vector>
-#include <memory>
+#include <iostream>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -89,7 +88,7 @@ public:
 
   // Construct for given letter. It takes over the pointer.
   TaQLNode (TaQLNodeRep* rep)
-    { itsRep.reset (rep); }
+    { itsRep = rep; }
 
   // Copy constructor (reference semantics).
   TaQLNode (const TaQLNode& that)
@@ -113,12 +112,11 @@ public:
 
   // Parse a TaQL command and return the result.
   // An exception is thrown in case of parse errors.
-  // The parse tree is deleted by function clearNodeCreated.
   static TaQLNode parse (const String& command);
 
   // Does the envelope contain a letter?
   Bool isValid() const
-    { return Bool(itsRep); }
+    { return itsRep; }
 
   // Return the type of letter.
   char nodeType() const
@@ -137,14 +135,14 @@ public:
   void show (std::ostream& os) const
     { if (itsRep) itsRep->show (os); }
 
-  // Save and restore the entire parse tree.
+  // Save and restore the entire tree.
   // <group>
   void save (AipsIO& aio) const;
   static TaQLNode restore (AipsIO& aio);
   // </group>
 
 protected:
-  std::shared_ptr<TaQLNodeRep> itsRep;
+  CountedPtr<TaQLNodeRep> itsRep;
 
 private:
   // Delete all nodes that were created by the parser.
@@ -165,7 +163,7 @@ public:
   // Keep the TaQL style to use.
   static TaQLStyle theirStyle;
   // Use a mutex to guard the statics.
-  static std::mutex theirMutex;
+  static Mutex theirMutex;
 };
 
 

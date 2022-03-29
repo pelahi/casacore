@@ -41,7 +41,7 @@
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
 #include <casacore/casa/Arrays/ArrayUtil.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Containers/Record.h>
 #include <casacore/casa/Utilities/Regex.h>
 #include <casacore/casa/Utilities/Assert.h>
@@ -121,8 +121,8 @@ TableDesc makeDesc (Bool ask)
       } else {
 	break;
       }
-    } catch (std::exception& x) {
-      cout << x.what() << endl;
+    } catch (AipsError& x) {
+      cout << x.getMesg() << endl;
     }
   }
   // Create the hypercolumn descriptions for all tiled columns.
@@ -267,7 +267,8 @@ void doTable (Bool ask, const TableDesc& td)
 	  cout << "Column names: ";
 	}
 	cin >> str;
-	Block<String> cols = makeBlock(stringToVector(str));
+	Block<String> cols;
+	stringToVector(str).toBlock (cols);
 	tab = tab.project (cols);
       } else if (op == 5) {
 	tab.actualTableDesc().show (cout);
@@ -307,8 +308,8 @@ void doTable (Bool ask, const TableDesc& td)
       } else {
 	break;
       }
-    } catch (std::exception& x) {
-      cout << removeDir(x.what()) << endl;
+    } catch (AipsError& x) {
+      cout << removeDir(x.getMesg()) << endl;
     }
   }
 }
@@ -320,8 +321,8 @@ int main (int argc, const char*[])
     cout << "-----------------------------------------------" << endl;
     Bool ask = argc < 2;
     doTable (ask, makeDesc(ask));
-  } catch (std::exception& x) {
-    cout << "Caught an exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << "Caught an exception: " << x.getMesg() << endl;
     return 1;
   } 
   return 0;                           // exit with success status

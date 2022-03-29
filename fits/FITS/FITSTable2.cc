@@ -99,7 +99,6 @@ FITSTableWriter::FITSTableWriter(FitsOutput *file,
 	      buffer << size;
 	      repeat = String(buffer);
 	  }
-	  CASACORE_FALLTHROUGH;
       case TpBool:
 	  sizeInBytes += size*1;
 	  code = "L";
@@ -116,7 +115,6 @@ FITSTableWriter::FITSTableWriter(FitsOutput *file,
 	      buffer << size;
 	      repeat = String(buffer);
 	  }
-	  CASACORE_FALLTHROUGH;
       case TpUChar:
 	  sizeInBytes += size*1;
 	  code = "B";
@@ -133,7 +131,6 @@ FITSTableWriter::FITSTableWriter(FitsOutput *file,
 	      buffer << size;
 	      repeat = String(buffer);
 	  }
-	  CASACORE_FALLTHROUGH;
       case TpShort:
 	  sizeInBytes += size*2;
 	  code = "I";
@@ -150,7 +147,6 @@ FITSTableWriter::FITSTableWriter(FitsOutput *file,
 	      buffer << size;
 	      repeat = String(buffer);
 	  }
-	  CASACORE_FALLTHROUGH;
       case TpInt:
 	  sizeInBytes += size*4;
 	  code = "J";
@@ -167,7 +163,6 @@ FITSTableWriter::FITSTableWriter(FitsOutput *file,
 	      buffer << size;
 	      repeat = String(buffer);
 	  }
-	  CASACORE_FALLTHROUGH;
       case TpFloat:
 	  sizeInBytes += size*4;
 	  code = "E";
@@ -184,7 +179,6 @@ FITSTableWriter::FITSTableWriter(FitsOutput *file,
 	      buffer << size;
 	      repeat = String(buffer);
 	  }
-	  CASACORE_FALLTHROUGH;
       case TpDouble:
 	  sizeInBytes += size*8;
 	  code = "D";
@@ -201,7 +195,6 @@ FITSTableWriter::FITSTableWriter(FitsOutput *file,
 	      buffer << size;
 	      repeat = String(buffer);
 	  }
-	  CASACORE_FALLTHROUGH;
       case TpComplex:
 	  sizeInBytes += size*8;
 	  code = "C";
@@ -218,7 +211,6 @@ FITSTableWriter::FITSTableWriter(FitsOutput *file,
 	      buffer << size;
 	      repeat = String(buffer);
 	  }
-	  CASACORE_FALLTHROUGH;
       case TpDComplex:
 	  sizeInBytes += size*16;
 	  code = "M";

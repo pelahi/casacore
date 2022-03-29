@@ -66,34 +66,31 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     return keywordSet_p;
   }
 
-  rownr_t ConcatColumn::nrow() const
+  uInt ConcatColumn::nrow() const
   {
     return refTabPtr_p->nrow();
   }
 
-  void ConcatColumn::initialize (rownr_t startRow, rownr_t endRow)
+  void ConcatColumn::initialize (uInt startRow, uInt endRow)
   {
-    uInt tableNr;
-    rownr_t tabRownr;
-    for (rownr_t i=startRow; i<endRow; ++i) {
+    uInt tableNr, tabRownr;
+    for (uInt i=startRow; i<endRow; ++i) {
       refTabPtr_p->rows().mapRownr (tableNr, tabRownr, i);
       refColPtr_p[tableNr]->initialize (tabRownr, tabRownr);
     }
   }
 
-  void ConcatColumn::setShape (rownr_t rownr, const IPosition& shape)
+  void ConcatColumn::setShape (uInt rownr, const IPosition& shape)
   {
-    uInt tableNr;
-    rownr_t tabRownr;
+    uInt tableNr, tabRownr;
     refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
     refColPtr_p[tableNr]->setShape (tabRownr, shape);
   }
 
-  void ConcatColumn::setShape (rownr_t rownr, const IPosition& shape,
+  void ConcatColumn::setShape (uInt rownr, const IPosition& shape,
 			       const IPosition& tileShape)
   {
-    uInt tableNr;
-    rownr_t tabRownr;
+    uInt tableNr, tabRownr;
     refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
     refColPtr_p[tableNr]->setShape (tabRownr, shape, tileShape);
   }
@@ -108,38 +105,59 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     return refColPtr_p[0]->shapeColumn();
   }
 
-  uInt ConcatColumn::ndim (rownr_t rownr) const
+  uInt ConcatColumn::ndim (uInt rownr) const
   {
-    uInt tableNr;
-    rownr_t tabRownr;
+    uInt tableNr, tabRownr;
     refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
     return refColPtr_p[tableNr]->ndim (tabRownr);
   }
 
-  IPosition ConcatColumn::shape(rownr_t rownr) const
+  IPosition ConcatColumn::shape(uInt rownr) const
   {
-    uInt tableNr;
-    rownr_t tabRownr;
+    uInt tableNr, tabRownr;
     refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
     return refColPtr_p[tableNr]->shape (tabRownr);
   }
 
-  IPosition ConcatColumn::tileShape(rownr_t rownr) const
+  IPosition ConcatColumn::tileShape(uInt rownr) const
   {
-    uInt tableNr;
-    rownr_t tabRownr;
+    uInt tableNr, tabRownr;
     refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
     return refColPtr_p[tableNr]->tileShape (tabRownr);
   }
 
-  Bool ConcatColumn::isDefined (rownr_t rownr) const
+  Bool ConcatColumn::isDefined (uInt rownr) const
   {
-    uInt tableNr;
-    rownr_t tabRownr;
+    uInt tableNr, tabRownr;
     refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
     return refColPtr_p[tableNr]->isDefined (tabRownr);
   }
 
+
+  Bool ConcatColumn::canAccessScalarColumn (Bool& reask) const
+  {
+    return refColPtr_p[0]->canAccessScalarColumn (reask);
+  }
+  Bool ConcatColumn::canAccessScalarColumnCells (Bool& reask) const
+  {
+    return refColPtr_p[0]->canAccessScalarColumnCells (reask);
+  }
+  Bool ConcatColumn::canAccessArrayColumn (Bool& reask) const
+  {
+    return refColPtr_p[0]->canAccessArrayColumn (reask);
+  }
+  Bool ConcatColumn::canAccessArrayColumnCells (Bool& reask) const
+  {
+    return refColPtr_p[0]->canAccessArrayColumnCells (reask);
+  }
+  Bool ConcatColumn::canAccessSlice (Bool& reask) const
+  {
+    return refColPtr_p[0]->canAccessSlice (reask);
+  }
+  Bool ConcatColumn::canAccessColumnSlice (Bool& reask) const
+  {
+    return refColPtr_p[0]->canAccessColumnSlice (reask);
+  }
 
   Bool ConcatColumn::canChangeShape() const
   {
@@ -147,58 +165,38 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
   }
 
 
-  void ConcatColumn::get (rownr_t rownr, void* dataPtr) const
+  void ConcatColumn::get (uInt rownr, void* dataPtr) const
   {
-    uInt tableNr;
-    rownr_t tabRownr;
+    uInt tableNr, tabRownr;
     refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
     refColPtr_p[tableNr]->get (tabRownr, dataPtr);
     // Set the column cache to the table used.
     ///setColumnCache (tableNr, refColPtr_p[tableNr]->columnCache());
   }
 
-  void ConcatColumn::getArray (rownr_t rownr, ArrayBase& arr) const
+  void ConcatColumn::getSlice (uInt rownr, const Slicer& ns,
+			       void* dataPtr) const
   {
-    uInt tableNr;
-    rownr_t tabRownr;
+    uInt tableNr, tabRownr;
     refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
-    refColPtr_p[tableNr]->getArray (tabRownr, arr);
+    refColPtr_p[tableNr]->getSlice (tabRownr, ns, dataPtr);
   }
 
-  void ConcatColumn::getSlice (rownr_t rownr, const Slicer& ns,
-			       ArrayBase& arr) const
+  void ConcatColumn::put (uInt rownr, const void* dataPtr)
   {
-    uInt tableNr;
-    rownr_t tabRownr;
-    refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
-    refColPtr_p[tableNr]->getSlice (tabRownr, ns, arr);
-  }
-
-  void ConcatColumn::put (rownr_t rownr, const void* dataPtr)
-  {
-    uInt tableNr;
-    rownr_t tabRownr;
+    uInt tableNr, tabRownr;
     refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
     refColPtr_p[tableNr]->put (tabRownr, dataPtr);
     // Set the column cache to the table used.
     ///setColumnCache (tableNr, refColPtr_p[tableNr]->columnCache());
   }
 
-  void ConcatColumn::putArray (rownr_t rownr, const ArrayBase& arr)
+  void ConcatColumn::putSlice (uInt rownr, const Slicer& ns,
+			       const void* dataPtr)
   {
-    uInt tableNr;
-    rownr_t tabRownr;
+    uInt tableNr, tabRownr;
     refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
-    refColPtr_p[tableNr]->putArray (tabRownr, arr);
-  }
-
-  void ConcatColumn::putSlice (rownr_t rownr, const Slicer& ns,
-			       const ArrayBase& arr)
-  {
-    uInt tableNr;
-    rownr_t tabRownr;
-    refTabPtr_p->rows().mapRownr (tableNr, tabRownr, rownr);
-    refColPtr_p[tableNr]->putSlice (tabRownr, ns, arr);
+    refColPtr_p[tableNr]->putSlice (tabRownr, ns, dataPtr);
   }
 
   void ConcatColumn::setMaximumCacheSize (uInt nbytes)
@@ -216,85 +214,91 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     { refColPtr_p[0]->freeIterBuf (lastVal, curVal); }
 
 
-  void ConcatColumn::getArrayColumn (ArrayBase& arr) const
+  void ConcatColumn::getArrayColumn (void* dataPtr) const
   {
-    accessColumn (0, arr, &getColumnPart);
+    accessColumn (0, dataPtr, &getColumnPart);
   }
 
   void ConcatColumn::getColumnSlice (const Slicer& ns,
-				     ArrayBase& arr) const
+				     void* dataPtr) const
   {
-    accessColumn (&ns, arr, &getColumnSlicePart);
+    accessColumn (&ns, dataPtr, &getColumnSlicePart);
   }
 
   void ConcatColumn::getArrayColumnCells (const RefRows& rownrs,
-					  ArrayBase& arr) const
+					  void* dataPtr) const
   {
-    accessRows (rownrs, 0, arr, &getRowsPart);
+    accessRows (rownrs, 0, dataPtr, &getRowsPart);
   }
 
   void ConcatColumn::getColumnSliceCells (const RefRows& rownrs,
 					  const Slicer& ns,
-					  ArrayBase& arr) const
+					  void* dataPtr) const
   {
-    accessRows (rownrs, &ns, arr, &getRowsSlicePart);
+    accessRows (rownrs, &ns, dataPtr, &getRowsSlicePart);
   }
 
-  void ConcatColumn::putArrayColumn (const ArrayBase& arr)
+  void ConcatColumn::putArrayColumn (const void* dataPtr)
   {
-    accessColumn (0, const_cast<ArrayBase&>(arr), &putColumnPart);
+    accessColumn (0, const_cast<void*>(dataPtr), &putColumnPart);
   }
 
   void ConcatColumn::putColumnSlice (const Slicer& ns,
-				     const ArrayBase& arr)
+				     const void* dataPtr)
   {
-    accessColumn (&ns, const_cast<ArrayBase&>(arr), &putColumnSlicePart);
+    accessColumn (&ns, const_cast<void*>(dataPtr), &putColumnSlicePart);
   }
 
   void ConcatColumn::putArrayColumnCells (const RefRows& rownrs,
-					  const ArrayBase& arr)
+					  const void* dataPtr)
   {
-    accessRows (rownrs, 0, const_cast<ArrayBase&>(arr), &putRowsPart);
+    accessRows (rownrs, 0, const_cast<void*>(dataPtr), &putRowsPart);
   }
 
   void ConcatColumn::putColumnSliceCells (const RefRows& rownrs,
 					  const Slicer& ns,
-					  const ArrayBase& arr)
+					  const void* dataPtr)
   {
-    accessRows (rownrs, &ns, const_cast<ArrayBase&>(arr), &putRowsSlicePart);
+    accessRows (rownrs, &ns, const_cast<void*>(dataPtr), &putRowsSlicePart);
   }
 
   void ConcatColumn::accessColumn (const Slicer* ns,
-				   ArrayBase& arr,
+				   void* dataPtr,
 				   AccessColumnFunc* accessFunc) const
   {
+    ArrayBase& arr = *static_cast<ArrayBase*>(dataPtr);
     IPosition st(arr.ndim(), 0);
     IPosition sz(arr.shape());
     uInt nlast = arr.ndim() - 1;
+    CountedPtr<ArrayBase> part;
     for (uInt i=0; i<refColPtr_p.nelements(); ++i) {
-      rownr_t nr = refColPtr_p[i]->nrow();
+      uInt nr = refColPtr_p[i]->nrow();
       sz[nlast] = nr;
-      std::unique_ptr<ArrayBase> part (arr.getSection (Slicer(st, sz)));
-      accessFunc (refColPtr_p[i], ns, *part);
+      // Store in CountedPtr, so deleted in case of exception.
+      part = arr.getSection (Slicer(st, sz));
+      accessFunc (refColPtr_p[i], ns, part.operator->());
       st[nlast] += nr;
     }
   }
 
   void ConcatColumn::accessRows (const RefRows& rownrs,
 				 const Slicer* ns,
-				 ArrayBase& arr,
+				 void* dataPtr,
 				 AccessRowsFunc* accessFunc) const
   {
+    ArrayBase& arr = *static_cast<ArrayBase*>(dataPtr);
     // The rows to access.
-    Vector<rownr_t> rows = rownrs.convert();
+    Vector<uInt> rows = rownrs.convert();
     // We have one or more slices of rows.
     // Try to access them also in a sliced way, because that is faster.
     // First make resources.
     // The row number mapping.
     const ConcatRows& ccRows = refTabPtr_p->rows();
+    // The holder for the array part to handle.
+    CountedPtr<ArrayBase> part;
     // The RefRows vector for the rownrs to be handled in an underlying table.
     // Make it as large as needed to avoid resizes.
-    Vector<rownr_t> tabRowNrs(rows.nelements());
+    Vector<uInt> tabRowNrs(rows.nelements());
     // The rows are handled by combining them as much as possible in a RefRows
     // slice. This is possible until a different underlying table needs to
     // be accessed.
@@ -305,69 +309,71 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     Int lastTabNr = -1;
     uInt tableNr;
     // Step through all concat rownrs.
-    for (rownr_t i=0; i<rows.nelements(); ++i) {
+    for (uInt i=0; i<rows.nelements(); ++i) {
       // Map to the table and rownr in it.
       ccRows.mapRownr (tableNr, tabRowNrs[i], rows[i]);
       // An access has to be done if we have another table.
       if (Int(tableNr) != lastTabNr) {
 	// Access the cells if not the first time.
 	if (lastTabNr >= 0) {
-	  rownr_t nrrow = i - st[rowAxis];
+	  uInt nrrow = i - st[rowAxis];
 	  sz[rowAxis] = nrrow;
-	  Vector<rownr_t> rowPart(tabRowNrs(Slice(st[rowAxis], nrrow))); 
-	  std::unique_ptr<ArrayBase> part (arr.getSection (Slicer(st, sz)));
-	  accessFunc (refColPtr_p[lastTabNr], RefRows(rowPart), ns, *part);
+	  Vector<uInt> rowPart(tabRowNrs(Slice(st[rowAxis], nrrow))); 
+	  part = arr.getSection (Slicer(st, sz));
+	  accessFunc (refColPtr_p[lastTabNr], RefRows(rowPart), ns,
+		      part.operator->());
 	}
         st[rowAxis] = i;
         lastTabNr = tableNr;
       }
     }
     if (lastTabNr >= 0) {
-      rownr_t nrrow = rows.nelements() - st[rowAxis];
+      uInt nrrow = rows.nelements() - st[rowAxis];
       sz[rowAxis] = nrrow;
-      Vector<rownr_t> rowPart(tabRowNrs(Slice(st[rowAxis], nrrow))); 
-      CountedPtr<ArrayBase> part (arr.getSection (Slicer(st, sz)));
-      accessFunc (refColPtr_p[lastTabNr], RefRows(rowPart), ns, *part);
+      Vector<uInt> rowPart(tabRowNrs(Slice(st[rowAxis], nrrow))); 
+      part = arr.getSection (Slicer(st, sz));
+      accessFunc (refColPtr_p[lastTabNr], RefRows(rowPart), ns,
+		  part.operator->());
     }
   }
 
   void ConcatColumn::getColumnPart (BaseColumn* col,
-				    const Slicer*, ArrayBase& arr)
+				    const Slicer*, ArrayBase* arr)
   {
     col->getArrayColumn (arr);
   }
   void ConcatColumn::putColumnPart (BaseColumn* col,
-				    const Slicer*, ArrayBase& arr)
+				    const Slicer*, ArrayBase* arr)
   {
     col->putArrayColumn (arr);
   }
   void ConcatColumn::getColumnSlicePart (BaseColumn* col,
-					 const Slicer* ns, ArrayBase& arr)
+					 const Slicer* ns, ArrayBase* arr)
   {
     col->getColumnSlice (*ns, arr);
   }
   void ConcatColumn::putColumnSlicePart (BaseColumn* col,
-					 const Slicer* ns, ArrayBase& arr)
+					 const Slicer* ns, ArrayBase* arr)
   {
     col->putColumnSlice (*ns, arr);
   }
   void ConcatColumn::getRowsPart (BaseColumn* col, const RefRows& rows,
-				  const Slicer*, ArrayBase& arr)
+				  const Slicer*, ArrayBase* arr)
   {
     col->getArrayColumnCells (rows, arr);
   }
   void ConcatColumn::putRowsPart (BaseColumn* col, const RefRows& rows,
-				  const Slicer*, ArrayBase& arr)
+				  const Slicer*, ArrayBase* arr)
   {
     col->putArrayColumnCells (rows, arr);
   }
   void ConcatColumn::getRowsSlicePart (BaseColumn* col, const RefRows& rows,
-				       const Slicer* ns, ArrayBase& arr)
+				       const Slicer* ns, ArrayBase* arr)
   {
     col->getColumnSliceCells (rows, *ns, arr);
   }
   void ConcatColumn::putRowsSlicePart (BaseColumn* col, const RefRows& rows,
-				       const Slicer* ns, ArrayBase& arr)
+				       const Slicer* ns, ArrayBase* arr)
   {
     col->putColumnSliceCells (rows, *ns, arr);
   }

@@ -41,7 +41,7 @@
 #include <casacore/casa/Arrays/ArrayLogical.h>
 #include <casacore/casa/Arrays/Slicer.h>
 #include <casacore/casa/Arrays/Slice.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/tables/Tables/TableError.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/iostream.h>
@@ -60,8 +60,8 @@ int main () {
     try {
 	a();
 	b();
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     return 0;                           // exit with success status
@@ -70,6 +70,16 @@ int main () {
 // First build a description.
 void a()
 {
+    {
+        // First ensure it can do the things it should.
+        ScaledComplexData<Complex,Short> engine("", "", Complex(1.,1.),
+						Complex(0.,0.));
+	Bool reask;
+	AlwaysAssertExit (engine.canAccessArrayColumn(reask));
+	AlwaysAssertExit (engine.canAccessArrayColumnCells(reask));
+	AlwaysAssertExit (engine.canAccessSlice(reask));
+	AlwaysAssertExit (engine.canAccessColumnSlice(reask));
+    }
     // First register the virtual column engine.
     ScaledComplexData<Complex,Short>::registerClass();
     ScaledComplexData<DComplex,Int>::registerClass();
@@ -141,8 +151,8 @@ void a()
         newtab2.bindColumn ("source2", engine1);
         try {
     	Table tab2(newtab2, 10);                // bound to incorrect column
-        } catch (std::exception& x) {
-    	cout << x.what() << endl;
+        } catch (AipsError& x) {
+    	cout << x.getMesg() << endl;
         } 
     }
 

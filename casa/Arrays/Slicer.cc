@@ -25,12 +25,9 @@
 //#
 //# $Id$
 
-#include "Slicer.h"
-#include "Slice.h"
-#include "ArrayError.h"
-
-#include <istream>
-#include <sstream>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/casa/Arrays/Slice.h>
+#include <casacore/casa/Arrays/ArrayError.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -40,7 +37,7 @@ Slicer::Slicer()
   end_p   (1,MimicSource),
   stride_p(1,1),
   len_p   (1,MimicSource),
-  fixed_p (false)
+  fixed_p (False)
 {}
 
 Slicer::Slicer (const IPosition& bl, const IPosition& tr, const IPosition& in,
@@ -114,7 +111,38 @@ Slicer::Slicer (const Slice& x,
     fillEndLen();
 }
 
-bool Slicer::operator==(const Slicer& that) const
+
+Slicer::Slicer (const Slicer& that)
+: asEnd_p (that.asEnd_p),
+  start_p (that.start_p),
+  end_p   (that.end_p),
+  stride_p(that.stride_p),
+  len_p   (that.len_p),
+  fixed_p (that.fixed_p)
+{}
+
+Slicer& Slicer::operator= (const Slicer& that)
+{
+    if (this != &that) {
+	uInt nels = that.ndim();
+	if (ndim() != nels) {
+	    start_p.resize (nels);
+	    end_p.resize (nels);
+	    stride_p.resize (nels);
+	    len_p.resize (nels);
+	}
+	asEnd_p  = that.asEnd_p;
+	start_p  = that.start_p;
+	end_p    = that.end_p;
+	stride_p = that.stride_p;
+	len_p    = that.len_p;
+	fixed_p  = that.fixed_p;
+    }
+    return *this;
+}
+
+
+Bool Slicer::operator==(const Slicer& that) const
 {
    return this->len_p.isEqual(that.len_p) &&
           this->start_p.isEqual(that.start_p) &&
@@ -133,7 +161,7 @@ void Slicer::fillEndLen()
 	throw (ArraySlicerError ("IPosition-lengths differ"));
     }
     //# Reversed strides are not allowed yet (thus stride>0).
-    for (size_t i=0; i<start_p.nelements(); i++) {
+    for (uInt i=0; i<start_p.nelements(); i++) {
         if (stride_p(i) <= 0) {
 	    throw (ArraySlicerError ("stride<=0"));
 	}else{
@@ -167,10 +195,10 @@ void Slicer::fillEndLen()
 
 void Slicer::fillFixed()
 {
-    fixed_p = true;
-    for (size_t i=0; i<start_p.nelements(); i++) {
+    fixed_p = True;
+    for (uInt i=0; i<start_p.nelements(); i++) {
 	if (start_p(i) < 0  ||  end_p(i) < 0) {
-	    fixed_p = false;
+	    fixed_p = False;
 	    break;
 	}
     }
@@ -207,7 +235,7 @@ IPosition Slicer::inferShapeFromSource (const IPosition& shp,
     end    = shp - 1;
     stride = stride_p;
     IPosition res(start_p.nelements(), 0);
-    for (size_t i=0; i<start_p.nelements(); i++) {
+    for (uInt i=0; i<start_p.nelements(); i++) {
 	//# Fill and check start value; unspecified means 0.
 	if (start_p(i) != MimicSource) {
             start(i) = start_p(i);
@@ -250,7 +278,7 @@ IPosition Slicer::inferShapeFromSource (const IPosition& shp,
 }
 
 
-std::ostream  &operator << (std::ostream &stream, const Slicer &slicer)
+ostream  &operator << (ostream &stream, const Slicer &slicer)
 {
   
   stream << slicer.start () << " to " << slicer.end () 
@@ -258,13 +286,6 @@ std::ostream  &operator << (std::ostream &stream, const Slicer &slicer)
          << slicer.length ();
 
   return stream;
-}
-
-std::string to_string(const Slicer& slicer)
-{
-  std::ostringstream str;
-  str << slicer;
-  return str.str();
 }
 
 } //# NAMESPACE CASACORE - END

@@ -31,7 +31,6 @@
 
 //# Includes
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/measures/Measures/MeasBase.h>
 #include <casacore/measures/Measures/MeasRef.h>
 #include <casacore/casa/Quanta/MVDoppler.h>
@@ -44,6 +43,7 @@ class MCDoppler;
 template <class M> class MeasConvert;
 template <class M> class ArrayMeasColumn;
 template <class M> class ScalarMeasColumn;
+template <class T> class Vector;
 template <class T> class Quantum;
 
 //# Typedefs
@@ -198,6 +198,7 @@ class MDoppler : public MeasBase<MVDoppler, MeasRef<MDoppler> > {
   // <group>
   virtual const String &tellMe() const;
   static const String &showMe();
+  virtual uInt type() const;
   static void assure(const Measure &in);
   // </group>
   // Translate reference code. The uInt version has a check for valid codes
@@ -243,6 +244,8 @@ class MDoppler : public MeasBase<MVDoppler, MeasRef<MDoppler> > {
   // </group>
   // Get the reference type (for records, including codes like R_)
   virtual String getRefString() const;
+  // Get my type (as Register)
+  static uInt myType();
 
   // Get in specified units
   Quantity get(const Unit &un) const;

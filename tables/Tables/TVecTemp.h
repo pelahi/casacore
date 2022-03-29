@@ -30,10 +30,13 @@
 
 //# Includes
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/tables/Tables/TVec.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
+
+//# Forward Declarations
+template<class T> class Vector;
+
 
 // <summary>
 // Templated table vectors held in memory as a temporary
@@ -98,24 +101,24 @@ public:
     TabVecTemp (const Vector<T>&);
 
     // Create table vector containing a Vector with given length.
-    TabVecTemp (rownr_t leng);
+    TabVecTemp (uInt leng);
 
     // Destruct the object.
     ~TabVecTemp();
 
     // Return a reference to a value.
-    inline const T& operator() (rownr_t index) const;
+    inline const T& operator() (uInt index) const;
 
     // Return a reference to a value.
-    inline T& operator() (rownr_t index);
+    inline T& operator() (uInt index);
 
     // Get a value (virtual function).
-    T value (rownr_t index) const;
+    T value (uInt index) const;
     // Get a value (virtual function).
-    void getVal (rownr_t index, T&) const;
+    void getVal (uInt index, T&) const;
 
     // Put a value (virtual function).
-    void putVal (rownr_t index, const T&);
+    void putVal (uInt index, const T&);
 
     // Set entire vector to a value.
     void set (const T&);
@@ -128,10 +131,10 @@ protected:
 
 //# Return a reference to a value.
 template<class T>
-inline const T& TabVecTemp<T>::operator() (rownr_t index) const
+inline const T& TabVecTemp<T>::operator() (uInt index) const
     { return (*vecPtr_p)(index); }
 template<class T>
-inline T& TabVecTemp<T>::operator() (rownr_t index)
+inline T& TabVecTemp<T>::operator() (uInt index)
     { return (*vecPtr_p)(index); }
 
 

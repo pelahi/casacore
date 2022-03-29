@@ -7,7 +7,6 @@ build/
 .project
 .cproject
 .settings
-.vscode
 WSRT_Measures.ztar
 sofa.tgz
 sofa/

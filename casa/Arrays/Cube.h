@@ -25,12 +25,19 @@
 //#
 //# $Id$
 
-#ifndef CASA_CUBE_2_H
-#define CASA_CUBE_2_H
+#ifndef CASA_CUBE_H
+#define CASA_CUBE_H
 
-#include "Array.h"
+
+//# Includes
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/Array.h>
 
 namespace casacore { //#Begin casa namespace
+
+//# Forward Declarations
+template<class T> class Matrix;
+
 
 // <summary> A 3-D Specialization of the Array class </summary>
 // <reviewed reviewer="UNKNOWN" date="before2004/08/25" tests="" demos="">
@@ -46,7 +53,7 @@ namespace casacore { //#Begin casa namespace
 // is three-dimensional, the IPositions are overkill, although you may
 // use those versions if you want to.
 // <srcblock>
-// Cube<int> ci(100,100,100);   // Shape is 100x100
+// Cube<Int> ci(100,100,100);   // Shape is 100x100
 // ci.resize(50,50,50);         // Shape now 50x50
 // </srcblock>
 //
@@ -55,8 +62,8 @@ namespace casacore { //#Begin casa namespace
 // are optional. Additionally, there is an xyPlane()
 // member function which return a Matrix which corresponds to some plane:
 // <srcblock>
-// Cube<float> cube(10,20,30);
-// for(size_t i=0; i < 30; i++) {
+// Cube<Float> cube(10,20,30);
+// for(uInt i=0; i < 30; i++) {
 //    cube.xyPlane(i) = i;   // Set every 10x20 plane to its "height"
 // }
 // </srcblock>
@@ -70,50 +77,70 @@ namespace casacore { //#Begin casa namespace
 // index operations will be bounds-checked. Neither of these should
 // be defined for production code.
 
-template<typename T, typename Alloc> class Cube : public Array<T, Alloc>
+template<class T> class Cube : public Array<T>
 {
 public:
 
     // A Cube of length zero in each dimension; zero origin.
-    Cube(const Alloc& allocator=Alloc());
+    Cube();
+
+    // A l1xl2xl3 sized cube.
+    Cube(size_t l1, size_t l2, size_t l3);
+
+    // A l1xl2xl3 sized cube.
+    Cube(size_t l1, size_t l2, size_t l3, ArrayInitPolicy initPolicy);
 
     // A l1xl2xl3 sized cube.
     // Fill it with the initial value.
-    Cube(size_t l1, size_t l2, size_t l3, const T &initialValue=T(), const Alloc& allocator=Alloc());
-    
-    // An uninitialized l1xl2xl3 sized cube.
-    Cube(size_t l1, size_t l2, size_t l3, typename Array<T, Alloc>::uninitializedType, const Alloc& allocator=Alloc());
+    Cube(size_t l1, size_t l2, size_t l3, const T &initialValue);
+
+    // A Cube where the shape ("len") is defined with IPositions.
+    Cube(const IPosition &len);
+
+    // A Cube where the shape ("len") is defined with IPositions.
+    Cube(const IPosition &len, ArrayInitPolicy initPolicy);
 
     // A Cube where the shape ("len") is defined with IPositions.
     // Fill it with the initial value.
-    Cube(const IPosition &length, const T &initialValue = T(), const Alloc& allocator=Alloc());
+    Cube(const IPosition &len, const T &initialValue);
 
-    // An uninitialized Cube where the shape ("len") is defined with IPositions.
-    Cube(const IPosition& length, typename Array<T, Alloc>::uninitializedType, const Alloc& allocator=Alloc());
-    
     // The copy constructor uses reference semantics.
-    Cube(const Cube<T, Alloc> &);
-    Cube(Cube<T, Alloc> &&);
+    Cube(const Cube<T> &);
 
     // Construct a cube by reference from "other". "other must have
     // ndim() of 3 or less. The warning which applies to the copy constructor
     // is also valid here.
-    Cube(const Array<T, Alloc> &);
-    Cube(Array<T, Alloc> &&);
+    Cube(const Array<T> &);
 
     // Create an Cube of a given shape from a pointer.
     Cube(const IPosition &shape, T *storage, StorageInitPolicy policy = COPY);
     // Create an Cube of a given shape from a pointer.
-    Cube(const IPosition &shape, T *storage, StorageInitPolicy policy, const Alloc& allocator);
+    Cube(const IPosition &shape, T *storage, StorageInitPolicy policy, AbstractAllocator<T> const &allocator);
     // Create an  Cube of a given shape from a pointer. Because the pointer
     // is const, a copy is always made.
     Cube(const IPosition &shape, const T *storage);
-    
+
+    // Define a destructor, otherwise the (SUN) compiler makes a static one.
+    virtual ~Cube();
+
+    // Assign the other array (which must be dimension 3) to this cube.
+    // If the shapes mismatch, this array is resized.
+    virtual void assign (const Array<T>& other);
+
+    // Make this cube a reference to other. Other must be of dimensionality
+    // 3 or less.
+    virtual void reference(const Array<T> &other);
+
     // Resize to the given shape.
     // Resize without argument is equal to resize(0,0,0).
     // <group>
-    using Array<T, Alloc>::resize;
-    void resize(size_t nx, size_t ny, size_t nz, bool copyValues=false);
+    using Array<T>::resize;
+    void resize(size_t nx, size_t ny, size_t nz, Bool copyValues=False) {
+        Cube<T>::resize(nx, ny, nz, copyValues, Array<T>::defaultArrayInitPolicy());
+    }
+    void resize(size_t nx, size_t ny, size_t nz, Bool copyValues, ArrayInitPolicy policy);
+    virtual void resize();
+    virtual void resize(const IPosition &newShape, Bool copyValues, ArrayInitPolicy policy);
     // </group>
 
     // Copy the values from other to this cube. If this cube has zero
@@ -122,58 +149,19 @@ public:
     // Note that the assign function can be used to assign a
     // non-conforming cube.
     // <group>
-    Cube<T, Alloc> &operator=(const Cube<T, Alloc>& source)
-    { Array<T, Alloc>::operator=(source); return *this; }
-    Cube<T, Alloc> &operator=(Cube<T, Alloc>&& source)
-    { Array<T, Alloc>::operator=(std::move(source)); return *this; }
-    
-    Cube<T, Alloc>& operator=(const Array<T, Alloc>& source)
-    {
-      // TODO is it highly confusing that operator= is specialized for Cube, e.g.
-      // this is allowed:
-      //   Cube<int> cube(5,1,1);
-      //   Vector<int> v(5,0);
-      //   cube = v;
-      // But this is not:
-      //   Array arr(IPosition{5,1,1});
-      //   Vector<int> v(5,0);
-      //   arr = v;
-      // If it should be allowed to assign from dim(5,1,1) to dim(5), this should
-      // be supported already by the Array class so that the semantics are the
-      // same!
-      
-      if (source.ndim() == 3) {
-        Array<T, Alloc>::operator=(source);
-      } else {
-        // This might work if a.ndim == 1 or 2
-        (*this) = Cube<T, Alloc>(source);
-      }
-      return *this;
-    }
-   
-    Cube<T, Alloc>& operator=(Array<T, Alloc>&& source)
-    {
-      if (source.ndim() == 3) {
-        Array<T, Alloc>::operator=(std::move(source));
-      } else {
-        (*this) = Cube<T, Alloc>(std::move(source));
-      }
-      return *this;
-    }
-   
+    Cube<T> &operator=(const Cube<T> &other);
+    virtual Array<T> &operator=(const Array<T> &other);
     // </group>
 
     // Copy val into every element of this cube; i.e. behaves as if
     // val were a constant conformant cube.
-    Array<T, Alloc> &operator=(const T &val)
+    Array<T> &operator=(const T &val)
       { return Array<T>::operator=(val); }
 
     // Copy to this those values in marray whose corresponding elements
-    // in marray's mask are true.
-    
-    // TODO
-    //Cube<T, Alloc> &operator= (const MaskedArray<T> &marray)
-    //  { Array<T> (*this) = marray; return *this; }
+    // in marray's mask are True.
+    Cube<T> &operator= (const MaskedArray<T> &marray)
+      { Array<T> (*this) = marray; return *this; }
 
 
     // Single-pixel addressing. If AIPS_ARRAY_INDEX_CHECK is defined,
@@ -186,27 +174,53 @@ public:
 
     T &operator()(size_t i1, size_t i2, size_t i3)
       {
-	return this->begin_p[index(i1, i2, i3)];
+#if defined(AIPS_ARRAY_INDEX_CHECK)
+        this->validateIndex(i1, i2, i3);   // Throws an exception on failure
+#endif
+	return this->begin_p[i1*xinc_p + i2*yinc_p + i3*zinc_p];
       }
 
     const T &operator()(size_t i1, size_t i2, size_t i3) const
-    {
-      return this->begin_p[index(i1, i2, i3)];
-    }
+      {
+#if defined(AIPS_ARRAY_INDEX_CHECK)
+        this->validateIndex(i1, i2, i3);   // Throws an exception on failure
+#endif
+	return this->begin_p[i1*xinc_p + i2*yinc_p + i3*zinc_p];
+      }
+
+  //# Have function at (temporarily) to check if test on contiguous is
+  //# indeed slower than always using multiplication in operator()
+    T &at(size_t i1, size_t i2, size_t i3)
+      {
+#if defined(AIPS_ARRAY_INDEX_CHECK)
+        this->validateIndex(i1, i2, i3);   // Throws an exception on failure
+#endif
+	return this->contiguous_p ? this->begin_p[i1 + i2*yinc_p + i3*zinc_p] :
+                              this->begin_p[i1*xinc_p + i2*yinc_p + i3*zinc_p];
+      }
+
+    const T &at(size_t i1, size_t i2, size_t i3) const
+      {
+#if defined(AIPS_ARRAY_INDEX_CHECK)
+        this->validateIndex(i1, i2, i3);   // Throws an exception on failure
+#endif
+	return this->contiguous_p ? this->begin_p[i1 + i2*yinc_p + i3*zinc_p] :
+                              this->begin_p[i1*xinc_p + i2*yinc_p + i3*zinc_p];
+      }
     // </group>
 
     // Take a slice of this cube. Slices are always indexed starting
     // at zero. This uses reference semantics, i.e. changing a value
     // in the slice changes the original.
     // <srcblock>
-    // Cube<double> vd(100,100,100);
+    // Cube<Double> vd(100,100,100);
     // //...
     // vd(Slice(0,10),Slice(10,10,Slice(0,10))) = -1.0; // sub-cube set to -1.0
     // </srcblock>
     // <group>
-    Cube<T, Alloc> operator()(const Slice &sliceX, const Slice &sliceY,
+    Cube<T> operator()(const Slice &sliceX, const Slice &sliceY,
 		       const Slice &sliceZ);
-    const Cube<T, Alloc> operator()(const Slice &sliceX, const Slice &sliceY,
+    const Cube<T> operator()(const Slice &sliceX, const Slice &sliceY,
                              const Slice &sliceZ) const;
     // </group>
 
@@ -266,18 +280,18 @@ public:
     // Of course you could also use a Matrix
     // iterator on the cube.
     // <group>
-    Matrix<T, Alloc> xyPlane(size_t zplane); 
-    const  Matrix<T, Alloc> xyPlane(size_t zplane) const; 
-    Matrix<T, Alloc> xzPlane(size_t yplane); 
-    const  Matrix<T, Alloc> xzPlane(size_t yplane) const; 
-    Matrix<T, Alloc> yzPlane(size_t xplane); 
-    const  Matrix<T, Alloc> yzPlane(size_t xplane) const; 
+    Matrix<T> xyPlane(size_t zplane); 
+    const  Matrix<T> xyPlane(size_t zplane) const; 
+    Matrix<T> xzPlane(size_t yplane); 
+    const  Matrix<T> xzPlane(size_t yplane) const; 
+    Matrix<T> yzPlane(size_t xplane); 
+    const  Matrix<T> yzPlane(size_t xplane) const; 
     // </group>
 
     // The length of each axis of the cube.
     const IPosition &shape() const
       { return this->length_p; }
-    void shape(int &s1, int &s2, int &s3) const
+    void shape(Int &s1, Int &s2, Int &s3) const
       { s1 = this->length_p(0); s2=this->length_p(1); s3=this->length_p(2); }
 
     // The number of rows in the Cube, i.e. the length of the first axis.
@@ -293,41 +307,26 @@ public:
       { return this->length_p(2); }
 
     // Checks that the cube is consistent (invariants check out).
-    virtual bool ok() const override;
+    virtual Bool ok() const;
 
 protected:
-    virtual void preTakeStorage(const IPosition &shape) override;
+    virtual void preTakeStorage(const IPosition &shape);
+    virtual void postTakeStorage();
     // Remove the degenerate axes from other and store result in this cube.
     // An exception is thrown if removing degenerate axes does not result
     // in a cube.
     virtual void doNonDegenerate(const Array<T> &other,
-                                 const IPosition &ignoreAxes) override;
-                                 
-    size_t fixedDimensionality() const override { return 3; }
+                                 const IPosition &ignoreAxes);
 
 private:
     // Cached constants to improve indexing.
-    //size_t xinc_p, yinc_p, zinc_p;
+    size_t xinc_p, yinc_p, zinc_p;
     // Helper fn to calculate the indexing constants.
-    //void makeIndexingConstants();
-    size_t xinc() const { return this->inc_p(0); }
-    size_t yinc() const { return this->inc_p(1)*this->originalLength_p(0); }
-    size_t zinc() const { return this->inc_p(2)*this->originalLength_p(0)*this->originalLength_p(1); }
-    size_t index(size_t i1, size_t i2, size_t i3) const {
-      return xinc()*i1 + 
-        this->originalLength_p(0)*(this->inc_p(1)*i2 + 
-          this->inc_p(2)*this->originalLength_p(1)*i3);
-    }
-    size_t index_continuous(size_t i1, size_t i2, size_t i3) const {
-      return i1 + 
-        this->originalLength_p(0)*(this->inc_p(1)*i2 + 
-          this->inc_p(2)*this->originalLength_p(1)*i3);
-    }
-
+    void makeIndexingConstants();
 };
 
 } //#End casa namespace
-
-#include "Cube.tcc"
-
+#ifndef CASACORE_NO_AUTO_TEMPLATES
+#include <casacore/casa/Arrays/Cube.tcc>
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

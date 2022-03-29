@@ -27,7 +27,7 @@
 
 #include <casacore/tables/Tables/ConcatRows.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/OS/Timer.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/iostream.h>
@@ -53,7 +53,7 @@ void doIt()
 
   // Check if rownr mapping is fine.
   uInt tabnr;
-  rownr_t rownr;
+  uInt rownr;
   for (uInt i=0; i<10; ++i) {
     rows.mapRownr (tabnr, rownr, i);
     AlwaysAssertExit (tabnr == 0);
@@ -68,7 +68,7 @@ void doIt()
   Bool ok = True;
   try {
     rows.mapRownr (tabnr, rownr, rows.nrow());
-  } catch (std::exception& x) {
+  } catch (AipsError& x) {
     ok = False;
   }
   AlwaysAssertExit (!ok);
@@ -215,8 +215,8 @@ int main()
 {
   try {
     doIt();
-  } catch (std::exception& x) {
-    cout << "\nCaught an exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << "\nCaught an exception: " << x.getMesg() << endl;
     return 1;
   } 
   return 0;               // successfully executed

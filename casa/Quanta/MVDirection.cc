@@ -31,6 +31,7 @@
 #include <casacore/casa/Quanta/Euler.h>
 #include <casacore/casa/Quanta/RotMatrix.h>
 #include <casacore/casa/Utilities/Assert.h>
+#include <casacore/casa/Utilities/Register.h>
 #include <casacore/casa/Quanta/MVDirection.h>
 #include <casacore/casa/Quanta/UnitVal.h>
 #include <casacore/casa/Quanta/QMath.h>
@@ -51,6 +52,13 @@ MVDirection::MVDirection() :
 
 MVDirection::MVDirection(const MVPosition &other) : 
   MVPosition(other) {}
+
+MVDirection &MVDirection::operator=(const MVDirection &other) {
+  if (this != &other) {
+    xyz = other.xyz;
+  }
+  return *this;
+}
 
 MVDirection::MVDirection(Double in0, Double in1, Double in2) : 
   MVPosition(in0,in1,in2) {
@@ -103,6 +111,9 @@ MVDirection::MVDirection(const Vector<Quantity> &angle) :
     }
   }
 
+//# Destructor
+MVDirection::~MVDirection() {}
+
 //# Operators
 MVDirection &MVDirection::operator+=(const MVDirection &right) {
   xyz += right.xyz;
@@ -130,8 +141,12 @@ MVDirection MVDirection::operator-(const MVDirection &right) const{
 
 //# Member functions
 
+uInt MVDirection::type() const {
+  return Register(static_cast<MVDirection *>(0));
+}
+
 void MVDirection::assure(const MeasValue &in) {
-  if (!dynamic_cast<const MVDirection*>(&in)) {
+  if (in.type() != Register(static_cast<MVDirection *>(0))) {
     throw(AipsError("Illegal MeasValue type argument: MVDirection"));
   }
 }

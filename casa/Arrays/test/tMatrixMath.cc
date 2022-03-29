@@ -27,51 +27,59 @@
 
 //# Includes
 
-#include "../MatrixMath.h"
-#include "../ArrayMath.h"
-#include "../ArrayLogical.h"
+#include <casacore/casa/Arrays/MatrixMath.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/ArrayLogical.h>
+#include <casacore/casa/Utilities/Assert.h>
+#include <casacore/casa/iostream.h>
 
-#include <boost/test/unit_test.hpp>
 
-using namespace casacore;
-
-BOOST_AUTO_TEST_SUITE(matrix_math)
-
-BOOST_AUTO_TEST_CASE( all )
+#include <casacore/casa/namespace.h>
+int main()
 {
-  Matrix<double> ind(3,3);
-  ind(0,0) = 2; ind(0,1) = 8; ind(0,2) = 6;
-  ind(1,0) = 4; ind(1,1) = 2; ind(1,2) = -2;
-  ind(2,0) = 3; ind(2,1) = -1; ind(2,2) = 1;
+  try {
+    Matrix<Double> ind(3,3);
+    ind(0,0) = 2; ind(0,1) = 8; ind(0,2) = 6;
+    ind(1,0) = 4; ind(1,1) = 2; ind(1,2) = -2;
+    ind(2,0) = 3; ind(2,1) = -1; ind(2,2) = 1;
 
-  Matrix<double> outd(3,3);
-  outd(0,0) = 2; outd(0,1) = 4; outd(0,2) = 3;
-  outd(1,0) = 8; outd(1,1) = 2; outd(1,2) = -1;
-  outd(2,0) = 6; outd(2,1) = -2; outd(2,2) = 1;
+    Matrix<Double> outd(3,3);
+    outd(0,0) = 2; outd(0,1) = 4; outd(0,2) = 3;
+    outd(1,0) = 8; outd(1,1) = 2; outd(1,2) = -1;
+    outd(2,0) = 6; outd(2,1) = -2; outd(2,2) = 1;
 
-  BOOST_CHECK(allNearAbs(transpose(ind), outd, 0.00001));
+    AlwaysAssertExit(allNearAbs(transpose(ind), outd, 0.00001));
 
-  // Now test the other types - float/std::complex<float>/std::complex<double>
+    // Now test the other types - Float/Complex/DComplex
 
-  Matrix<float> inf(3,3), outf(3,3);
-  convertArray(inf, ind); convertArray(outf, outd);
-  BOOST_CHECK(allNearAbs(transpose(inf), outf, 0.00001));
+    Matrix<Float> inf(3,3), outf(3,3);
+    convertArray(inf, ind); convertArray(outf, outd);
+    AlwaysAssertExit(allNearAbs(transpose(inf), outf, 0.00001));
 
-  Matrix<std::complex<float>> inc(3,3), outc(3,3);
-  convertArray(inc, ind); convertArray(outc, outd);
-  BOOST_CHECK(allNearAbs(transpose(inc), outc, 0.00001));
+    Matrix<Complex> inc(3,3), outc(3,3);
+    convertArray(inc, ind); convertArray(outc, outd);
+    AlwaysAssertExit(allNearAbs(transpose(inc), outc, 0.00001));
 
-  Matrix<std::complex<double>> indc(3,3), outdc(3,3);
-  convertArray(indc, ind); convertArray(outdc, outd);
-  BOOST_CHECK(allNearAbs(transpose(indc), outdc, 0.00001));
+    Matrix<DComplex> indc(3,3), outdc(3,3);
+    convertArray(indc, ind); convertArray(outdc, outd);
+    AlwaysAssertExit(allNearAbs(transpose(indc), outdc, 0.00001));
 
-  Vector<double> a(2, 2);
-  Vector<double> b(2, 3);
-  BOOST_CHECK_EQUAL(crossProduct2D(a, b), 0);
-  a[0] = -2;
-  BOOST_CHECK_EQUAL(crossProduct2D(a, b),-12);
-  b[1] = -5;
-  BOOST_CHECK_EQUAL(crossProduct2D(a, b), 4);
+
+    Vector<Double> a(2, 2);
+    Vector<Double> b(2, 3);
+    AlwaysAssertExit(crossProduct2D(a, b) == 0);
+    a[0] = -2;
+    AlwaysAssertExit(crossProduct2D(a, b) == -12);
+    b[1] = -5;
+    AlwaysAssertExit(crossProduct2D(a, b) == 4);
+
+
+
+  } catch(AipsError& x) {
+    cout << "Caught exception : " << x.getMesg() << endl;
+    return 1;
+  } 
+
+  cout << "OK" << endl;
+  return 0;
 }
-
-BOOST_AUTO_TEST_SUITE_END()

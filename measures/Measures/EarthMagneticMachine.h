@@ -30,7 +30,6 @@
 
 //# Includes
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/measures/Measures.h>
 #include <casacore/measures/Measures/MCDirection.h>
 #include <casacore/casa/Quanta/MVPosition.h>
@@ -43,6 +42,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 class MeasFrame;
 class MPosition;
 class MEpoch;
+
+template <class T> class Vector;
 
 // <summary> Calculates magnetic field in a direction </summary>
 

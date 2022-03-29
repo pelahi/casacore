@@ -83,8 +83,8 @@ int main()
 {
   try {
     doIt();
-  } catch (std::exception& x) {
-    cout << "Caught exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << "Caught exception: " << x.getMesg() << endl;
     return 1;
   }
   cout << "OK" << endl;

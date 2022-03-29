@@ -62,7 +62,6 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 // <ul>
 //   <li> MVEarthMagnetic() creates  (0,0,0)
 //   <li> MVEarthMagnetic(MVEarthMagnetic) creates a copy
-//   <li> MVEarthMagnetic(MVPosition) creates (x,y,z) from the given position
 //   <li> MVEarthMagnetic(Double, Double, Double) creates (x,y,z) with
 //		specified values in tesla
 //   <li> MVEarthMagnetic(Quantity length,Double, Double) creates an
@@ -116,7 +115,7 @@ public:
   //# Constructors
   // Default constructor generates a (0,0,0) EarthMagnetic
   MVEarthMagnetic();
-  // Creates from an MVPosition
+  // Copy constructor
   MVEarthMagnetic(const MVPosition &other);
   // Creates a specified vector
   MVEarthMagnetic(Double in0, Double in1, Double in2);
@@ -143,6 +142,11 @@ public:
   MVEarthMagnetic(const Vector<Double> &other);
   MVEarthMagnetic(const Vector<Quantity> &other);
   // </group>
+  // Copy assignment
+  MVEarthMagnetic &operator=(const MVEarthMagnetic &other);
+  
+  // Destructor
+  ~MVEarthMagnetic();
   
   //# Operators
   // Multiplication defined as in-product
@@ -172,6 +176,7 @@ public:
   
   // Tell me your type
   // <group>
+  virtual uInt type() const;
   static void assure(const MeasValue &in);
   // </group>
   

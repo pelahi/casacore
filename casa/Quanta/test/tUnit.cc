@@ -171,8 +171,8 @@ int main () {
 	cout << "User list after FITS removal:" << endl;
 	UnitMap::listUser();	
 
-    } catch (std::exception& x) {
-	cout << "Unexpected: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Unexpected: " << x.getMesg() << endl;
     } 
     
     cout << endl << "--------------------------" << endl;
@@ -180,14 +180,14 @@ int main () {
 
     try {
 	Unit ca="Kpm/s";
-    } catch (std::exception& x) {
-	cout << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << x.getMesg() << endl;
     } 
 
     try {
 	UnitVal errval(2.,"KpH");
-    } catch (std::exception& x) {
-	cout << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << x.getMesg() << endl;
     } 
     
     cout << endl << "--------------------------" << endl;

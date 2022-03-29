@@ -25,11 +25,13 @@
 //#
 //# $Id$
 
-#ifndef CASA_MATRIXITER_2_H
-#define CASA_MATRIXITER_2_H
+#ifndef CASA_MATRIXITER_H
+#define CASA_MATRIXITER_H
 
-#include "ArrayIter.h"
-#include "Matrix.h"
+
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/ArrayIter.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -53,37 +55,36 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 // In this example we want to make a "moment" map of a cube, i.e. collapse
 // the "Z" axis by averaging it.
 // <srcblock>
-// Cube<float> cube;
+// Cube<Float> cube;
 // MatrixIterator planeIter(cube);
-// Matrix<float> average(planeIter.matrix().copy()); // init with first plane
+// Matrix<Float> average(planeIter.matrix().copy()); // init with first plane
 // planeIter.next(); // advance the iterator
 // while (! planeIter.pastEnd()) {
 //     average += planeIter.matrix(); // Sum the next plane
 //     planeIter.next();
 // }
-// average /= float(cube.shape()(2));  // divide by the number of planes
+// average /= Float(cube.shape()(2));  // divide by the number of planes
 // </srcblock>
 
-template<typename T, typename Alloc=std::allocator<T>>
-class MatrixIterator : public ArrayIterator<T, Alloc>
+template<class T> class MatrixIterator : public ArrayIterator<T>
 {
 public:
     // Iterate by matrices through array "a".
     // The first 2 axes form the cursor axes.
-    explicit MatrixIterator(Array<T, Alloc> &a);
+    explicit MatrixIterator(Array<T> &a);
 
     // Iterate by matrices through array "a".
     // The given axes form the cursor axes.
-    MatrixIterator(Array<T, Alloc> &a, size_t cursorAxis1, size_t cursorAxis2);
+    MatrixIterator(Array<T> &a, uInt cursorAxis1, uInt cursorAxis2);
 
     // Return the matrix at the current position.
-    Matrix<T, Alloc> &matrix() {return *(Matrix<T, Alloc> *)(this->ap_p.get());}
+    Matrix<T> &matrix() {return *(Matrix<T> *)(this->ap_p);}
 
 private:
     // Not implemented.
-    MatrixIterator(const MatrixIterator<T, Alloc> &) = delete;
+    MatrixIterator(const MatrixIterator<T> &);
     // Not implemented.
-    MatrixIterator<T, Alloc> &operator=(const MatrixIterator<T, Alloc> &) = delete;
+    MatrixIterator<T> &operator=(const MatrixIterator<T> &);
 };
 
 // 
@@ -106,7 +107,7 @@ public:
       mi(const_cast<Array<T>&>(a)) {}
 
     ReadOnlyMatrixIterator(const Array<T> &a,
-			   size_t cursorAxis1, size_t cursorAxis2)
+			   uInt cursorAxis1, uInt cursorAxis2)
       : mi(const_cast<Array<T>&>(a), cursorAxis1, cursorAxis2) {}
 
     void next()   {mi.next();}
@@ -116,17 +117,17 @@ public:
     const Array<T> &array() {return mi.array();}
     const Matrix<T> &matrix() {return mi.matrix();}
 
-    bool atStart() const {return mi.atStart();}
-    bool pastEnd() const {return mi.pastEnd();}
+    Bool atStart() const {return mi.atStart();}
+    Bool pastEnd() const {return mi.pastEnd();}
     const IPosition &pos() const {return mi.pos();}
     IPosition endPos() const {return mi.endPos();}
-    size_t ndim() const {return mi.ndim();}
+    uInt ndim() const {return mi.ndim();}
     // </group>
 private:
     // Not implemented.
-    ReadOnlyMatrixIterator(const ReadOnlyMatrixIterator<T> &) = delete;
+    ReadOnlyMatrixIterator(const ReadOnlyMatrixIterator<T> &);
     // Not implemented.
-    ReadOnlyMatrixIterator<T> &operator=(const ReadOnlyMatrixIterator<T> &) = delete;
+    ReadOnlyMatrixIterator<T> &operator=(const ReadOnlyMatrixIterator<T> &);
 
     MatrixIterator<T> mi;
 };
@@ -134,6 +135,7 @@ private:
 
 } //# NAMESPACE CASACORE - END
 
-#include "MatrixIter.tcc"
-
+#ifndef CASACORE_NO_AUTO_TEMPLATES
+#include <casacore/casa/Arrays/MatrixIter.tcc>
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

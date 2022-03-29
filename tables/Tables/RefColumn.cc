@@ -57,22 +57,22 @@ TableRecord& RefColumn::keywordSet()
     { return colPtr_p->keywordSet(); }
 
 
-rownr_t RefColumn::nrow() const
+uInt RefColumn::nrow() const
     { return refTabPtr_p->nrow(); }
 
-void RefColumn::initialize (rownr_t startRow, rownr_t endRow)
+void RefColumn::initialize (uInt startRow, uInt endRow)
 {
-    rownr_t rownr;
-    for (rownr_t i=startRow; i<endRow; i++) {
+    uInt rownr;
+    for (uInt i=startRow; i<endRow; i++) {
 	rownr = refTabPtr_p->rootRownr(i);
 	colPtr_p->initialize (rownr, rownr);
     }
 }
 
-void RefColumn::setShape (rownr_t rownr, const IPosition& shape)
+void RefColumn::setShape (uInt rownr, const IPosition& shape)
     { colPtr_p->setShape (refTabPtr_p->rootRownr(rownr), shape); }
 
-void RefColumn::setShape (rownr_t rownr, const IPosition& shape,
+void RefColumn::setShape (uInt rownr, const IPosition& shape,
 			  const IPosition& tileShape)
     { colPtr_p->setShape (refTabPtr_p->rootRownr(rownr), shape, tileShape); }
 
@@ -82,101 +82,116 @@ uInt RefColumn::ndimColumn() const
 IPosition RefColumn::shapeColumn() const
     { return colPtr_p->shapeColumn(); }
 
-uInt RefColumn::ndim (rownr_t rownr) const
+uInt RefColumn::ndim (uInt rownr) const
     { return colPtr_p->ndim (refTabPtr_p->rootRownr(rownr)); }
 
-IPosition RefColumn::shape(rownr_t rownr) const
+IPosition RefColumn::shape(uInt rownr) const
     { return colPtr_p->shape (refTabPtr_p->rootRownr(rownr)); }
 
-Bool RefColumn::isDefined (rownr_t rownr) const
+Bool RefColumn::isDefined (uInt rownr) const
     { return colPtr_p->isDefined (refTabPtr_p->rootRownr(rownr)); }
 
+
+Bool RefColumn::canAccessScalarColumn (Bool& reask) const
+    { return colPtr_p->canAccessScalarColumnCells (reask); }
+Bool RefColumn::canAccessScalarColumnCells (Bool& reask) const
+    { return colPtr_p->canAccessScalarColumnCells (reask); }
+Bool RefColumn::canAccessArrayColumn (Bool& reask) const
+    { return colPtr_p->canAccessArrayColumnCells (reask); }
+Bool RefColumn::canAccessArrayColumnCells (Bool& reask) const
+    { return colPtr_p->canAccessArrayColumnCells (reask); }
+Bool RefColumn::canAccessSlice (Bool& reask) const
+    { return colPtr_p->canAccessSlice (reask); }
+Bool RefColumn::canAccessColumnSlice (Bool& reask) const
+{
+    Bool reask1;
+    Bool acc1 = colPtr_p->canAccessColumnSlice (reask1);
+    Bool acc2 = colPtr_p->canAccessArrayColumnCells (reask);
+    if (reask1) {
+	reask = reask1;
+    }
+    return  (acc1 && acc2);
+}
 
 Bool RefColumn::canChangeShape() const
     { return colPtr_p->canChangeShape(); }
 
 
-void RefColumn::get (rownr_t rownr, void* dataPtr) const
+void RefColumn::get (uInt rownr, void* dataPtr) const
     { colPtr_p->get (refTabPtr_p->rootRownr(rownr), dataPtr); }
 
-void RefColumn::getArray (rownr_t rownr, ArrayBase& data) const
-    { colPtr_p->getArray (refTabPtr_p->rootRownr(rownr), data); }
+void RefColumn::getSlice (uInt rownr, const Slicer& ns, void* dataPtr) const
+    { colPtr_p->getSlice (refTabPtr_p->rootRownr(rownr), ns, dataPtr); }
 
-void RefColumn::getSlice (rownr_t rownr, const Slicer& ns, ArrayBase& data) const
-    { colPtr_p->getSlice (refTabPtr_p->rootRownr(rownr), ns, data); }
-
-void RefColumn::put (rownr_t rownr, const void* dataPtr)
+void RefColumn::put (uInt rownr, const void* dataPtr)
     { colPtr_p->put (refTabPtr_p->rootRownr(rownr), dataPtr); }
 
-void RefColumn::putArray (rownr_t rownr, const ArrayBase& data)
-    { colPtr_p->putArray (refTabPtr_p->rootRownr(rownr), data); }
+void RefColumn::putSlice (uInt rownr, const Slicer& ns, const void* dataPtr)
+    { colPtr_p->putSlice (refTabPtr_p->rootRownr(rownr), ns, dataPtr); }
 
-void RefColumn::putSlice (rownr_t rownr, const Slicer& ns, const ArrayBase& data)
-    { colPtr_p->putSlice (refTabPtr_p->rootRownr(rownr), ns, data); }
-
-void RefColumn::getScalarColumn (ArrayBase& data) const
+void RefColumn::getScalarColumn (void* dataPtr) const
 {
-    colPtr_p->getScalarColumnCells (refTabPtr_p->rowNumbers(), data);
+    colPtr_p->getScalarColumnCells (refTabPtr_p->rowNumbers(), dataPtr);
 }
-void RefColumn::getArrayColumn (ArrayBase& data) const
+void RefColumn::getArrayColumn (void* dataPtr) const
 {
-    colPtr_p->getArrayColumnCells (refTabPtr_p->rowNumbers(), data);
+    colPtr_p->getArrayColumnCells (refTabPtr_p->rowNumbers(), dataPtr);
 }
 void RefColumn::getColumnSlice (const Slicer& ns,
-				ArrayBase& data) const
+				void* dataPtr) const
 {
-    colPtr_p->getColumnSliceCells (refTabPtr_p->rowNumbers(), ns, data); 
+    colPtr_p->getColumnSliceCells (refTabPtr_p->rowNumbers(), ns, dataPtr); 
 }
 void RefColumn::getScalarColumnCells (const RefRows& rownrs,
-				      ArrayBase& data) const
+				      void* dataPtr) const
 {
     colPtr_p->getScalarColumnCells (rownrs.convert(refTabPtr_p->rowNumbers()),
-				    data);
+				    dataPtr);
 }
 void RefColumn::getArrayColumnCells (const RefRows& rownrs,
-				     ArrayBase& data) const
+				     void* dataPtr) const
 {
     colPtr_p->getArrayColumnCells (rownrs.convert(refTabPtr_p->rowNumbers()),
-				   data);
+				   dataPtr);
 }
 void RefColumn::getColumnSliceCells (const RefRows& rownrs,
 				     const Slicer& ns,
-				     ArrayBase& data) const
+				     void* dataPtr) const
 {
     colPtr_p->getColumnSliceCells (rownrs.convert(refTabPtr_p->rowNumbers()),
-				   ns, data);
+				   ns, dataPtr);
 }
-void RefColumn::putScalarColumn (const ArrayBase& data)
+void RefColumn::putScalarColumn (const void* dataPtr)
 {
-    colPtr_p->putScalarColumnCells (refTabPtr_p->rowNumbers(), data);
+    colPtr_p->putScalarColumnCells (refTabPtr_p->rowNumbers(), dataPtr);
 }
-void RefColumn::putArrayColumn (const ArrayBase& data)
+void RefColumn::putArrayColumn (const void* dataPtr)
 {
-    colPtr_p->putArrayColumnCells (refTabPtr_p->rowNumbers(), data);
+    colPtr_p->putArrayColumnCells (refTabPtr_p->rowNumbers(), dataPtr);
 }
 void RefColumn::putColumnSlice (const Slicer& ns,
-				const ArrayBase& data)
+				const void* dataPtr)
 {
-    colPtr_p->putColumnSliceCells (refTabPtr_p->rowNumbers(), ns, data); 
+    colPtr_p->putColumnSliceCells (refTabPtr_p->rowNumbers(), ns, dataPtr); 
 }
 void RefColumn::putScalarColumnCells (const RefRows& rownrs,
-				      const ArrayBase& data)
+				      const void* dataPtr)
 {
     colPtr_p->putScalarColumnCells (rownrs.convert(refTabPtr_p->rowNumbers()),
-				    data);
+				    dataPtr);
 }
 void RefColumn::putArrayColumnCells (const RefRows& rownrs,
-				     const ArrayBase& data)
+				     const void* dataPtr)
 {
     colPtr_p->putArrayColumnCells (rownrs.convert(refTabPtr_p->rowNumbers()),
-				   data);
+				   dataPtr);
 }
 void RefColumn::putColumnSliceCells (const RefRows& rownrs,
 				     const Slicer& ns,
-				     const ArrayBase& data)
+				     const void* dataPtr)
 {
     colPtr_p->putColumnSliceCells (rownrs.convert(refTabPtr_p->rowNumbers()),
-				   ns, data);
+				   ns, dataPtr);
 }
 
 
@@ -188,9 +203,12 @@ void RefColumn::setMaximumCacheSize (uInt nbytes)
 
 
 void RefColumn::makeSortKey (Sort& sortobj, CountedPtr<BaseCompare>& cmpObj,
-			     Int order, CountedPtr<ArrayBase>& dataSave)
+			     Int order, const void*& dataSave)
     { colPtr_p->makeRefSortKey (sortobj, cmpObj, order,
 				refTabPtr_p->rowNumbers(), dataSave); }
+
+void RefColumn::freeSortKey (const void*& dataSave)
+    { colPtr_p->freeSortKey (dataSave); }
 
 void RefColumn::allocIterBuf (void*& lastVal, void*& curVal,
 			      CountedPtr<BaseCompare>& cmpObj)

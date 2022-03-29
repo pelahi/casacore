@@ -95,25 +95,25 @@ public:
 
   // Get an array value in the given row.
   // An exception is thrown if no array is defined in this row.
-  virtual void getArrayV (rownr_t rownr, ArrayBase& dataPtr);
+  virtual void getArrayStringV (uInt rownr, Array<String>* dataPtr);
   
   // Put an array value in the given row.
-  virtual void putArrayV (rownr_t rownr, const ArrayBase& dataPtr);
+  virtual void putArrayStringV (uInt rownr, const Array<String>* dataPtr);
 
   // Set the shape of the array in the given row.
-  void setShape (rownr_t aRowNr, const IPosition& aShape);
+  void setShape (uInt aRowNr, const IPosition& aShape);
   
   // Get the shape of the array in the given row.
-  virtual IPosition shape (rownr_t aRowNr);
+  virtual IPosition shape (uInt aRowNr);
   
   // This storage manager can handle changing array shapes.
   Bool canChangeShape() const;
 
   // Is the shape defined (i.e. is there an array) in this row?
-  virtual Bool isShapeDefined (rownr_t aRowNr);
+  virtual Bool isShapeDefined (uInt aRowNr);
 
   // Get the dimensionality of the item in the given row.
-  virtual uInt ndim (rownr_t aRowNr);
+  virtual uInt ndim (uInt aRowNr);
 
 
 private:

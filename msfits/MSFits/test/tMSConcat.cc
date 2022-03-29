@@ -83,8 +83,8 @@ int main(int argc, const char* argv[])
     MSConcat mscat(ms);
     mscat.concatenate(appendedMS);
   }
-  catch (std::exception& x) {
-    cerr << x.what() << endl;
+  catch (AipsError& x) {
+    cerr << x.getMesg() << endl;
     cout << "FAIL" << endl;
     return 1;
   }

@@ -61,8 +61,8 @@ int main (int argc, const char* argv[])
 	istringstream istr1(argv[1]);
 	istr1 >> tileSize;
 	doIt (tileSize);
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     return 0;                           // exit with success status
@@ -91,14 +91,14 @@ IPosition getVec (uInt nrdim, const String& prompt)
 	if (str == "end") {
 	    return IPosition();
 	}
-	Vector<std::string> vec = strToVector (str);
+	Vector<String> vec = stringToVector (str);
 	if (vec.nelements() > nrdim) {
 	    cout << "value can contain max. " << nrdim << " values" << endl;
 	}else{
 	    Bool error = False;
 	    IPosition pos(vec.nelements());
 	    for (uInt i=0; i<vec.nelements(); i++) {
-		istringstream istr(vec(i));
+		istringstream istr(vec(i).chars());
 		istr >> pos(i);
 		if (pos(i) < 0) {
 		    cout << "Value " << pos(i) << " must be >= 0" << endl;

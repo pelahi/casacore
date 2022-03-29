@@ -32,7 +32,6 @@
 
 #include <casacore/casa/aips.h>
 #include <casacore/fits/FITS/fits.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/BasicSL/String.h>
 #include <casacore/casa/Utilities/DataType.h>
@@ -47,6 +46,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
   template<class T> class PagedImage;
   template<class T> class ImageInterface;
+  template<class T> class Vector;
   class FitsOutput;
   class File;
   class ImageInfo;

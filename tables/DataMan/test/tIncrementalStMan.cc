@@ -38,7 +38,7 @@
 #include <casacore/casa/Arrays/Cube.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Arrays/Slicer.h>
 #include <casacore/casa/Arrays/Slice.h>
 #include <casacore/casa/Utilities/Assert.h>
@@ -66,7 +66,6 @@ void testWithLocking();
 
 int main (int argc, const char* argv[])
 {
-  ///  DataManager::MAXROWNR32 = 0;
     uInt nr = 1000;
     if (argc > 1) {
 	istringstream istr(argv[1]);
@@ -84,8 +83,8 @@ int main (int argc, const char* argv[])
 	a (nr, 0);
 	f();
         testWithLocking();
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     return 0;                           // exit with success status
@@ -249,9 +248,6 @@ void a (uInt bucketSize, uInt mode)
     }
     // All rows from 0 on get this value.
     arr4.put (0, vstr);
-    ///cout << "arr4 = ";
-    ///    cout << arr4(0) << ' '<< arr4(9) << endl;
-    ///cout << "arr4 = " << arr4.getColumn () << endl;
     cout << "arr4 = " << arr4.getColumn (Slicer(Slice(0,1))) << endl;
     // All rows from 1 on get this value.
     arr4.put (1, vstr);
@@ -437,7 +433,7 @@ void c()
     removedRows(12) = True;                    // row 10 was old row 12
     b (removedRows);
     // Remove several rows.
-    Vector<rownr_t> rows(5);
+    Vector<uInt> rows(5);
     for (i=0; i<5; i++) {
 	rows(i)=i+2;
 	removedRows(i+3) = True;
@@ -465,7 +461,7 @@ void d()
     // Remove the last 10 rows.
     // Open the table as read/write for that purpose.
     Table rwtab ("tIncrementalStMan_tmp.data", Table::Update);
-    Vector<rownr_t> rows(10);
+    Vector<uInt> rows(10);
     for (i=0; i<10; i++) {
 	rows(i)=i+10;
     }
@@ -497,13 +493,13 @@ void f()
     //# Try to change some arrays (which cannot be done).
     try {
 	arr1.put (0, vecf);
-    } catch (std::exception& x) {
-	cout << x.what() << endl;         // shape cannot change
+    } catch (AipsError& x) {
+	cout << x.getMesg() << endl;         // shape cannot change
     } 
     try {
 	arr7.put (0, vecb);
-    } catch (std::exception& x) {
-	cout << x.what() << endl;         // shape cannot change
+    } catch (AipsError& x) {
+	cout << x.getMesg() << endl;         // shape cannot change
     } 
     Vector<Bool> removedRows(20);
     removedRows.set (False);
@@ -560,7 +556,7 @@ void testWithLocking()
                                                    IPosition(1,n)));
       // Check the contents.
       for (uInt i=0; i<n; ++i) {
-        AlwaysAssertExit (vec[i] == (Int)row/10000*10000);
+        AlwaysAssertExit (vec[i] == row/10000*10000);
         row++;
       }
       tab.unlock();

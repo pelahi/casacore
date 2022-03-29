@@ -59,8 +59,8 @@ int main (int argc, const char*[])
 	}
         delete mfile;
       }
-    } catch (const std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (const AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     cout << "OK" << endl;
@@ -132,9 +132,9 @@ void c(MultiFile* mfile)
     BucketFile file1 ("tBucketFile_tmp.data1", False, 0, False, mfile);
     try {
 	file1.open();
-    } catch (const std::exception& x) {
+    } catch (const AipsError& x) {
 	flag = True;
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
     } 
     AlwaysAssertExit (flag);
     
@@ -146,9 +146,9 @@ void c(MultiFile* mfile)
     BucketFile file2 ("tBucketFile_tmp.data", True);
     try {
 	file2.open();
-    } catch (const std::exception& x) {
+    } catch (const AipsError& x) {
 	flag = True;
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
     } 
     AlwaysAssertExit (flag);
     
@@ -157,9 +157,9 @@ void c(MultiFile* mfile)
     file3.setRW();
     try {
 	file3.open();
-    } catch (const std::exception& x) {
+    } catch (const AipsError& x) {
 	flag = True;
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
     } 
     AlwaysAssertExit (flag);
 
@@ -168,9 +168,9 @@ void c(MultiFile* mfile)
     file4.open();
     try {
 	file4.setRW();
-    } catch (const std::exception& x) {
+    } catch (const AipsError& x) {
 	flag = True;
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
     } 
     AlwaysAssertExit (flag);
 

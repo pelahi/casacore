@@ -31,7 +31,6 @@
 #define COORDINATES_COORDINATESYSTEM_H
 
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/coordinates/Coordinates/Coordinate.h>
 #include <casacore/measures/Measures/MDirection.h>
 #include <casacore/measures/Measures/MFrequency.h>
@@ -42,6 +41,7 @@
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
+template<class T> class Matrix;
 class DirectionCoordinate;
 class LinearCoordinate;
 class SpectralCoordinate;
@@ -903,7 +903,7 @@ private:
     ObsInfo obsinfo_p;
 
     const static String _class;
-    static std::mutex _mapInitMutex;
+    static Mutex _mapInitMutex;
     static std::map<String, String> _friendlyAxisMap;
 
     static void _initFriendlyAxisMap();

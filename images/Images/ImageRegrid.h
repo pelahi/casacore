@@ -44,6 +44,7 @@ template<class T> class MaskedLattice;
 template<class T> class ImageInterface;
 template<class T> class Lattice;
 template<class T> class LatticeIterator;
+template<class T> class Vector;
 
 class CoordinateSystem;
 class DirectionCoordinate;

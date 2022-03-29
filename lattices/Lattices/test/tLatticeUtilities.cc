@@ -69,9 +69,9 @@ int main()
 
      doBin();
 
-  } catch (const std::exception& x) {
+  } catch (const AipsError& x) {
     cout<< "FAIL"<< endl;
-    cerr << x.what() << endl;
+    cerr << x.getMesg() << endl;
     return 1;
   } 
   cout<< "OK"<< endl;
@@ -175,8 +175,8 @@ void doReplicate ()
       try {
          LatticeUtilities::replicate (lat, slice, arr);
          throw(AipsError("replicate unexpectedly did not fail"));
-      } catch (std::exception& x) {
-         cerr << "Expected error = " << x.what() << endl;
+      } catch (AipsError& x) {
+         cerr << "Expected error = " << x.getMesg() << endl;
       }
    }
 }

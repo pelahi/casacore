@@ -31,7 +31,6 @@
 #define FITS_FITSKEYWORDUTIL_H
 
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -40,6 +39,7 @@ class FitsKeywordList;
 class RecordInterface;
 class IPosition;
 class String;
+template<class T> class Vector;
 
 // <summary>
 // A class with static functions to help deal with FITS Keywords.

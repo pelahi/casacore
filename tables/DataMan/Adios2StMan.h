@@ -47,26 +47,19 @@ class Adios2StMan : public DataManager
     friend class Adios2StManColumn;
     template<typename T> friend class Adios2StManColumnT;
 public:
-
-    Adios2StMan(MPI_Comm mpiComm = MPI_COMM_WORLD,
-            std::string engineType = std::string(),
-            std::map<std::string, std::string> engineParams
-                = std::map<std::string, std::string>(),
-            std::vector<std::map<std::string, std::string>> transportParams
-                = std::vector<std::map<std::string, std::string>>(),
-            std::vector<std::map<std::string, std::string>> operatorParams
-                = std::vector<std::map<std::string, std::string>>());
-
-    Adios2StMan(std::string xmlFile, MPI_Comm mpiComm = MPI_COMM_WORLD);
+    Adios2StMan(MPI_Comm mpiComm = MPI_COMM_WORLD);
+    Adios2StMan(MPI_Comm mpiComm, std::string engineType,
+            std::map<std::string, std::string> engineParams,
+            std::vector<std::map<std::string, std::string>> transportParams);
 
     virtual ~Adios2StMan();
 
     virtual DataManager *clone() const;
     virtual String dataManagerType() const;
     virtual String dataManagerName() const;
-    virtual void create64(rownr_t aNrRows);
-    virtual rownr_t open64(rownr_t aRowNr, AipsIO &ios);
-    virtual rownr_t resync64(rownr_t aRowNr);
+    virtual void create(uInt aNrRows);
+    virtual void open(uInt aRowNr, AipsIO &ios);
+    virtual void resync(uInt aRowNr);
     virtual Bool flush(AipsIO &, Bool doFsync);
     virtual DataManagerColumn *makeScalarColumn(const String &aName,
                                                 int aDataType,
@@ -78,15 +71,14 @@ public:
                                                 int aDataType,
                                                 const String &aDataTypeID);
     virtual void deleteManager();
-    virtual void addRow64(rownr_t aNrRows);
+    virtual void addRow(uInt aNrRows);
     static DataManager *makeObject(const String &aDataManType,
                                    const Record &spec);
-    Record dataManagerSpec() const;
-    rownr_t getNrRows();
+    uInt getNrRows();
 
 private:
-    class impl;
-    std::unique_ptr<impl> pimpl;
+	 class impl;
+	 std::unique_ptr<impl> pimpl;
 }; // end of class Adios2StMan
 
 extern "C" void register_adios2stman();

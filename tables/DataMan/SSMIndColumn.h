@@ -105,24 +105,27 @@ public:
   // It is needed to override the bahviour of the base class.
   virtual void setMaxLength (uInt maxLength);
 
+  // It can handle access to a slice in a cell.
+  virtual Bool canAccessSlice (Bool& reask) const;
+  
   // Add (newNrrow-oldNrrow) rows to the column.
-  virtual void addRow (rownr_t aNewNrRows, rownr_t anOldNrRows, Bool doInit);
+  virtual void addRow (uInt aNewNrRows, uInt anOldNrRows, Bool doInit);
   
   // Set the (fixed) shape of the arrays in the entire column.
   virtual void setShapeColumn (const IPosition& aShape);
   
   // Get the dimensionality of the item in the given row.
-  virtual uInt ndim (rownr_t aRowNr);
+  virtual uInt ndim (uInt aRowNr);
   
   // Set the shape of the array in the given row and allocate the array
   // in the file.
-  void setShape (rownr_t aRowNr, const IPosition& aShape);
+  void setShape (uInt aRowNr, const IPosition& aShape);
   
   // Is the shape defined (i.e. is there an array) in this row?
-  virtual Bool isShapeDefined (rownr_t aRowNr);
+  virtual Bool isShapeDefined (uInt aRowNr);
   
   // Get the shape of the array in the given row.
-  virtual IPosition shape (rownr_t aRowNr);
+  virtual IPosition shape (uInt aRowNr);
   
   // This storage manager can handle changing array shapes.
   Bool canChangeShape() const;
@@ -130,33 +133,119 @@ public:
   // Get an array value in the given row.
   // The buffer pointed to by dataPtr has to have the correct length
   // (which is guaranteed by the ArrayColumn get function).
-  virtual void getArrayV (rownr_t aRowNr, ArrayBase& aDataPtr);
+  // <group>
+  virtual void getArrayBoolV     (uInt aRowNr, Array<Bool>* aDataPtr);
+  virtual void getArrayuCharV    (uInt aRowNr, Array<uChar>* aDataPtr);
+  virtual void getArrayShortV    (uInt aRowNr, Array<Short>* aDataPtr);
+  virtual void getArrayuShortV   (uInt aRowNr, Array<uShort>* aDataPtr);
+  virtual void getArrayIntV      (uInt aRowNr, Array<Int>* aDataPtr);
+  virtual void getArrayuIntV     (uInt aRowNr, Array<uInt>* aDataPtr);
+  virtual void getArrayInt64V    (uInt aRowNr, Array<Int64>* aDataPtr);
+  virtual void getArrayfloatV    (uInt aRowNr, Array<float>* aDataPtr);
+  virtual void getArraydoubleV   (uInt aRowNr, Array<double>* aDataPtr);
+  virtual void getArrayComplexV  (uInt aRowNr, Array<Complex>* aDataPtr);
+  virtual void getArrayDComplexV (uInt aRowNr, Array<DComplex>* aDataPtr);
+  virtual void getArrayStringV   (uInt aRowNr, Array<String>* aDataPtr);
+  // </group>
   
   // Put an array value into the given row.
   // The buffer pointed to by dataPtr has to have the correct length
   // (which is guaranteed by the ArrayColumn put function).
-  virtual void putArrayV (rownr_t aRowNr, const ArrayBase& aDataPtr);
+  // <group>
+  virtual void putArrayBoolV     (uInt aRowNr,
+				  const Array<Bool>* aDataPtr);
+  virtual void putArrayuCharV    (uInt aRowNr,
+				  const Array<uChar>* aDataPtr);
+  virtual void putArrayShortV    (uInt aRowNr,
+				  const Array<Short>* aDataPtr);
+  virtual void putArrayuShortV   (uInt aRowNr,
+				  const Array<uShort>* aDataPtr);
+  virtual void putArrayIntV      (uInt aRowNr,
+				  const Array<Int>* aDataPtr);
+  virtual void putArrayuIntV     (uInt aRowNr,
+				  const Array<uInt>* aDataPtr);
+  virtual void putArrayInt64V    (uInt aRowNr,
+				  const Array<Int64>* aDataPtr);
+  virtual void putArrayfloatV    (uInt aRowNr,
+				  const Array<float>* aDataPtr);
+  virtual void putArraydoubleV   (uInt aRowNr,
+				  const Array<double>* aDataPtr);
+  virtual void putArrayComplexV  (uInt aRowNr,
+				  const Array<Complex>* aDataPtr);
+  virtual void putArrayDComplexV (uInt aRowNr,
+				  const Array<DComplex>* aDataPtr);
+  virtual void putArrayStringV   (uInt aRowNr,
+				  const Array<String>* aDataPtr);
+  // </group>
   
   // Get a section of the array in the given row.
   // The buffer pointed to by dataPtr has to have the correct length
   // (which is guaranteed by the ArrayColumn getSlice function).
-  virtual void getSliceV (rownr_t aRowNr, const Slicer&,
-                          ArrayBase& aDataPtr);
+  // <group>
+  virtual void getSliceBoolV     (uInt aRowNr, const Slicer&,
+				  Array<Bool>* aDataPtr);
+  virtual void getSliceuCharV    (uInt aRowNr, const Slicer&,
+				  Array<uChar>* aDataPtr);
+  virtual void getSliceShortV    (uInt aRowNr, const Slicer&,
+				  Array<Short>* aDataPtr);
+  virtual void getSliceuShortV   (uInt aRowNr, const Slicer&,
+				  Array<uShort>* aDataPtr);
+  virtual void getSliceIntV      (uInt aRowNr, const Slicer&,
+				  Array<Int>* aDataPtr);
+  virtual void getSliceuIntV     (uInt aRowNr, const Slicer&,
+				  Array<uInt>* aDataPtr);
+  virtual void getSliceInt64V    (uInt aRowNr, const Slicer&,
+				  Array<Int64>* aDataPtr);
+  virtual void getSlicefloatV    (uInt aRowNr, const Slicer&,
+				  Array<float>* aDataPtr);
+  virtual void getSlicedoubleV   (uInt aRowNr, const Slicer&,
+				  Array<double>* aDataPtr);
+  virtual void getSliceComplexV  (uInt aRowNr, const Slicer&,
+				  Array<Complex>* aDataPtr);
+  virtual void getSliceDComplexV (uInt aRowNr, const Slicer&,
+				  Array<DComplex>* aDataPtr);
+  virtual void getSliceStringV   (uInt aRowNr, const Slicer&,
+				  Array<String>* aDataPtr);
+  // </group>
   
   // Put into a section of the array in the given row.
   // The buffer pointed to by aDataPtr has to have the correct length
   // (which is guaranteed by the ArrayColumn putSlice function).
-  virtual void putSliceV (rownr_t aRowNr, const Slicer&,
-                          const ArrayBase& aDataPtr);
+  // <group>
+  virtual void putSliceBoolV     (uInt aRowNr, const Slicer&,
+				  const Array<Bool>* aDataPtr);
+  virtual void putSliceuCharV    (uInt aRowNr, const Slicer&,
+				  const Array<uChar>* aDataPtr);
+  virtual void putSliceShortV    (uInt aRowNr, const Slicer&,
+				  const Array<Short>* aDataPtr);
+  virtual void putSliceuShortV   (uInt aRowNr, const Slicer&,
+				  const Array<uShort>* aDataPtr);
+  virtual void putSliceIntV      (uInt aRowNr, const Slicer&,
+				  const Array<Int>* aDataPtr);
+  virtual void putSliceuIntV     (uInt aRowNr, const Slicer&,
+				  const Array<uInt>* aDataPtr);
+  virtual void putSliceInt64V    (uInt aRowNr, const Slicer&,
+				  const Array<Int64>* aDataPtr);
+  virtual void putSlicefloatV    (uInt aRowNr, const Slicer&,
+				  const Array<float>* aDataPtr);
+  virtual void putSlicedoubleV   (uInt aRowNr, const Slicer&,
+				  const Array<double>* aDataPtr);
+  virtual void putSliceComplexV  (uInt aRowNr, const Slicer&,
+				  const Array<Complex>* aDataPtr);
+  virtual void putSliceDComplexV (uInt aRowNr, const Slicer&,
+				  const Array<DComplex>* aDataPtr);
+  virtual void putSliceStringV   (uInt aRowNr, const Slicer&,
+				  const Array<String>* aDataPtr);
+  // </group>
   
   // Let the column object create its array file.
-  virtual void doCreate (rownr_t aNrRows);
+  virtual void doCreate (uInt aNrRows);
 
   // Open an existing file.
-  virtual void getFile (rownr_t aNrRows);
+  virtual void getFile (uInt aNrRows);
 
   // Remove the given row from the data bucket and possibly string bucket.
-  virtual void deleteRow(rownr_t aRowNr);
+  virtual void deleteRow(uInt aRowNr);
 
 
 private:
@@ -173,10 +262,10 @@ private:
   // Read the shape at the given row.
   // This will cache the information in the StIndArray
   // object for that row.
-  StIndArray* getShape (rownr_t aRowNr);
+  StIndArray* getShape (uInt aRowNr);
   
   // Return a pointer to the array in the given row (for a get).
-  StIndArray* getArrayPtr (rownr_t aRowNr);
+  StIndArray* getArrayPtr (uInt aRowNr);
 
   
   //# The shape off all arrays in case it is fixed

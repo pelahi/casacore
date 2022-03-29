@@ -25,11 +25,12 @@
 //#
 //# $Id$
 
-#ifndef CASA_ARRAYPOSITER_2_H
-#define CASA_ARRAYPOSITER_2_H
+#ifndef CASA_ARRAYPOSITER_H
+#define CASA_ARRAYPOSITER_H
 
+#include <casacore/casa/aips.h>
 //# Change the following to a forward declare?
-#include "IPosition.h"
+#include <casacore/casa/Arrays/IPosition.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -72,7 +73,7 @@ class ArrayBase;
 // <br>The iteration step always "fills up" its dimensionality.
 // E.g., if we are stepping through a cube by matrices, the matrix completely
 // fills up the plane.
-// Casacore class ArrayLattice in the lattices
+// Class <linkto class=ArrayLattice>ArrayLattice</linkto> in the lattices
 // package can be used to iterate with partial volumes.
 //
 // <p>
@@ -94,18 +95,18 @@ public:
     // through the remaining axes.
     // <group>
     ArrayPositionIterator(const IPosition &shape, const IPosition &origin,
-			  size_t byDim);
+			  uInt byDim);
     ArrayPositionIterator(const IPosition &shape,
-			  size_t byDim);
+			  uInt byDim);
     // </group>
 
     // Step through an array using the given axes.
     // The axes can be given in two ways:
     // <ol>
-    // <li>axesAreCursor=true means that the axes form the cursor axes.
+    // <li>axesAreCursor=True means that the axes form the cursor axes.
     //     The remaining axes will form the iteration axes.
     //     This is the default.
-    // <li>axesAreCursor=false means the opposite.
+    // <li>axesAreCursor=False means the opposite.
     //     In this case the iteration axes can be given in any order.
     // </ol>
     // E.g. when using iteration axes 2,0 for an array with shape [5,3,7], each
@@ -117,7 +118,7 @@ public:
     // (1 the fastest varying one).
     ArrayPositionIterator(const IPosition &shape,
 			  const IPosition &axes,
-			  bool axesAreCursor=true);
+			  Bool axesAreCursor=True);
 
     virtual ~ArrayPositionIterator() {};
 
@@ -129,10 +130,10 @@ public:
     // </group>
 
     // Returns true of the cursor is at the origin.
-    bool atStart() const;
+    Bool atStart() const;
 
     // Returns true if the cursor has moved past the end of its volume.
-    bool pastEnd() const;
+    Bool pastEnd() const;
 
     // Return the position of the cursor.
     // This include all axes
@@ -155,7 +156,7 @@ public:
     virtual void set (const IPosition& cursorPos);
 
     // What is the dimensionality of the volume we are iterating through?
-    size_t ndim() const;
+    uInt ndim() const;
 
     // Return the iteration axes.
     const IPosition &iterAxes() const {return iterationAxes;}
@@ -170,32 +171,32 @@ public:
 
 protected:
     // Advance cursor to its next position and tell which dimension stepped.
-    size_t nextStep();
+    uInt nextStep();
     // What is the dimensionality of the "step" the cursor takes, i.e.
     // 0 for scalars, 1 for vector, ....
-    size_t dimIter() const {return cursAxes.nelements();}
+    uInt dimIter() const {return cursAxes.nelements();}
 
 private:
     // Setup the object for the constructor.
     // <group>
-    void setup(size_t byDim);
-    void setup(const IPosition &axes, bool axesAreCursor);
+    void setup(uInt byDim);
+    void setup(const IPosition &axes, Bool axesAreCursor);
     // </group>
 
     //# We should probably have mf's for getting at Start,Shape and End.
     IPosition Start, Shape, End, Cursor;
-    bool atOrBeyondEnd;
+    Bool atOrBeyondEnd;
     IPosition cursAxes, iterationAxes;
 };
 
 // Dimensionality of the array we are iterating through.
-inline size_t ArrayPositionIterator::ndim() const
+inline uInt ArrayPositionIterator::ndim() const
 {
     return Start.nelements();
 }
 
 // We are at the "end" if we cannot advance any more.
-inline bool ArrayPositionIterator::pastEnd() const
+inline Bool ArrayPositionIterator::pastEnd() const
 {
     return atOrBeyondEnd;
 }

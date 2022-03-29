@@ -685,8 +685,8 @@ int main()
     checkFloat (error);
     checkDouble (error);
   } 
-  catch (std::exception& x) {
-    cerr << x.what() << endl;
+  catch (AipsError& x) {
+    cerr << x.getMesg() << endl;
     cout << "FAIL" << endl;
     return 1;
   } 

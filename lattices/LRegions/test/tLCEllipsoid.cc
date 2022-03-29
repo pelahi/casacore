@@ -161,7 +161,7 @@ int main() {
             try {
                 LCEllipsoid e0(center, radii, latticeShape);
             }
-            catch (const std::exception& x) {
+            catch (const AipsError& x) {
                 thrown = True;
             }
             AlwaysAssert(thrown, AipsError);
@@ -179,7 +179,7 @@ int main() {
                     xcenter, ycenter, major, minor, theta, latticeShape
                 );
             }
-            catch (const std::exception& x) {
+            catch (const AipsError& x) {
                 thrown = True;
             }
             AlwaysAssert(thrown, AipsError);
@@ -243,8 +243,8 @@ int main() {
             show(ellipse7);
         }
     }
-    catch (const std::exception& x) {
-        cout << "Caught exception: " << x.what() << endl;
+    catch (const AipsError& x) {
+        cout << "Caught exception: " << x.getMesg() << endl;
         return 1;
     } 
     cout << "OK" << endl;

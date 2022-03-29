@@ -193,8 +193,8 @@ int main()
       indgen(arr);
       AlwaysAssertExit (allEQ(pa.get(), float(2)*arr));
     }
-  } catch (std::exception& x) {
-    cerr << x.what() << endl;
+  } catch (AipsError& x) {
+    cerr << x.getMesg() << endl;
     return 1;
   } 
   cout<< "OK"<< endl;

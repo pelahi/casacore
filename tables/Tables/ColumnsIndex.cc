@@ -318,7 +318,7 @@ void ColumnsIndex::readData()
 {
   // Acquire a lock if needed.
   TableLocker locker(itsTable, FileLocker::Read);
-  rownr_t nrrow = itsTable.nrow();
+  uInt nrrow = itsTable.nrow();
   if (nrrow != itsNrrow) {
     itsColumnChanged.set (True);
     itsChanged = True;
@@ -465,13 +465,12 @@ void ColumnsIndex::readData()
   itsChanged = False;
 }
 
-rownr_t ColumnsIndex::bsearch (Bool& found, const Block<void*>& fieldPtrs) const
+uInt ColumnsIndex::bsearch (Bool& found, const Block<void*>& fieldPtrs) const
 {
   found = False;
-  Int64 lower = 0;
-  Int64 upper = itsUniqueIndex.nelements();
-  upper--;
-  Int64 middle = 0;
+  Int lower = 0;
+  Int upper = itsUniqueIndex.nelements() - 1;
+  Int middle = 0;
   while (lower <= upper) {
     middle = (upper + lower) / 2;
     Int cmp = itsCompare (fieldPtrs, itsData, itsDataTypes,
@@ -492,7 +491,7 @@ rownr_t ColumnsIndex::bsearch (Bool& found, const Block<void*>& fieldPtrs) const
 Int ColumnsIndex::compare (const Block<void*>& fieldPtrs,
 			   const Block<void*>& dataPtrs,
 			   const Block<Int>& dataTypes,
-			   rownr_t index)
+			   Int index)
 {
   uInt nfield = fieldPtrs.nelements();
   for (uInt i=0; i<nfield; i++) {
@@ -625,13 +624,13 @@ Int ColumnsIndex::compare (const Block<void*>& fieldPtrs,
   return 0;
 }
  
-rownr_t ColumnsIndex::getRowNumber (Bool& found, const Record& key)
+uInt ColumnsIndex::getRowNumber (Bool& found, const Record& key)
 {
   copyKey (itsLowerFields, key);
   return getRowNumber (found);
 }
 
-rownr_t ColumnsIndex::getRowNumber (Bool& found)
+uInt ColumnsIndex::getRowNumber (Bool& found)
 {
   if (!isUnique()) {
     throw (TableError ("ColumnsIndex::getRowNumber only possible "
@@ -639,44 +638,44 @@ rownr_t ColumnsIndex::getRowNumber (Bool& found)
   }
   // Read the data (if needed).
   readData();
-  rownr_t inx = bsearch (found, itsLowerFields);
+  uInt inx = bsearch (found, itsLowerFields);
   if (found) {
     inx = itsDataInx[inx];
   }
   return inx;
 }
 
-RowNumbers ColumnsIndex::getRowNumbers (const Record& key)
+Vector<uInt> ColumnsIndex::getRowNumbers (const Record& key)
 {
   copyKey (itsLowerFields, key);
   return getRowNumbers();
 }
 
-RowNumbers ColumnsIndex::getRowNumbers()
+Vector<uInt> ColumnsIndex::getRowNumbers()
 {
   // Read the data (if needed).
   readData();
   Bool found;
-  rownr_t inx = bsearch (found, itsLowerFields);
-  RowNumbers rows;
+  uInt inx = bsearch (found, itsLowerFields);
+  Vector<uInt> rows;
   if (found) {
     fillRowNumbers (rows, inx, inx+1);
   }
   return rows;
 }
 
-RowNumbers ColumnsIndex::getRowNumbers (const Record& lowerKey,
-                                        const Record& upperKey,
-                                        Bool lowerInclusive,
-                                        Bool upperInclusive)
+Vector<uInt> ColumnsIndex::getRowNumbers (const Record& lowerKey,
+					  const Record& upperKey,
+					  Bool lowerInclusive,
+					  Bool upperInclusive)
 {
   copyKey (itsLowerFields, lowerKey);
   copyKey (itsUpperFields, upperKey);
   return getRowNumbers (lowerInclusive, upperInclusive);
 }
 
-RowNumbers ColumnsIndex::getRowNumbers (Bool lowerInclusive,
-                                        Bool upperInclusive)
+Vector<uInt> ColumnsIndex::getRowNumbers (Bool lowerInclusive,
+					  Bool upperInclusive)
 {
   // Read the data (if needed).
   readData();
@@ -684,26 +683,26 @@ RowNumbers ColumnsIndex::getRowNumbers (Bool lowerInclusive,
   // Try to find the lower key. If not found, bsearch is giving the
   // index of the next higher key.
   // So increment the start index if found and is not to be included.
-  rownr_t start = bsearch (found, itsLowerFields);
+  uInt start = bsearch (found, itsLowerFields);
   if (found  &&  !lowerInclusive) {
     start++;
   }
   // Try to find the upper key.
   // Increment the end index such that it is not inclusive
   // (thus increment if the found end index is to be included).
-  rownr_t end = bsearch (found, itsUpperFields);
+  uInt end = bsearch (found, itsUpperFields);
   if (found  &&  upperInclusive) {
     end++;
   }
-  RowNumbers rows;
+  Vector<uInt> rows;
   if (start < end) {
     fillRowNumbers (rows, start, end);
   }
   return rows;
 }
 
-void ColumnsIndex::fillRowNumbers (Vector<rownr_t>& rows,
-				   rownr_t start, rownr_t end) const
+void ColumnsIndex::fillRowNumbers (Vector<uInt>& rows,
+				   uInt start, uInt end) const
 {
   start = itsUniqueInx[start];
   if (end < itsUniqueIndex.nelements()) {
@@ -711,10 +710,10 @@ void ColumnsIndex::fillRowNumbers (Vector<rownr_t>& rows,
   } else {
     end = itsDataIndex.nelements();
   }
-  rownr_t nr = end-start;
+  uInt nr = end-start;
   rows.resize (nr);
   Bool deleteIt;
-  rownr_t* rowStorage = rows.getStorage (deleteIt);
+  uInt* rowStorage = rows.getStorage (deleteIt);
   objcopy (rowStorage, itsDataInx+start, nr);
   rows.putStorage (rowStorage, deleteIt);
 }

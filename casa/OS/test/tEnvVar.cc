@@ -42,8 +42,8 @@ int main ()
     AlwaysAssertExit (EnvironmentVariable::isDefined ("crazyHOMExyz"));
     AlwaysAssertExit (EnvironmentVariable::get("crazyHOMExyz").length() != 0);
     AlwaysAssertExit (EnvironmentVariable::get("crazyHOMExyz") == "abc");
-  } catch (std::exception& x) {
-    cerr << "Unexpected exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cerr << "Unexpected exception: " << x.getMesg() << endl;
     return 1;
   } 
   cout << "OK" << endl;

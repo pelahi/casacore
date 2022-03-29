@@ -38,8 +38,7 @@
 #include <casacore/measures/Measures/MDirection.h>
 #include <casacore/measures/Measures/MFrequency.h>
 #include <casacore/scimath/Functionals/Polynomial.h>
-
-#include <mutex>
+#include <casacore/casa/OS/Mutex.h>
 #include <vector>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
@@ -521,8 +520,8 @@ private:
   //# Data
   // Planetary table data
   // <group>
-  static std::once_flag theirPlanetaryInitOnceFlag;
-  static std::once_flag theirPlanetaryConstantsInitOnceFlag;
+  static CallOnce theirPlanetaryInitOnce;
+  static CallOnce theirPlanetaryConstantsInitOnce;
   // </group>
 
   // Multipliers for nutation, etc.
@@ -541,26 +540,26 @@ private:
 
   // Observatories table data
   // <group>
-  static std::once_flag theirObsInitOnceFlag;
+  static CallOnce0 theirObsInitOnce;
   static Vector<String> obsNams;
   static Vector<MPosition> obsPos;
   static Vector<String> antResponsesPath;
   // </group>
   // Spectral line table data
   // <group>
-  static std::once_flag theirLinesInitOnceFlag;
+  static CallOnce0 theirLinesInitOnce;
   static Vector<String> lineNams;
   static Vector<MFrequency> linePos;
   // </group>
   // Sources table data
   // <group>
-  static std::once_flag theirSrcInitOnceFlag;
+  static CallOnce0 theirSrcInitOnce;
   static Vector<String> srcNams;
   static Vector<MDirection> srcPos;
   // </group>
   // IGRF data
   // <group>
-  static std::once_flag theirIGRFInitOnceFlag;
+  static CallOnce0 theirIGRFInitOnce;
   static Double dtimeIGRF;
   static Double firstIGRF;
   static Double lastIGRF;
@@ -571,7 +570,7 @@ private:
   // </group>
 
   ///#if !defined(USE_THREADS) || defined(__APPLE__)
-  ///  static std::mutex theirdUT1Mutex;
+  ///  static Mutex theirdUT1Mutex;
   ///#endif
 };
 

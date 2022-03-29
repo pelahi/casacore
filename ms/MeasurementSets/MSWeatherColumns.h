@@ -171,7 +171,7 @@ public:
 
   // Convenience function that returns the number of rows in any of the
   // columns. Returns zero if the object is null.
-  rownr_t nrow() const {return isNull() ? 0 : antennaId_p.nrow();}
+  uInt nrow() const {return isNull() ? 0 : antennaId_p.nrow();}
 
   // set the epoch type for the TIME column.
   // <note role=tip>

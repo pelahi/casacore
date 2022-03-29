@@ -44,7 +44,7 @@
 // This program and script tTableTrace.run test the class TableTrace.
 
 
-void testTable (rownr_t nrrow)
+void testTable (uInt nrrow)
 {
   {
     // Build the table description.
@@ -64,7 +64,7 @@ void testTable (rownr_t nrrow)
     // Write some data.
     ScalarColumn<uInt> ab1(tab, "ab");
     ArrayColumn<Int> ad(tab, "ad");
-    for (rownr_t i=0; i<nrrow; i++) {
+    for (uInt i=0; i<nrrow; i++) {
       ab1.put (i, i);
       ad.put (i, Vector<Int>(8,i/10));
     }
@@ -83,9 +83,7 @@ void testTable (rownr_t nrrow)
                                                 IPosition(1,nrrow-1)));
   }
   {
-    Vector<rownr_t> abv64(abv.size());
-    convertArray (abv64, abv);
-    Table rtab (tab(abv64));
+    Table rtab (tab(abv));
     ScalarColumn<uInt> ab1(rtab,"ab");
     ArrayColumn<Int> ad(rtab,"ad");
     Vector<uInt> abv = ab1.getColumn();
@@ -96,10 +94,10 @@ void testTable (rownr_t nrrow)
 int main()
 {
   try {
-    rownr_t nrrow = 5;
+    uInt nrrow = 5;
     testTable (nrrow);
-  } catch (const std::exception& x) {
-    cout << "Caught an exception: " << x.what() << endl;
+  } catch (const AipsError& x) {
+    cout << "Caught an exception: " << x.getMesg() << endl;
     return 1;
   } 
   return 0;                           // exit with success status

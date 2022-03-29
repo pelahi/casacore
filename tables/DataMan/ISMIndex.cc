@@ -27,7 +27,6 @@
 
 //# Includes
 #include <casacore/tables/DataMan/ISMIndex.h>
-#include <casacore/tables/DataMan/DataManager.h>
 #include <casacore/casa/Containers/BlockIO.h>
 #include <casacore/casa/Utilities/BinarySearch.h>
 #include <casacore/casa/IO/AipsIO.h>
@@ -41,8 +40,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 ISMIndex::ISMIndex (ISMBase* parent)
 : stmanPtr_p (parent),
   nused_p    (1),
-  rows_p     (2, 0),
-  bucketNr_p (1, 0)
+  rows_p     (2, (uInt)0),
+  bucketNr_p (1, (uInt)0)
 {}
 
 ISMIndex::~ISMIndex()
@@ -50,40 +49,23 @@ ISMIndex::~ISMIndex()
 
 void ISMIndex::get (AipsIO& os)
 {
-    uInt version = os.getstart ("ISMIndex");
+    os.getstart ("ISMIndex");
     os >> nused_p;
-    if (version > 1) {
-      // stored as 64-bit
-      getBlock (os, rows_p);
-    } else {
-      // stored as 32-bit
-      Block<uInt> rows;
-      getBlock (os, rows);
-      rows_p.resize (rows.size());
-      std::copy (rows.begin(), rows.end(), rows_p.begin());
-    }
+    getBlock (os, rows_p);
     getBlock (os, bucketNr_p);
     os.getend();
 }
 
 void ISMIndex::put (AipsIO& os)
 {
-    // If the last rownr fits in 32-bit, write as version 1 (thus 32-bit).
-    uInt version = (rows_p[nused_p] > DataManager::MAXROWNR32  ?  2 : 1);
-    os.putstart ("ISMIndex", version);
+    os.putstart ("ISMIndex", 1);
     os << nused_p;
-    if (version > 1) {
-      putBlock (os, rows_p, nused_p + 1);
-    } else {
-      Block<uInt> rows(nused_p +1);
-      std::copy (rows_p.begin(), rows_p.begin() + nused_p + 1, rows.begin());
-      putBlock (os, rows, nused_p + 1);
-    }
+    putBlock (os, rows_p, nused_p + 1);
     putBlock (os, bucketNr_p, nused_p);
     os.putend();
 }
 
-void ISMIndex::addBucketNr (rownr_t rownr, uInt bucketNr)
+void ISMIndex::addBucketNr (uInt rownr, uInt bucketNr)
 {
     if (nused_p >= bucketNr_p.nelements()) {
 	rows_p.resize (nused_p + 64 + 1);
@@ -101,12 +83,12 @@ void ISMIndex::addBucketNr (rownr_t rownr, uInt bucketNr)
     nused_p++;
 }
 
-void ISMIndex::addRow (rownr_t nrrow)
+void ISMIndex::addRow (uInt nrrow)
 {
     rows_p[nused_p] += nrrow;
 }
 
-Int ISMIndex::removeRow (rownr_t rownr)
+Int ISMIndex::removeRow (uInt rownr)
 {
     // Decrement the row number for all intervals after the row
     // to be removed.
@@ -132,7 +114,7 @@ Int ISMIndex::removeRow (rownr_t rownr)
     return emptyBucket;
 }
 
-uInt ISMIndex::getIndex (rownr_t rownr) const
+uInt ISMIndex::getIndex (uInt rownr) const
 {
     // If no exact match, the interval starts at the previous index.
     Bool found;
@@ -144,8 +126,8 @@ uInt ISMIndex::getIndex (rownr_t rownr) const
     return index;
 }
 
-uInt ISMIndex::getBucketNr (rownr_t rownr, rownr_t& bucketStartRow,
-			    rownr_t& bucketNrrow) const
+uInt ISMIndex::getBucketNr (uInt rownr, uInt& bucketStartRow,
+			    uInt& bucketNrrow) const
 {
     uInt index = getIndex (rownr);
     bucketStartRow = rows_p[index];
@@ -153,8 +135,8 @@ uInt ISMIndex::getBucketNr (rownr_t rownr, rownr_t& bucketStartRow,
     return bucketNr_p[index];
 }
 
-Bool ISMIndex::nextBucketNr (uInt& cursor, rownr_t& bucketStartRow,
-			     rownr_t& bucketNrrow, uInt& bucketNr) const
+Bool ISMIndex::nextBucketNr (uInt& cursor, uInt& bucketStartRow,
+			     uInt& bucketNrrow, uInt& bucketNr) const
 {
     // When first time, get the index of the bucket containing the row.
     // End the iteration when the first row is past the end.

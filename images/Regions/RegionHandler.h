@@ -32,7 +32,6 @@
 //# Includes
 #include <casacore/casa/aips.h>
 #include <casacore/casa/BasicSL/String.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -42,6 +41,7 @@ class ImageRegion;
 class LatticeBase;
 class LCPagedMask;
 class String;
+template<class T> class Vector;
 
 
 // <summary>

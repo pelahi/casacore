@@ -809,8 +809,8 @@ namespace casacore { //# name space casa begins
 	myimage.defineRegion (newName, mask, RegionHandler::Masks);
 	retval=myimage.hasRegion(newName);
       }
-      catch(std::exception& x){
-	throw(AipsError("Could not write mask in image "+tabName+" because "+x.what()));
+      catch(AipsError& x){
+	throw(AipsError("Could not write mask in image "+tabName+" because "+x.getMesg()));
       }
       catch(...){
 	throw(AipsError("Could not write mask in image "+tabName));

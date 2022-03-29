@@ -37,7 +37,7 @@
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/Arrays/Array.h>
 #include <casacore/casa/Arrays/Matrix.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/iostream.h>
 
@@ -81,8 +81,8 @@ void a (Bool doExcp)
     if (doExcp) {
 	try {
 	    td.addColumn (ScalarColumnDesc<Int> ("ab"));   // already exists
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	} 
     }
     td.addColumn (ScalarColumnDesc<Int> ("ac"));
@@ -97,8 +97,8 @@ void a (Bool doExcp)
 	try {
 	    td.addColumn (ScalarColumnDesc<ExampleDesc>
 			                     ("af", ColumnDesc::Undefined));
-    	} catch (std::exception& x) {
-	    cout << x.what() << endl;     // undefined given
+    	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;     // undefined given
 	} 
     }
 
@@ -112,23 +112,23 @@ void a (Bool doExcp)
     if (doExcp) {
 	try {
 	    td.rwColumnDesc("ab").setNdim (2);
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;     // column is a scalar
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;     // column is a scalar
 	} 
 	try {
 	    td.rwColumnDesc("ab").setShape (IPosition());
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;     // column is a scalar
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;     // column is a scalar
 	} 
 	try {
 	    td.rwColumnDesc("Arr3").setNdim (2);
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;     // ndim already defined
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;     // ndim already defined
 	} 
 	try {
 	    td.rwColumnDesc("Arr3").setShape (IPosition());
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;     // shape already defined
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;     // shape already defined
 	} 
     }
     td.addColumn (SubTableDesc("sub1", "subtable by name",
@@ -146,8 +146,8 @@ void a (Bool doExcp)
     if (doExcp) {
 	try {
 	    td.checkSubTableDesc();
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;     // subtable sub1 does not exist
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;     // subtable sub1 does not exist
 	} 
     }
 
@@ -263,8 +263,8 @@ void b (Bool doExcp) {
     if (doExcp) {
 	try {
 	    td.rwColumnDesc("Arr1").setShape (IPosition(3,4,5,6));
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;        // shape mimatches ndim
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;        // shape mimatches ndim
 	} 
     }
     td.rwColumnDesc("Arr1").setShape (IPosition(2,4,5));
@@ -272,8 +272,8 @@ void b (Bool doExcp) {
     if (doExcp) {
 	try {
 	    td["Arr1"].tableDesc();              // no subtable
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	} 
     }
 
@@ -301,8 +301,8 @@ void b (Bool doExcp) {
 	try {
 	    cout << "Tryerr update" << endl;
 	    TableDesc td1("",TableDesc::Update);
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	} 
     }
 }
@@ -322,24 +322,24 @@ void c (Bool doExcp) {
 	try {
 	    cout << "Tryerr update not exist" << endl;
 	    td1 = new TableDesc("tTableDescXX_tmp", TableDesc::Update);
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	    td1 = 0;
 	} 
 
 	try {
 	    cout << "Tryerr old not exist" << endl;
 	    td2 = new TableDesc("tTableDescXX_tmp", TableDesc::Old);
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	    td2 = 0;
 	} 
 
 	try {
 	    cout << "Tryerr newnoreplace" << endl;
 	    td3 = new TableDesc("tTableDesc_tmp", TableDesc::NewNoReplace);
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	    td3 = 0;
 	} 
     }
@@ -385,13 +385,13 @@ void d (Bool doExcp)
     if (doExcp) {
 	try {
 	    td.renameColumn ("colint2", "colint");
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	} 
 	try {
 	    td.renameColumn ("colintnew", "colintxxx");
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	} 
     }
 
@@ -430,8 +430,8 @@ int main (int argc, const char*[])
 	a ( (argc<2));
 	b ( (argc<2));
 	c ( (argc<2));
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     cout << "OK" << endl;

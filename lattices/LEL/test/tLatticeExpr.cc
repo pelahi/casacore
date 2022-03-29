@@ -237,8 +237,8 @@ int main (int argc, const char* argv[])
      cout << "ok" << endl;
   }
 
- } catch (std::exception& x) {
-    cerr << "aipserror: error " << x.what() << endl;
+ } catch (AipsError& x) {
+    cerr << "aipserror: error " << x.getMesg() << endl;
     return 1;
  } 
  
@@ -270,13 +270,13 @@ Bool checkFloat(Lattice<Float>& expr,
 
    try {
      expr.putSlice(outArr, origin, stride);
-   } catch (std::exception& x) {
-     if (!supress)  cout << "   Caught expected exception; message is: " << x.what() << endl;
+   } catch (AipsError& x) {
+     if (!supress)  cout << "   Caught expected exception; message is: " << x.getMesg() << endl;
    } 
    try {
      expr.putSlice(outArr, origin);
-   } catch (std::exception& x) {
-     if (!supress)  cout << "   Caught expected exception; message is: " << x.what() << endl;
+   } catch (AipsError& x) {
+     if (!supress)  cout << "   Caught expected exception; message is: " << x.getMesg() << endl;
    } 
 
    outLat.copyData(expr);
@@ -355,13 +355,13 @@ Bool checkDouble(Lattice<Double>& expr,
 
    try {
      expr.putSlice(outArr, origin, stride);
-   } catch (std::exception& x) {
-     if (!supress)  cout << "   Caught expected exception; message is: " << x.what() << endl;
+   } catch (AipsError& x) {
+     if (!supress)  cout << "   Caught expected exception; message is: " << x.getMesg() << endl;
    } 
    try {
      expr.putSlice(outArr, origin);
-   } catch (std::exception& x) {
-     if (!supress)  cout << "   Caught expected exception; message is: " << x.what() << endl;
+   } catch (AipsError& x) {
+     if (!supress)  cout << "   Caught expected exception; message is: " << x.getMesg() << endl;
    } 
 
    outLat.copyData(expr);
@@ -440,13 +440,13 @@ Bool checkComplex(Lattice<Complex>& expr,
 
    try {
      expr.putSlice(outArr, origin, stride);
-   } catch (std::exception& x) {
-     if (!supress)  cout << "   Caught expected exception; message is: " << x.what() << endl;
+   } catch (AipsError& x) {
+     if (!supress)  cout << "   Caught expected exception; message is: " << x.getMesg() << endl;
    } 
    try {
      expr.putSlice(outArr, origin);
-   } catch (std::exception& x) {
-     if (!supress)  cout << "   Caught expected exception; message is: " << x.what() << endl;
+   } catch (AipsError& x) {
+     if (!supress)  cout << "   Caught expected exception; message is: " << x.getMesg() << endl;
    } 
 
    outLat.copyData(expr);
@@ -526,13 +526,13 @@ Bool checkDComplex(Lattice<DComplex>& expr,
 
    try {
      expr.putSlice(outArr, origin, stride);
-   } catch (std::exception& x) {
-     if (!supress)  cout << "   Caught expected exception; message is: " << x.what() << endl;
+   } catch (AipsError& x) {
+     if (!supress)  cout << "   Caught expected exception; message is: " << x.getMesg() << endl;
    } 
    try {
      expr.putSlice(outArr, origin);
-   } catch (std::exception& x) {
-     if (!supress)  cout << "   Caught expected exception; message is: " << x.what() << endl;
+   } catch (AipsError& x) {
+     if (!supress)  cout << "   Caught expected exception; message is: " << x.getMesg() << endl;
    } 
 
    outLat.copyData(expr);
@@ -613,13 +613,13 @@ Bool checkBool(Lattice<Bool>& expr,
 
    try {
      expr.putSlice(outArr, origin, stride);
-   } catch (std::exception& x) {
-     if (!supress)  cout << "   Caught expected exception; message is: " << x.what() << endl;
+   } catch (AipsError& x) {
+     if (!supress)  cout << "   Caught expected exception; message is: " << x.getMesg() << endl;
    } 
    try {
      expr.putSlice(outArr, origin);
-   } catch (std::exception& x) {
-     if (!supress)  cout << "   Caught expected exception; message is: " << x.what() << endl;
+   } catch (AipsError& x) {
+     if (!supress)  cout << "   Caught expected exception; message is: " << x.getMesg() << endl;
    } 
 
    outLat.copyData(expr);

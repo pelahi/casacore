@@ -632,8 +632,11 @@ public:
     // The field number is only used for type REMOVE.
     RecordNotice (NoticeType changeType, uInt fieldNumber);
 
+    // Returns the change type.
+    virtual uInt type() const;
+
     // Always returns False.
-    virtual bool operator== (const Notice& that) const;
+    virtual int operator== (const Notice& that) const;
 
     // Return the change type.
     NoticeType changeType() const;

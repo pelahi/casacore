@@ -32,9 +32,11 @@
 #include <casacore/casa/aips.h>
 #include <casacore/lattices/LRegions/LCRegionFixed.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
+
+//# Forward Declarations
+template<class T> class Matrix;
 
 
 // <summary>

@@ -54,7 +54,7 @@ TableVector<T>::TableVector (const Vector<T>& vec)
 
 //# Construct a vector with a given length.
 template<class T>
-TableVector<T>::TableVector (rownr_t leng)
+TableVector<T>::TableVector (uInt leng)
 {
     tabVecPtr_p = new TabVecTemp<T>(leng);
     tabVecPtr_p->link();

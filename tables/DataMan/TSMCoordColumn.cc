@@ -48,7 +48,7 @@ TSMCoordColumn::~TSMCoordColumn()
 {}
 
 
-void TSMCoordColumn::setShape (rownr_t rownr, const IPosition& shape)
+void TSMCoordColumn::setShape (uInt rownr, const IPosition& shape)
 {
     if (shape.nelements() != 1) {
 	throw (TSMError ("setShape of coordinate column " + columnName() +
@@ -104,7 +104,7 @@ void TSMCoordColumn::setShape (rownr_t rownr, const IPosition& shape)
     }
 }
 
-Bool TSMCoordColumn::isShapeDefined (rownr_t rownr)
+Bool TSMCoordColumn::isShapeDefined (uInt rownr)
 {
     //# The shape is defined when the shape is fixed, when
     //# a hypercube has been defined for this row or when the
@@ -120,7 +120,7 @@ Bool TSMCoordColumn::isShapeDefined (rownr_t rownr)
     
 }
 
-IPosition TSMCoordColumn::shape (rownr_t rownr)
+IPosition TSMCoordColumn::shape (uInt rownr)
 {
     //# Return the shape when it is fixed.
     if (shapeColumn().nelements() != 0) {
@@ -141,7 +141,7 @@ IPosition TSMCoordColumn::shape (rownr_t rownr)
 }
 
 
-void TSMCoordColumn::getfloat (rownr_t rownr, float* dataPtr)
+void TSMCoordColumn::getfloatV (uInt rownr, float* dataPtr)
 {
     // Get the hypercube the row is in.
     // It also gives the position of the row in the hypercube.
@@ -155,7 +155,7 @@ void TSMCoordColumn::getfloat (rownr_t rownr, float* dataPtr)
     *dataPtr = (*field) (IPosition (1, position(axisNr_p)));
 }
 
-void TSMCoordColumn::putfloat (rownr_t rownr, const float* dataPtr)
+void TSMCoordColumn::putfloatV (uInt rownr, const float* dataPtr)
 {
     // Get the hypercube the row is in.
     // It also gives the position of the row in the hypercube.
@@ -171,105 +171,64 @@ void TSMCoordColumn::putfloat (rownr_t rownr, const float* dataPtr)
 }
 
 
-void TSMCoordColumn::getArrayV (rownr_t rownr, ArrayBase& dataPtr)
+void TSMCoordColumn::getArrayfloatV (uInt rownr, Array<float>* dataPtr)
 {
     // Get the hypercube the row is in.
     // It also gives the position of the row in the hypercube.
     IPosition position;
     TSMCube* hypercube = stmanPtr_p->getHypercube (rownr, position);
-    switch (dtype()) {
-    case TpInt:
-      hypercube->valueRecord().toArray
-        (columnName(), static_cast<Array<Int>&>(dataPtr));
-      break;
-    case TpUInt:
-      hypercube->valueRecord().toArray
-        (columnName(), static_cast<Array<uInt>&>(dataPtr));
-      break;
-    case TpFloat:
-      hypercube->valueRecord().toArray
-        (columnName(), static_cast<Array<float>&>(dataPtr));
-      break;
-    case TpDouble:
-      hypercube->valueRecord().toArray
-        (columnName(), static_cast<Array<double>&>(dataPtr));
-      break;
-    case TpComplex:
-      hypercube->valueRecord().toArray
-        (columnName(), static_cast<Array<Complex>&>(dataPtr));
-      break;
-    case TpDComplex:
-      hypercube->valueRecord().toArray
-        (columnName(), static_cast<Array<DComplex>&>(dataPtr));
-      break;
-    default:
-      throw DataManInvDT ("TSMCoordColiumn::getArrayV");
-    }
+    hypercube->valueRecord().get (columnName(), *dataPtr);
 }
 
-void TSMCoordColumn::putArrayV (rownr_t rownr, const ArrayBase& dataPtr)
+void TSMCoordColumn::putArrayfloatV (uInt rownr, const Array<float>* dataPtr)
 {
     // Get the hypercube the row is in.
     // It also gives the position of the row in the hypercube.
     IPosition position;
     TSMCube* hypercube = stmanPtr_p->getHypercube (rownr, position);
-    switch (dtype()) {
-    case TpInt:
-      hypercube->rwValueRecord().define
-        (columnName(), static_cast<const Array<Int>&>(dataPtr));
-      break;
-    case TpUInt:
-      hypercube->rwValueRecord().define
-        (columnName(), static_cast<const Array<uInt>&>(dataPtr));
-      break;
-    case TpFloat:
-      hypercube->rwValueRecord().define
-        (columnName(), static_cast<const Array<float>&>(dataPtr));
-      break;
-    case TpDouble:
-      hypercube->rwValueRecord().define
-        (columnName(), static_cast<const Array<double>&>(dataPtr));
-      break;
-    case TpComplex:
-      hypercube->rwValueRecord().define
-        (columnName(), static_cast<const Array<Complex>&>(dataPtr));
-      break;
-    case TpDComplex:
-      hypercube->rwValueRecord().define
-        (columnName(), static_cast<const Array<DComplex>&>(dataPtr));
-      break;
-    default:
-      throw DataManInvDT ("TSMCoordColiumn::putArrayV");
-    }
+    hypercube->rwValueRecord().define (columnName(), *dataPtr);
     stmanPtr_p->setDataChanged();
 }
 
 
 
-#define TSMCOORDCOLUMN_GETPUT(T) \
-void TSMCoordColumn::aips_name2(get,T) (rownr_t rownr, T* dataPtr) \
+#define TSMCOORDCOLUMN_GETPUT(T,NM) \
+void TSMCoordColumn::aips_name2(get,NM) (uInt rownr, T* dataPtr) \
 { \
     IPosition position; \
     TSMCube* hypercube = stmanPtr_p->getHypercube (rownr, position); \
     RORecordFieldPtr<Array<T> > field (hypercube->valueRecord(),columnName());\
     *dataPtr = (*field) (IPosition (1, position(axisNr_p))); \
 } \
-void TSMCoordColumn::aips_name2(put,T) (rownr_t rownr, const T* dataPtr) \
+void TSMCoordColumn::aips_name2(put,NM) (uInt rownr, const T* dataPtr) \
 { \
     IPosition position; \
     TSMCube* hypercube = stmanPtr_p->getHypercube (rownr, position); \
     RecordFieldPtr<Array<T> > field (hypercube->rwValueRecord(),columnName()); \
     (*field) (IPosition (1, position(axisNr_p))) = *dataPtr; \
     stmanPtr_p->setDataChanged(); \
+} \
+void TSMCoordColumn::aips_name2(getArray,NM) (uInt rownr, Array<T>* dataPtr) \
+{ \
+    IPosition position; \
+    TSMCube* hypercube = stmanPtr_p->getHypercube (rownr, position); \
+    hypercube->valueRecord().get (columnName(), *dataPtr); \
+} \
+void TSMCoordColumn::aips_name2(putArray,NM) (uInt rownr, const Array<T>* dataPtr) \
+{ \
+    IPosition position; \
+    TSMCube* hypercube = stmanPtr_p->getHypercube (rownr, position); \
+    hypercube->rwValueRecord().define (columnName(), *dataPtr); \
+    stmanPtr_p->setDataChanged(); \
 }
 
-TSMCOORDCOLUMN_GETPUT(Int)
-TSMCOORDCOLUMN_GETPUT(uInt)
-TSMCOORDCOLUMN_GETPUT(Int64)
-//#TSMCOORDCOLUMN_GETPUT(float)
-TSMCOORDCOLUMN_GETPUT(double)
-TSMCOORDCOLUMN_GETPUT(Complex)
-TSMCOORDCOLUMN_GETPUT(DComplex)
+TSMCOORDCOLUMN_GETPUT(Int,IntV)
+TSMCOORDCOLUMN_GETPUT(uInt,uIntV)
+TSMCOORDCOLUMN_GETPUT(Int64,Int64V)
+//#TSMCOORDCOLUMN_GETPUT(float,floatV)
+TSMCOORDCOLUMN_GETPUT(double,doubleV)
+TSMCOORDCOLUMN_GETPUT(Complex,ComplexV)
+TSMCOORDCOLUMN_GETPUT(DComplex,DComplexV)
 
 } //# NAMESPACE CASACORE - END
 

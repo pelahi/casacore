@@ -30,9 +30,6 @@
 
 
 //# Includes
-#include <cassert>
-#include <limits>
-
 #include <casacore/casa/aips.h>
 
 
@@ -91,11 +88,11 @@ public:
     ColumnCache();
 
     // Set the increment to the given value.
-    void setIncrement (rownr_t increment);
+    void setIncrement (uInt increment);
 
     // Set the start and end row number for which the given data pointer
     // is valid.
-    void set (rownr_t startRow, rownr_t endRow, const void* dataPtr);
+    void set (uInt startRow, uInt endRow, const void* dataPtr);
 
     // Invalidate the cache.
     // This clears the data pointer and sets startRow>endRow.
@@ -103,7 +100,7 @@ public:
 
     // Calculate the offset in the cached data for the given row.
     // -1 is returned if the row is not within the cached rows.
-    Int64 offset (rownr_t rownr) const;
+    Int offset (uInt rownr) const;
 
     // Give a pointer to the data.
     // The calling function has to do a proper cast after which the
@@ -112,22 +109,19 @@ public:
 
     // Give the start, end (including), and increment row number
     // of the cached column values.
-    rownr_t start() const
-      { return itsStart; }
-    rownr_t end() const
-      { return itsEnd; }
-    rownr_t incr() const
-      { return itsIncr; }
+    uInt start() const {return itsStart;}
+    uInt end() const {return itsEnd;}
+    uInt incr() const {return itsIncr;}
 
 private:
-    rownr_t  itsStart;
-    rownr_t  itsEnd;
-    rownr_t  itsIncr;
+    uInt  itsStart;
+    uInt  itsEnd;
+    uInt  itsIncr;
     const void* itsData;
 };
 
 
-inline void ColumnCache::setIncrement (rownr_t increment)
+inline void ColumnCache::setIncrement (uInt increment)
 {
     itsIncr = increment;
 }
@@ -137,20 +131,31 @@ inline void ColumnCache::invalidate()
     set (1, 0, 0);
 }
 
-inline Int64 ColumnCache::offset (rownr_t rownr) const
+inline Int ColumnCache::offset (uInt rownr) const
 {
-    if (rownr < itsStart || rownr > itsEnd) {
-        return -1;
-    }
-    auto offset = (rownr - itsStart) * itsIncr;
-    assert(offset <= std::numeric_limits<Int64>::max());
-    return Int64(offset);
+    return rownr<itsStart || rownr>itsEnd  ?  -1 :
+	                                      Int((rownr-itsStart)*itsIncr);
 }
 
 inline const void* ColumnCache::dataPtr() const
 {
     return itsData;
 }
+
+/*
+inline uInt ColumnCache::start() const
+{
+    return itsStart;
+}
+inline uInt ColumnCache::end() const
+{
+    return itsEnd;
+}
+inline uInt ColumnCache::incr() const
+{
+    return itsIncr;
+}
+*/
 
 
 } //# NAMESPACE CASACORE - END

@@ -189,6 +189,7 @@ int main()
 	  cout << "nearAbs:        " << x.nearAbs(x2) << endl;
 	  cout << "!=:             " << (x != x2) << endl;
 	  cout << "==:             " << (x == x2) << endl;
+	  cout << "type:           " << x.type() << endl;
 	  cout << "Original:       " << x << endl;
 	  Double xa;
 	  x.adjust(xa);
@@ -222,7 +223,9 @@ int main()
 	  cout << "getAngle:       " << mb.getAngle("deg") << endl;
 	  cout << "getDefaultType: " << mb.getDefaultType() << endl;
 	  cout << "getRefString:   " << mb.getRefString() << endl;
+	  cout << "myType:         " << mb.myType() << endl;
 	  cout << "Original:       " << mb << endl;
+	  cout << "type:           " << mb.type() << endl;
 	  Muvw cpc(mb);
 	  cout << "Ctor copy:      " << cpc << endl;
 	  Muvw cpas;
@@ -235,8 +238,8 @@ int main()
 	  cout << "---------------------------" << endl;
 	}
 
-    } catch (std::exception& x) {
-	cout << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << x.getMesg() << endl;
     } 
 
     try {
@@ -245,8 +248,8 @@ int main()
       MEpoch x;
       Muvw::assure(x);
 
-    } catch (std::exception& x) {
-	cout << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << x.getMesg() << endl;
     } 
 
     try {
@@ -255,8 +258,8 @@ int main()
       MVEpoch x;
       MVuvw::assure(x);
 
-    } catch (std::exception& x) {
-	cout << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << x.getMesg() << endl;
     } 
     cout << "---------------------------" << endl;
 

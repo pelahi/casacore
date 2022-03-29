@@ -54,8 +54,8 @@ int main (int argc, const char* argv[])
     }else{
       docomm();
     }
-  } catch (std::exception& x) {
-    cout << "\nCaught an exception: " << x.what() << endl;
+  } catch (AipsError x) {
+    cout << "\nCaught an exception: " << x.getMesg() << endl;
     return 1;
   } 
   return 0;               // successfully executed
@@ -74,8 +74,8 @@ void docomm()
       break;
     try {
       seltab (str);
-    } catch (std::exception& x) {
-      cout << x.what() << endl;
+    } catch (AipsError x) {
+      cout << x.getMesg() << endl;
     } 
   }
 }
@@ -88,8 +88,8 @@ void seltab (const String& str)
   try {
     // Parse the command.
     node = TaQLNode::parse (str);
-  } catch (std::exception& x) {
-    cout << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << x.getMesg() << endl;
     return;
   }
   ostringstream oss;
@@ -100,8 +100,8 @@ void seltab (const String& str)
   try {
     // Parse the command.
     node1 = TaQLNode::parse (oss.str());
-  } catch (std::exception& x) {
-    cout << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << x.getMesg() << endl;
     return;
   }
   ostringstream oss1;

@@ -408,30 +408,30 @@ namespace casacore {
 
   // Get partial ntrues.
   template<typename T>
-  MArray<size_t> partialNTrue (const MArray<T>& a,
+  MArray<uInt> partialNTrue (const MArray<T>& a,
                              const IPosition& collapseAxes)
   {
     if (a.isNull()) {
-      return MArray<size_t>();
+      return MArray<uInt>();
     } else if (! a.hasMask()) {
-      return MArray<size_t>(partialNTrue (a.array(), collapseAxes));
+      return MArray<uInt>(partialNTrue (a.array(), collapseAxes));
     }
-    MArray<size_t> res;
-    partialArrayMath (res, a, collapseAxes, MNTrueFunc<T,size_t>());
+    MArray<uInt> res;
+    partialArrayMath (res, a, collapseAxes, MNTrueFunc<T,uInt>());
     return res;
   }
   // Get partial nfalses.
   template<typename T>
-  MArray<size_t> partialNFalse (const MArray<T>& a,
+  MArray<uInt> partialNFalse (const MArray<T>& a,
                               const IPosition& collapseAxes)
   {
     if (a.isNull()) {
-      return MArray<size_t>();
+      return MArray<uInt>();
     } else if (! a.hasMask()) {
-      return MArray<size_t>(partialNFalse (a.array(), collapseAxes));
+      return MArray<uInt>(partialNFalse (a.array(), collapseAxes));
     }
-    MArray<size_t> res;
-    partialArrayMath (res, a, collapseAxes, MNFalseFunc<T,size_t>());
+    MArray<uInt> res;
+    partialArrayMath (res, a, collapseAxes, MNFalseFunc<T,uInt>());
     return res;
   }
   // Get partial all.

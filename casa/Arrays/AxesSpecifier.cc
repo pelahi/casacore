@@ -26,21 +26,22 @@
 //#
 //# $Id$
 
-#include "AxesSpecifier.h"
+#include <casacore/casa/Arrays/AxesSpecifier.h>
+#include <casacore/casa/Utilities/Assert.h>
+#include <casacore/casa/Exceptions/Error.h>
 
-#include <stdexcept>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 AxesSpecifier::AxesSpecifier()
-: itsKeep (true)
+: itsKeep (True)
 {}
 
-AxesSpecifier::AxesSpecifier (bool keepDegenerate)
+AxesSpecifier::AxesSpecifier (Bool keepDegenerate)
 : itsKeep (keepDegenerate)
 {}
 
-AxesSpecifier::AxesSpecifier (bool keepDegenerate,
+AxesSpecifier::AxesSpecifier (Bool keepDegenerate,
 			      const IPosition& axisPath)
 : itsPath (axisPath),
   itsKeep (keepDegenerate)
@@ -48,14 +49,35 @@ AxesSpecifier::AxesSpecifier (bool keepDegenerate,
 
 AxesSpecifier::AxesSpecifier (const IPosition& keepAxes)
 : itsAxes (keepAxes),
-  itsKeep (false)
+  itsKeep (False)
 {}
 
 AxesSpecifier::AxesSpecifier (const IPosition& keepAxes,
 			      const IPosition& axisPath)
 : itsAxes (keepAxes),
   itsPath (axisPath),
-  itsKeep (false)
+  itsKeep (False)
+{}
+
+AxesSpecifier::AxesSpecifier (const AxesSpecifier& that)
+: itsAxes (that.itsAxes),
+  itsPath (that.itsPath),
+  itsKeep (that.itsKeep)
+{}
+
+AxesSpecifier& AxesSpecifier::operator= (const AxesSpecifier& that)
+{
+  if (this != &that) {
+    itsAxes.resize (that.itsAxes.nelements(), False);
+    itsAxes = that.itsAxes;
+    itsPath.resize (that.itsPath.nelements(), False);
+    itsPath = that.itsPath;
+    itsKeep = that.itsKeep;
+  }
+  return *this;
+}
+
+AxesSpecifier::~AxesSpecifier()
 {}
 
 AxesMapping AxesSpecifier::apply (const IPosition& shape) const
@@ -63,7 +85,7 @@ AxesMapping AxesSpecifier::apply (const IPosition& shape) const
   // Find the axes to be kept.
   // It also checks the keepAxes specification.
   IPosition keepAxes;
-  size_t nrnew;
+  uInt nrnew;
   if (itsKeep) {
     nrnew = shape.nelements();
     keepAxes = IPosition::otherAxes (nrnew, IPosition());
@@ -71,17 +93,16 @@ AxesMapping AxesSpecifier::apply (const IPosition& shape) const
     // First determine which axes have to be always kept.
     // To remove degenerate axes we use two passes
     // First find out how many axes have to be kept.
-    int naxes = shape.nelements();
-    keepAxes.resize (naxes, false);
+    Int naxes = shape.nelements();
+    keepAxes.resize (naxes, False);
     keepAxes = 0;
-    for (size_t i=0; i<itsAxes.nelements(); i++) {
-      if (itsAxes(i) >= naxes)
-        throw std::runtime_error("itsAxes(i) >= naxes");
+    for (uInt i=0; i<itsAxes.nelements(); i++) {
+      AlwaysAssert (itsAxes(i) < naxes, AipsError);
       keepAxes(itsAxes(i)) = 1;
     }
     // Now remove degenerate axes.
     nrnew = 0;
-    for (int i=0; i<naxes; i++) {
+    for (Int i=0; i<naxes; i++) {
       if (keepAxes(i) != 0  ||  shape(i) != 1) {
 	keepAxes(nrnew++) = i;
       }
@@ -93,8 +114,8 @@ AxesMapping AxesSpecifier::apply (const IPosition& shape) const
   // Fill the mappings original->new.
   // -1 means that the axis is not used.
   IPosition axisToNew(shape.nelements(), -1);
-  for (size_t i=0; i<nrnew; i++) {
-    size_t inx = keepAxes(path(i));
+  for (uInt i=0; i<nrnew; i++) {
+    uInt inx = keepAxes(path(i));
     axisToNew(inx) = i;
   }
   return AxesMapping(axisToNew);

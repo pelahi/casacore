@@ -216,8 +216,8 @@ int main() {
 //  		   AipsError);
 //     }
 //   }
-//   catch (std::exception x) {
-//     cerr << x.what() << endl;
+//   catch (AipsError x) {
+//     cerr << x.getMesg() << endl;
 //     cout << "FAIL" << endl;
 //     return 1;
 //   }
@@ -226,8 +226,8 @@ int main() {
 //     MSField ms(filename);
 //     ms.markForDelete();
 //   }
-//   catch (std::exception x) {
-//     cerr << x.what() << endl;
+//   catch (AipsError x) {
+//     cerr << x.getMesg() << endl;
 //     cout << "FAIL" << endl;
 //     return 1;
 //   }

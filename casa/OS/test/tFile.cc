@@ -69,8 +69,7 @@ void doIt (Bool doExcp)
     // Test assignment.
     File isFile2;
     isFile2 = isFile;
-    const File& exist2ref(exist2);
-    exist2 = exist2ref;
+    exist2 = exist2;
     
     AlwaysAssertExit (isFile.isRegular());
     AlwaysAssertExit (isDir.isDirectory());
@@ -102,8 +101,8 @@ void doIt (Bool doExcp)
     if (doExcp) {
 	try {
 	    exist2.userID();
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	} 
     }
 
@@ -180,8 +179,8 @@ int main (int argc, const char*[])
 {
     try {
 	doIt ( (argc<2));
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     cout << "OK" << endl;

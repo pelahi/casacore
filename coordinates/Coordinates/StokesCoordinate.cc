@@ -36,7 +36,6 @@
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/Utilities/LinearSearch.h>
 #include <casacore/casa/BasicMath/Math.h>
-#include <casacore/casa/IO/ArrayIO.h>
 
 #include <casacore/casa/sstream.h>
 
@@ -184,7 +183,7 @@ Stokes::StokesTypes StokesCoordinate::toWorld (Double world)
 
 Vector<Int> StokesCoordinate::stokes() const
 {
-    return Vector<Int>(values_p.begin(), values_p.end());
+    return Vector<Int>(values_p);
 }
 
 Vector<String> StokesCoordinate::stokesStrings() const {
@@ -217,7 +216,7 @@ void StokesCoordinate::setStokes (const Vector<Int> &whichStokes)
     }
 //
     values_p.resize(whichStokes.nelements());
-    values_p = makeBlock(whichStokes);
+    whichStokes.toBlock(values_p);
     nValues_p = values_p.nelements();
 //
     crval_p = whichStokes(0);

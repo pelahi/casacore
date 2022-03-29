@@ -64,23 +64,22 @@ void doIt (Bool doExcp)
     if (doExcp) {
 	try {
 	    RegularFile rf ("tRegularFile_tmp/a/b");         // not creatable
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	} 
 	try {
 	    RegularFile rf ("tRegularFile_tmp");             // directory
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	} 
 	try {
 	    RegularFile rf ("tRegularFile_tmp/isLink2");     // symlink to dir
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	} 
     }
     // Assignment.
-    const RegularFile& risLink1ref(risLink1);
-    risLink1 = risLink1ref;
+    risLink1 = risLink1;
     AlwaysAssertExit (risLink1.path().originalName() ==
                                              "tRegularFile_tmp/isLink1");
     rFile5 = risFile;
@@ -92,8 +91,8 @@ void doIt (Bool doExcp)
     if (doExcp) {
 	try {
 	    risFile.create (False);                         // already exists
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;
 	} 
     }
     // Do a valid create and assure its timestamp is greater and it is empty.
@@ -118,21 +117,21 @@ void doIt (Bool doExcp)
     if (doExcp) {
 	try {
 	    risFile1.copy (Path("tRegularFile_tmp/aa/bb/cc"));
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;         // non-writable directory
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;         // non-writable directory
 	} 
 	try {
 	    risFile1.copy (Path("tRegularFile_tmp/isFile"), False);
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;         // already exists
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;         // already exists
 	} 
     }
     risCopy.setPermissions (0444);
     if (doExcp) {
 	try {
 	    risFile1.copy (Path("tRegularFile_tmp/moveto/isFile1"));
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;         // exists, non-writable
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;         // exists, non-writable
 	} 
     }
     risCopy.setPermissions (0644);
@@ -145,8 +144,8 @@ void doIt (Bool doExcp)
     if (doExcp) {
 	try {
 	    file2.move ("tRegularFile_tmp/moveto/isFile1", False);
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;         // already exists
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;         // already exists
 	} 
     }
     file2.move ("tRegularFile_tmp/moveto");
@@ -180,8 +179,8 @@ int main (int argc,const char*[])
 {
     try {
 	doIt ( (argc<2));
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     cout << "OK" << endl;

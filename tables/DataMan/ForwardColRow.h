@@ -114,83 +114,92 @@ private:
     // This data manager cannot handle changing array shapes.
     Bool canChangeShape() const;
 
+    // This data manager cannot do get/putColumn.
+    Bool canAccessScalarColumn (Bool& reask) const;
+
+    // This data manager cannot do get/putColumn.
+    Bool canAccessArrayColumn (Bool& reask) const;
+
+    // This data manager cannot do get/putColumn.
+    Bool canAccessColumnSlice (Bool& reask) const;
+
     // Set the shape of an (indirect) array in the given row.
     // This throws an exception, because putting is not supported.
-    void setShape (rownr_t rownr, const IPosition& shape);
+    void setShape (uInt rownr, const IPosition& shape);
 
     // Is the value shape defined in the given row?
-    Bool isShapeDefined (rownr_t rownr);
+    Bool isShapeDefined (uInt rownr);
 
     // Get the dimensionality of the item in the given row.
-    uInt ndim (rownr_t rownr);
+    uInt ndim (uInt rownr);
 
     // Get the shape of the item in the given row.
-    IPosition shape (rownr_t rownr);
+    IPosition shape (uInt rownr);
 
     // Get the scalar value with a standard data type in the given row.
     // <group>
-    virtual void getBool     (rownr_t rownr, Bool* dataPtr);
-    virtual void getuChar    (rownr_t rownr, uChar* dataPtr);
-    virtual void getShort    (rownr_t rownr, Short* dataPtr);
-    virtual void getuShort   (rownr_t rownr, uShort* dataPtr);
-    virtual void getInt      (rownr_t rownr, Int* dataPtr);
-    virtual void getuInt     (rownr_t rownr, uInt* dataPtr);
-    virtual void getInt64    (rownr_t rownr, Int64* dataPtr);
-    virtual void getfloat    (rownr_t rownr, float* dataPtr);
-    virtual void getdouble   (rownr_t rownr, double* dataPtr);
-    virtual void getComplex  (rownr_t rownr, Complex* dataPtr);
-    virtual void getDComplex (rownr_t rownr, DComplex* dataPtr);
-    virtual void getString   (rownr_t rownr, String* dataPtr);
+    void getBoolV     (uInt rownr, Bool* dataPtr);
+    void getuCharV    (uInt rownr, uChar* dataPtr);
+    void getShortV    (uInt rownr, Short* dataPtr);
+    void getuShortV   (uInt rownr, uShort* dataPtr);
+    void getIntV      (uInt rownr, Int* dataPtr);
+    void getuIntV     (uInt rownr, uInt* dataPtr);
+    void getInt64V    (uInt rownr, Int64* dataPtr);
+    void getfloatV    (uInt rownr, float* dataPtr);
+    void getdoubleV   (uInt rownr, double* dataPtr);
+    void getComplexV  (uInt rownr, Complex* dataPtr);
+    void getDComplexV (uInt rownr, DComplex* dataPtr);
+    void getStringV   (uInt rownr, String* dataPtr);
     // </group>
 
     // Get the scalar value with a non-standard data type in the given row.
-    virtual void getOther    (rownr_t rownr, void* dataPtr);
+    void getOtherV    (uInt rownr, void* dataPtr);
 
     // Put the scalar value with a standard data type into the given row.
     // This throws an exception, because putting is not supported.
     // <group>
-    virtual void putBool     (rownr_t rownr, const Bool* dataPtr);
-    virtual void putuChar    (rownr_t rownr, const uChar* dataPtr);
-    virtual void putShort    (rownr_t rownr, const Short* dataPtr);
-    virtual void putuShort   (rownr_t rownr, const uShort* dataPtr);
-    virtual void putInt      (rownr_t rownr, const Int* dataPtr);
-    virtual void putuInt     (rownr_t rownr, const uInt* dataPtr);
-    virtual void putInt64    (rownr_t rownr, const Int64* dataPtr);
-    virtual void putfloat    (rownr_t rownr, const float* dataPtr);
-    virtual void putdouble   (rownr_t rownr, const double* dataPtr);
-    virtual void putComplex  (rownr_t rownr, const Complex* dataPtr);
-    virtual void putDComplex (rownr_t rownr, const DComplex* dataPtr);
-    virtual void putString   (rownr_t rownr, const String* dataPtr);
+    void putBoolV     (uInt rownr, const Bool* dataPtr);
+    void putuCharV    (uInt rownr, const uChar* dataPtr);
+    void putShortV    (uInt rownr, const Short* dataPtr);
+    void putuShortV   (uInt rownr, const uShort* dataPtr);
+    void putIntV      (uInt rownr, const Int* dataPtr);
+    void putuIntV     (uInt rownr, const uInt* dataPtr);
+    void putInt64V    (uInt rownr, const Int64* dataPtr);
+    void putfloatV    (uInt rownr, const float* dataPtr);
+    void putdoubleV   (uInt rownr, const double* dataPtr);
+    void putComplexV  (uInt rownr, const Complex* dataPtr);
+    void putDComplexV (uInt rownr, const DComplex* dataPtr);
+    void putStringV   (uInt rownr, const String* dataPtr);
     // </group>
 
     // Put the scalar value with a non-standard data type into the given row.
     // This throws an exception, because putting is not supported.
-    virtual void putOther    (rownr_t rownr, const void* dataPtr);
+    void putOtherV    (uInt rownr, const void* dataPtr);
 
     // Get the array value in the given row.
-    // The argument dataPtr is in fact a Array<T>&, but a ArrayBase&
+    // The argument dataPtr is in fact a Array<T>*, but a void*
     // is needed to be generic.
     // The array pointed to by dataPtr has to have the correct shape
     // (which is guaranteed by the ArrayColumn get function).
-    void getArrayV (rownr_t rownr, ArrayBase& dataPtr);
+    void getArrayV (uInt rownr, void* dataPtr);
 
     // Put the array value into the given row.
     // This throws an exception, because putting is not supported.
-    void putArrayV (rownr_t rownr, const ArrayBase& dataPtr);
+    void putArrayV (uInt rownr, const void* dataPtr);
 
     // Get a section of the array in the given row.
-    // The argument dataPtr is in fact a Array<T>&, but a ArrayBase&
+    // The argument dataPtr is in fact a Array<T>*, but a void*
     // is needed to be generic.
     // The array pointed to by dataPtr has to have the correct shape
     // (which is guaranteed by the ArrayColumn getSlice function).
-    void getSliceV (rownr_t rownr, const Slicer& slicer, ArrayBase& dataPtr);
+    void getSliceV (uInt rownr, const Slicer& slicer, void* dataPtr);
 
     // Put into a section of the array in the given row.
     // This throws an exception, because putting is not supported.
-    void putSliceV (rownr_t rownr, const Slicer& slicer, const ArrayBase& dataPtr);
+    void putSliceV (uInt rownr, const Slicer& slicer, const void* dataPtr);
 
     // Convert the rownr to the rownr in the underlying table.
-    rownr_t convertRownr (rownr_t rownr);
+    uInt convertRownr (uInt rownr);
 
     //# Now define the data members.
     ForwardColumnIndexedRowEngine* enginePtr_p;  //# pointer to parent engine
@@ -349,7 +358,7 @@ private:
     // It defines the column keywords containing the name of the
     // original table, which can be the parent of the referenced table.
     // It also defines a keyword containing the row column name.
-    void create64 (rownr_t initialNrrow);
+    void create (uInt initialNrrow);
 
     // Initialize the engine.
     // It gets the name of the original table(s) from the column keywords,
@@ -369,8 +378,8 @@ private:
     // Define the various engine column objects.
     PtrBlock<ForwardColumnIndexedRow*> refColumns_p;
     // Cache of last row used to get row number.
-    Int64   lastRow_p;
-    rownr_t rowNumber_p;
+    Int lastRow_p;
+    uInt rowNumber_p;
 
 
 public:
@@ -384,20 +393,20 @@ public:
 				    const Record& spec);
 
     // Convert the rownr to the rownr in the underlying table.
-    rownr_t convertRownr (rownr_t rownr);
+    uInt convertRownr (uInt rownr);
 };
 
 
-inline rownr_t ForwardColumnIndexedRowEngine::convertRownr (rownr_t rownr)
+inline uInt ForwardColumnIndexedRowEngine::convertRownr (uInt rownr)
 {
-    if (Int64(rownr) != lastRow_p) {
+    if (Int(rownr) != lastRow_p) {
 	rowNumber_p = rowColumn_p(rownr);
 	lastRow_p   = rownr;
     }
     return rowNumber_p;
 }
 
-inline rownr_t ForwardColumnIndexedRow::convertRownr (rownr_t rownr)
+inline uInt ForwardColumnIndexedRow::convertRownr (uInt rownr)
     { return enginePtr_p->convertRownr (rownr); }
 
 

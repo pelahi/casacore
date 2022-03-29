@@ -62,7 +62,7 @@ SSMBase::SSMBase (Int aBucketSize, uInt aCacheSize)
   itsCache             (0),
   itsFile              (0),
   itsStringHandler     (0),
-  itsPersCacheSize     (std::max(aCacheSize,uInt(2))),
+  itsPersCacheSize     (max(aCacheSize,2u)),
   itsCacheSize         (0),
   itsNrBuckets         (0), 
   itsNrIdxBuckets      (0),
@@ -94,7 +94,7 @@ SSMBase::SSMBase (const String& aDataManName,
   itsCache             (0),
   itsFile              (0),
   itsStringHandler     (0),
-  itsPersCacheSize     (std::max(aCacheSize,uInt(2))),
+  itsPersCacheSize     (max(aCacheSize,2u)),
   itsCacheSize         (0),
   itsNrBuckets         (0), 
   itsNrIdxBuckets      (0),
@@ -140,7 +140,7 @@ SSMBase::SSMBase (const String& aDataManName,
   itsBucketRows        (0),
   isDataChanged        (False)
 { 
-  // Get nr of rows per bucket if defined.
+  // Get bucketrows if defined.
   if (spec.isDefined ("BUCKETROWS")) {
     itsBucketRows = spec.asInt ("BUCKETROWS");
   }
@@ -592,7 +592,7 @@ void SSMBase::writeIndex()
     }    
     itsFirstIdxBucket = aNewBucket;
     // If the index fits in half a bucket, we might be able to use the other
-    // half when writing the index the next time.
+    // half when writying the index the next time.
     // Set the index offset variable accordingly.
     if (idxLength <= idxBucketSize/2) {
       itsIdxBucketOffset = aCLength;
@@ -615,7 +615,7 @@ void SSMBase::writeIndex()
   itsFile->seek (0);
   AipsIO anOs (aTio);
   
-  // Write a few items at the beginning of the file  AipsIO anOs (aTio);
+  // write a few items at the beginning of the file  AipsIO anOs (aTio);
   // The endian switch is a new feature. So only put it if little endian
   // is used. In that way older software can read newer tables.
   if (asBigEndian()) {
@@ -673,7 +673,7 @@ Bool SSMBase::canRemoveColumn() const
 }
 
 
-void SSMBase::addRow64 (rownr_t aNrRows)
+void SSMBase::addRow (uInt aNrRows)
 {
   //make sure cache is available and filled (I need itsPtrIndex)
   getCache();
@@ -693,7 +693,7 @@ void SSMBase::addRow64 (rownr_t aNrRows)
   isDataChanged = True;
 }
 
-void SSMBase::removeRow64 (rownr_t aRowNr)
+void SSMBase::removeRow (uInt aRowNr)
 {
   uInt aNrCol = ncolumn();
   for (uInt j=0; j< aNrCol; j++) {
@@ -723,7 +723,7 @@ void SSMBase::removeRow64 (rownr_t aRowNr)
     itsFirstIdxBucket  = -1;
     itsIdxBucketOffset = 0;
     itsNrIdxBuckets    = 0;
-    create64(itsNrRows);
+    create(itsNrRows);
     //    recreate();
   }
   isDataChanged = True;
@@ -747,7 +747,7 @@ void SSMBase::addColumn (DataManagerColumn* aColumn)
   uInt saveIndex=0;
   Int  saveOffset=-1; 
 
-  // Try if there is freespace available where this column can fit (best fit)
+  // Try if there is  freespace available where this column can fit (best fit)
   // For now we assume that a best fit will be :
   //                                             1) exact fit
   //                                             2) any fit
@@ -903,8 +903,8 @@ char* SSMBase::initCallBack (void* anOwner)
   return aBucket;
 }
 
-char* SSMBase::find(rownr_t aRowNr,     uInt aColNr, 
-		    rownr_t& aStartRow, rownr_t& anEndRow,
+char* SSMBase::find(uInt aRowNr,     uInt aColNr, 
+		    uInt& aStartRow, uInt& anEndRow,
                     const String& colName)
 {
  
@@ -989,7 +989,7 @@ Bool SSMBase::flush (AipsIO& ios, Bool doFsync)
   return changed;
 }
 
-rownr_t SSMBase::resync64 (rownr_t aNrRows)
+void SSMBase::resync (uInt aNrRows)
 {
   itsNrRows = aNrRows;
   if (itsPtrIndex.nelements() != 0) {
@@ -1013,18 +1013,17 @@ rownr_t SSMBase::resync64 (rownr_t aNrRows)
   for (uInt i=0; i<aNrCol; i++) {
     itsPtrColumn[i]->resync (itsNrRows);
   }
-  return itsNrRows;
 }
 
-void SSMBase::create64 (rownr_t aNrRows)
+void SSMBase::create (uInt aNrRows)
 {
   init();
   recreate();
   itsNrRows = 0;
-  addRow64 (aNrRows);
+  addRow (aNrRows);
 }
 
-rownr_t SSMBase::open64 (rownr_t aRowNr, AipsIO& ios)
+void SSMBase::open (uInt aRowNr, AipsIO& ios)
 {
   itsNrRows = aRowNr;
   ios.getstart ("SSM");
@@ -1042,7 +1041,7 @@ rownr_t SSMBase::open64 (rownr_t aRowNr, AipsIO& ios)
   for (uInt i=0; i<aNrCol; i++) {
     itsPtrColumn[i]->getFile(itsNrRows);
   }
-  return itsNrRows;
+  
 }
 
 StManArrayFile* SSMBase::openArrayFile (ByteIO::OpenOption anOpt)

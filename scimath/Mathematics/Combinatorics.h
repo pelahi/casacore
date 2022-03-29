@@ -33,8 +33,7 @@
 //# Includes
 #include <casacore/casa/aips.h>
 #include <casacore/casa/Arrays/Vector.h>
-
-#include <mutex>
+#include <casacore/casa/OS/Mutex.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -85,7 +84,7 @@ class Combinatorics {
 
   static Vector<uInt> _factorialCache;
   static volatile uInt _factorialCacheSize; //# volatile for double checked lock
-  static std::mutex theirMutex;
+  static Mutex theirMutex;
 };
 } //# NAMESPACE CASACORE - END
 

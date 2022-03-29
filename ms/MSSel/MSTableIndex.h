@@ -121,11 +121,11 @@ public:
     // interval values.  For now, this code will miss the case where the subtable has
     // interval = -1 and the start time is outside of the time range implied by the time
     // and interval.  If the table has changed and the time is > 
-    virtual RowNumbers getRowNumbers();
+    virtual Vector<uInt> getRowNumbers();
 
     // get the row number which falls in the interval and has the time nearest to the
     // center of the interval (time()).  This also has the same problem as the previous function.
-    virtual Int64 getNearestRow(Bool &found);
+    virtual uInt getNearestRow(Bool &found);
 
     // is this attached to a null table
     virtual Bool isNull() { return tab_p.isNull();}
@@ -152,14 +152,14 @@ private:
     Double lastTime_p, lastInterval_p;
 
     // last search result - matching integer keys
-    RowNumbers lastSearch_p;
+    Vector<uInt> lastSearch_p;
 
     // last nearest
-    Int64 lastNearest_p;
+    Int lastNearest_p;
     Bool nearestFound_p, nearestReady_p;
 
     // last known sub-table size
-    rownr_t nrows_p;
+    uInt nrows_p;
 
     Bool hasChanged_p;
 

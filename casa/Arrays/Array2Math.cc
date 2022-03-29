@@ -25,148 +25,148 @@
 //#
 //# $Id$
 
-#include "ArrayMath.h"
-#include "ArrayError.h"
-#include "Matrix.h"
-
-#include <complex>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/ArrayError.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/BasicMath/Math.h>
+#include <casacore/casa/iostream.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
+
 
 //# We could use macros to considerably reduce the number of lines, however
 //# that makes it harder to debug, understand, etc.
 
-Array<std::complex<float>> conj(const Array<std::complex<float>> &carray)
+Array<Complex> conj(const Array<Complex> &carray)
 {
-  return arrayTransformResult (carray, [](std::complex<float> v) { return std::conj(v); });
+  return arrayTransformResult (carray, casacore::Conj<Complex>());
 }
   
-Array<std::complex<double>> conj(const Array<std::complex<double>> &carray)
+Array<DComplex> conj(const Array<DComplex> &carray)
 {
-  return arrayTransformResult (carray, [](std::complex<double> v) { return std::conj(v); });
+  return arrayTransformResult (carray, casacore::Conj<DComplex>());
 }
 
-Matrix<std::complex<float>> conj(const Matrix<std::complex<float>> &carray)
+Matrix<Complex> conj(const Matrix<Complex> &carray)
 {
-  return Matrix<std::complex<float>>(conj ((const Array<std::complex<float>>&)carray));
+  return Matrix<Complex>(conj ((const Array<Complex>&)carray));
 }
   
-Matrix<std::complex<double>> conj(const Matrix<std::complex<double>> &carray)
+Matrix<DComplex> conj(const Matrix<DComplex> &carray)
 {
-  return Matrix<std::complex<double>>(conj ((const Array<std::complex<double>>&)carray));
+  return Matrix<DComplex>(conj ((const Array<DComplex>&)carray));
 }
 
-void conj(Array<std::complex<float>> &rarray, const Array<std::complex<float>> &carray)
-{
-  checkArrayShapes (carray, rarray, "conj");
-  arrayTransform (carray, rarray, [](std::complex<float> v) { return std::conj(v); });
-}
-
-void conj(Array<std::complex<double>> &rarray, const Array<std::complex<double>> &carray)
+void conj(Array<Complex> &rarray, const Array<Complex> &carray)
 {
   checkArrayShapes (carray, rarray, "conj");
-  arrayTransform (carray, rarray, [](std::complex<double> v) { return std::conj(v); });
+  arrayTransform (carray, rarray, casacore::Conj<Complex>());
 }
 
-void real(Array<float> &rarray, const Array<std::complex<float>> &carray)
+void conj(Array<DComplex> &rarray, const Array<DComplex> &carray)
+{
+  checkArrayShapes (carray, rarray, "conj");
+  arrayTransform (carray, rarray, casacore::Conj<DComplex>());
+}
+
+void real(Array<Float> &rarray, const Array<Complex> &carray)
 {
   checkArrayShapes (carray, rarray, "real");
-  // std::real is only a template since c++14 :(
-  arrayTransform (carray, rarray, [](std::complex<float> v) { return std::real(v); });
+  arrayTransform (carray, rarray, casacore::Real<Complex,Float>());
 }
 
-void real(Array<double> &rarray, const Array<std::complex<double>> &carray)
+void real(Array<Double> &rarray, const Array<DComplex> &carray)
 {
   checkArrayShapes (carray, rarray, "real");
-  arrayTransform (carray, rarray, [](std::complex<double> v) { return std::real(v); });
+  arrayTransform (carray, rarray, casacore::Real<DComplex,Double>());
 }
 
-void imag(Array<float> &rarray, const Array<std::complex<float>> &carray)
+void imag(Array<Float> &rarray, const Array<Complex> &carray)
 {
   checkArrayShapes (carray, rarray, "imag");
-  arrayTransform (carray, rarray, [](std::complex<float> v) { return std::imag(v); });
+  arrayTransform (carray, rarray, casacore::Imag<Complex,Float>());
 }
 
-void imag(Array<double> &rarray, const Array<std::complex<double>> &carray)
+void imag(Array<Double> &rarray, const Array<DComplex> &carray)
 {
   checkArrayShapes (carray, rarray, "imag");
-  arrayTransform (carray, rarray, [](std::complex<double> v) { return std::imag(v); });
+  arrayTransform (carray, rarray, casacore::Imag<DComplex,Double>());
 }
 
-void amplitude(Array<float> &rarray, const Array<std::complex<float>> &carray)
+void amplitude(Array<Float> &rarray, const Array<Complex> &carray)
 {
   checkArrayShapes (carray, rarray, "amplitude");
-  arrayTransform (carray, rarray, std::abs<float>);
+  arrayTransform (carray, rarray, casacore::CAbs<Complex,Float>());
 }
 
-void amplitude(Array<double> &rarray, const Array<std::complex<double>> &carray)
+void amplitude(Array<Double> &rarray, const Array<DComplex> &carray)
 {
   checkArrayShapes (carray, rarray, "amplitude");
-  arrayTransform (carray, rarray, std::abs<double>);
+  arrayTransform (carray, rarray, casacore::CAbs<DComplex,Double>());
 }
 
-void phase(Array<float> &rarray, const Array<std::complex<float>> &carray)
+void phase(Array<Float> &rarray, const Array<Complex> &carray)
 {
   checkArrayShapes (carray, rarray, "pahse");
-  arrayTransform (carray, rarray, [](std::complex<float> v) { return std::arg(v); });
+  arrayTransform (carray, rarray, casacore::CArg<Complex,Float>());
 }
 
-void phase(Array<double> &rarray, const Array<std::complex<double>> &carray)
+void phase(Array<Double> &rarray, const Array<DComplex> &carray)
 {
   checkArrayShapes (carray, rarray, "phase");
-  arrayTransform (carray, rarray, [](std::complex<double> v) { return std::arg(v); });
+  arrayTransform (carray, rarray, casacore::CArg<DComplex,Double>());
 }
 
-Array<float> real(const Array<std::complex<float>> &carray)
+Array<Float> real(const Array<Complex> &carray)
 {
-  Array<float> rarray(carray.shape());
+  Array<Float> rarray(carray.shape());
   real(rarray, carray);
   return rarray;
 }
-Array<double> real(const Array<std::complex<double>> &carray)
+Array<Double> real(const Array<DComplex> &carray)
 {
-  Array<double> rarray(carray.shape());
+  Array<Double> rarray(carray.shape());
   real(rarray, carray);
   return rarray;
 }
 
 
-Array<float> imag(const Array<std::complex<float>> &carray)
+Array<Float> imag(const Array<Complex> &carray)
 {
-  Array<float> rarray(carray.shape());
+  Array<Float> rarray(carray.shape());
   imag(rarray, carray);
   return rarray;
 }
-Array<double> imag(const Array<std::complex<double>> &carray)
+Array<Double> imag(const Array<DComplex> &carray)
 {
-  Array<double> rarray(carray.shape());
+  Array<Double> rarray(carray.shape());
   imag(rarray, carray);
   return rarray;
 }
 
-Array<float> amplitude(const Array<std::complex<float>> &carray)
+Array<Float> amplitude(const Array<Complex> &carray)
 {
-  Array<float> rarray(carray.shape());
+  Array<Float> rarray(carray.shape());
   amplitude(rarray, carray);
   return rarray;
 }
-Array<double> amplitude(const Array<std::complex<double>> &carray)
+Array<Double> amplitude(const Array<DComplex> &carray)
 {
-  Array<double> rarray(carray.shape());
+  Array<Double> rarray(carray.shape());
   amplitude(rarray, carray);
   return rarray;
 }
 
-Array<float> phase(const Array<std::complex<float>> &carray)
+Array<Float> phase(const Array<Complex> &carray)
 {
-  Array<float> rarray(carray.shape());
+  Array<Float> rarray(carray.shape());
   phase(rarray, carray);
   return rarray;
 }
 
-Array<double> phase(const Array<std::complex<double>> &carray)
+Array<Double> phase(const Array<DComplex> &carray)
 {
-  Array<double> rarray(carray.shape());
+  Array<Double> rarray(carray.shape());
   phase(rarray, carray);
   return rarray;
 }
@@ -174,20 +174,20 @@ Array<double> phase(const Array<std::complex<double>> &carray)
 // <thrown>
 //     <item> ArrayError
 // </thrown>
-void ComplexToReal(Array<float> &rarray, const Array<std::complex<float>> &carray)
+void ComplexToReal(Array<Float> &rarray, const Array<Complex> &carray)
 {
   if (rarray.nelements() != 2*carray.nelements()) {
-    throw(ArrayError("::ComplexToReal(Array<float> &rarray, const "
-                     "Array<std::complex<float>> &carray) - rarray.nelements() != "
+    throw(ArrayError("::ComplexToReal(Array<Float> &rarray, const "
+                     "Array<Complex> &carray) - rarray.nelements() != "
                      "2*carray.nelements()"));
   }
   if (rarray.contiguousStorage()  &&  carray.contiguousStorage()) {
-    memcpy (const_cast<float*>(rarray.data()), carray.data(),
-            rarray.nelements() * sizeof(float));
+    memcpy (const_cast<Float*>(rarray.data()), carray.data(),
+            rarray.nelements() * sizeof(Float));
   } else {
-    Array<std::complex<float>>::const_iterator citer=carray.begin();
-    Array<float>::iterator rend = rarray.end();
-    for (Array<float>::iterator riter = rarray.begin();
+    Array<Complex>::const_iterator citer=carray.begin();
+    Array<Float>::iterator rend = rarray.end();
+    for (Array<Float>::iterator riter = rarray.begin();
          riter!=rend;  ++riter, ++citer) {
       *riter = real(*citer);
       ++riter;
@@ -199,20 +199,20 @@ void ComplexToReal(Array<float> &rarray, const Array<std::complex<float>> &carra
 // <thrown>
 //     <item> ArrayError
 // </thrown>
-void ComplexToReal(Array<double> &rarray, const Array<std::complex<double>> &carray)
+void ComplexToReal(Array<Double> &rarray, const Array<DComplex> &carray)
 {
   if (rarray.nelements() != 2*carray.nelements()) {
-    throw(ArrayError("::ComplexToReal(Array<double> &rarray, const "
-                     "Array<std::complex<double>> &carray) - rarray.nelements() != "
+    throw(ArrayError("::ComplexToReal(Array<Double> &rarray, const "
+                     "Array<DComplex> &carray) - rarray.nelements() != "
                      "2*carray.nelements()"));
   }
   if (rarray.contiguousStorage()  &&  carray.contiguousStorage()) {
-    memcpy (const_cast<double*>(rarray.data()), carray.data(),
-            rarray.nelements() * sizeof(double));
+    memcpy (const_cast<Double*>(rarray.data()), carray.data(),
+            rarray.nelements() * sizeof(Double));
   } else {
-    Array<std::complex<double>>::const_iterator citer=carray.begin();
-    Array<double>::iterator rend = rarray.end();
-    for (Array<double>::iterator riter = rarray.begin();
+    Array<DComplex>::const_iterator citer=carray.begin();
+    Array<Double>::iterator rend = rarray.end();
+    for (Array<Double>::iterator riter = rarray.begin();
          riter!=rend;  ++riter, ++citer) {
       *riter = real(*citer);
       ++riter;
@@ -221,20 +221,20 @@ void ComplexToReal(Array<double> &rarray, const Array<std::complex<double>> &car
   }
 }
 
-Array<float> ComplexToReal(const Array<std::complex<float>> &carray)
+Array<Float> ComplexToReal(const Array<Complex> &carray)
 {
   IPosition shape = carray.shape();
   shape(0) *= 2;
-  Array<float> retval(shape);
+  Array<Float> retval(shape);
   ComplexToReal(retval, carray);
   return retval;
 }
 
-Array<double> ComplexToReal(const Array<std::complex<double>> &carray)
+Array<Double> ComplexToReal(const Array<DComplex> &carray)
 {
   IPosition shape = carray.shape();
   shape(0) *= 2;
-  Array<double> retval(shape);
+  Array<Double> retval(shape);
   ComplexToReal(retval, carray);
   return retval;
 }
@@ -242,23 +242,24 @@ Array<double> ComplexToReal(const Array<std::complex<double>> &carray)
 // <thrown>
 //     <item> ArrayError
 // </thrown>
-void RealToComplex(Array<std::complex<float>> &carray, const Array<float> &rarray)
+void RealToComplex(Array<Complex> &carray, const Array<Float> &rarray)
 {
   if (rarray.nelements() != 2*carray.nelements()) {
-    throw(ArrayError("::RealToComplex(Array<std::complex<float>> &carray, const "
-                     "Array<float> &rarray) - rarray.nelements() != "
+    throw(ArrayError("::RealToComplex(Array<Complex> &carray, const "
+                     "Array<Float> &rarray) - rarray.nelements() != "
                      "2*carray.nelements()"));
   }
   if (rarray.contiguousStorage()  &&  carray.contiguousStorage()) {
-    std::copy_n(rarray.data(), rarray.nelements(), reinterpret_cast<float*>(const_cast<std::complex<float>*>(carray.data())));
+    memcpy (const_cast<Complex*>(carray.data()), rarray.data(),
+            rarray.nelements() * sizeof(Float));
   } else {
-    Array<std::complex<float>>::iterator citer=carray.begin();
-    Array<float>::const_iterator rend = rarray.end();
-    for (Array<float>::const_iterator riter = rarray.begin();
+    Array<Complex>::iterator citer=carray.begin();
+    Array<Float>::const_iterator rend = rarray.end();
+    for (Array<Float>::const_iterator riter = rarray.begin();
          riter!=rend;  ++riter, ++citer) {
-      float r = *riter;
+      Float r = *riter;
       ++riter;
-      *citer = std::complex<float>(r, *riter);
+      *citer = Complex(r, *riter);
     }
   }
 }
@@ -266,23 +267,24 @@ void RealToComplex(Array<std::complex<float>> &carray, const Array<float> &rarra
 // <thrown>
 //     <item> ArrayError
 // </thrown>
-void RealToComplex(Array<std::complex<double>> &carray, const Array<double> &rarray)
+void RealToComplex(Array<DComplex> &carray, const Array<Double> &rarray)
 {
   if (rarray.nelements() != 2*carray.nelements()) {
-    throw(ArrayError("::RealToComplex(Array<std::complex<double>> &carray, const "
-                     "Array<double> &rarray) - rarray.nelements() != "
+    throw(ArrayError("::RealToComplex(Array<DComplex> &carray, const "
+                     "Array<Double> &rarray) - rarray.nelements() != "
                      "2*carray.nelements()"));
   }
   if (rarray.contiguousStorage()  &&  carray.contiguousStorage()) {
-    std::copy_n(rarray.data(), rarray.nelements(), reinterpret_cast<double*>(const_cast<std::complex<double>*>(carray.data())));
+    memcpy (const_cast<DComplex*>(carray.data()), rarray.data(),
+            rarray.nelements() * sizeof(Double));
   } else {
-    Array<std::complex<double>>::iterator citer=carray.begin();
-    Array<double>::const_iterator rend = rarray.end();
-    for (Array<double>::const_iterator riter = rarray.begin();
+    Array<DComplex>::iterator citer=carray.begin();
+    Array<Double>::const_iterator rend = rarray.end();
+    for (Array<Double>::const_iterator riter = rarray.begin();
          riter!=rend;  ++riter, ++citer) {
-      double r = *riter;
+      Double r = *riter;
       ++riter;
-      *citer = std::complex<double>(r, *riter);
+      *citer = DComplex(r, *riter);
     }
   }
 }
@@ -291,15 +293,15 @@ void RealToComplex(Array<std::complex<double>> &carray, const Array<double> &rar
 // <thrown>
 //    <item> ArrayError
 // </thrown>
-Array<std::complex<float>> RealToComplex(const Array<float> &rarray)
+Array<Complex> RealToComplex(const Array<Float> &rarray)
 {
   IPosition shape = rarray.shape();
   if (shape(0) %2 == 1) { // Odd size
-    throw(ArrayError("Array<std::complex<float>> RealToComplex(const Array<float> &"
+    throw(ArrayError("Array<Complex> RealToComplex(const Array<Float> &"
                      "rarray) - rarray.shape()(0) not even"));
   }
   shape(0) /= 2;
-  Array<std::complex<float>> retval(shape);
+  Array<Complex> retval(shape);
   RealToComplex(retval, rarray);
   return retval;
 }
@@ -307,15 +309,15 @@ Array<std::complex<float>> RealToComplex(const Array<float> &rarray)
 // <thrown>
 //    <item> ArrayError
 // </thrown>
-Array<std::complex<double>> RealToComplex(const Array<double> &rarray)
+Array<DComplex> RealToComplex(const Array<Double> &rarray)
 {
   IPosition shape = rarray.shape();
   if (shape(0) %2 == 1) { // Odd size
-    throw(ArrayError("Array<std::complex<double>> RealToComplex(const Array<double> &"
+    throw(ArrayError("Array<DComplex> RealToDComplex(const Array<Double> &"
                      "rarray) - rarray.shape()(0) not even"));
   }
   shape(0) /= 2;
-  Array<std::complex<double>> retval(shape);
+  Array<DComplex> retval(shape);
   RealToComplex(retval, rarray);
   return retval;
 }
@@ -334,7 +336,7 @@ IPosition checkExpandArray (IPosition& mult,
   inshp.resize (outShape.size());
   inshp = 1;                             // missing axes have length 1
   IPosition alt(outShape.size(), 0);
-  for (size_t i=0; i<outShape.size(); ++i) {
+  for (uInt i=0; i<outShape.size(); ++i) {
     if (i < inShape.size()) {
       inshp[i] = inShape[i];
     }

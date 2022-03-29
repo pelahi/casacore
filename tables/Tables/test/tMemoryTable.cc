@@ -37,11 +37,11 @@
 #include <casacore/tables/DataMan/VirtualTaQLColumn.h>
 #include <casacore/casa/BasicSL/Complex.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Arrays/Cube.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Containers/Record.h>
 #include <casacore/casa/OS/Path.h>
 #include <casacore/casa/Utilities/Assert.h>
@@ -63,7 +63,7 @@ void init (uInt aMode, Table&);
 void deleteRow(const uInt aRow, Table&);
 
 // reopen table, and throw away a few rows
-void deleteRows(const Vector<rownr_t>& aNrRows, Table&);
+void deleteRows(const Vector<uInt>& aNrRows, Table&);
 
 // delete a Column
 void deleteColumn(const String aColumn, Table&);
@@ -152,7 +152,7 @@ int main ()
 	addDirectArrays (tab);
 	addIndStringArray(tab);
 	addIndArray     (tab);
-        Vector<rownr_t> aNrRows(3);
+        Vector<uInt> aNrRows(3);
 	for (uInt i=0; i< 3; i++) {
 	  aNrRows(i) = i+3;
 	}
@@ -160,15 +160,15 @@ int main ()
 	deleteColumn    ("Col-7", tab);
        	addColumn       (TpString, tab);
 	// remove all remaining rows to check freebucket performance
-        Vector<rownr_t> aNewNrRows(15);
+        Vector<uInt> aNewNrRows(15);
 	for (uInt i=0; i< 15; i++) {
 	  aNewNrRows(i) = i;
 	}
 	deleteRows      (aNewNrRows, tab);
 
 
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     return 0;                           // exit with success status
@@ -366,7 +366,7 @@ void deleteRow(const uInt aRow, Table& aTable)
   info(aTable);
 }
 
-void deleteRows(const Vector<rownr_t>& aNrRows, Table& aTable)
+void deleteRows(const Vector<uInt>& aNrRows, Table& aTable)
 {
   ScalarColumn<DComplex> ae(aTable,"Col-5");
 

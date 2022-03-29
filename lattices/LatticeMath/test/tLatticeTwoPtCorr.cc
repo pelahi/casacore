@@ -131,8 +131,8 @@ int main ()
         t = t2;
       }
 
-  } catch (std::exception& x) {
-    cerr << "Caught exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cerr << "Caught exception: " << x.getMesg() << endl;
     cout << "FAIL" << endl;
     return 1;
   } 

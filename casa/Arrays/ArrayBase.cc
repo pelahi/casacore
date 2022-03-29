@@ -17,7 +17,7 @@
 //# Inc., 675 Massachusetts Ave, Cambridge, MA 02139, USA.
 //#
 //# Correspondence concerning AIPS++ should be addressed as follows:
-//#        internet email: aips2-request@nrao.edu.
+//#        Internet email: aips2-request@nrao.edu.
 //#        Postal address: AIPS++ Project Office
 //#                        National Radio Astronomy Observatory
 //#                        520 Edgemont Road
@@ -25,18 +25,18 @@
 //#
 //# $Id: ArrayBase.cc 21521 2014-12-10 08:06:42Z gervandiepen $
 
-#include "ArrayBase.h"
-#include "ArrayError.h"
+#include <casacore/casa/Arrays/ArrayBase.h>
+#include <casacore/casa/Arrays/ArrayError.h>
+#include <casacore/casa/Utilities/Assert.h>
+#include <casacore/casa/BasicMath/Math.h>
 
-#include <cassert>
-#include <sstream>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
-ArrayBase::ArrayBase() noexcept
+ArrayBase::ArrayBase()
 : nels_p       (0),
   ndimen_p     (0),
-  contiguous_p (true)
+  contiguous_p (True)
 {}
 
 // <thrown>
@@ -45,12 +45,12 @@ ArrayBase::ArrayBase() noexcept
 ArrayBase::ArrayBase (const IPosition& Shape)
 : nels_p           (Shape.product()),
   ndimen_p         (Shape.nelements()),
-  contiguous_p     (true),
+  contiguous_p     (True),
   length_p         (Shape),
   inc_p            (Shape.nelements(), 1),
   originalLength_p (Shape)
 {
-  for (size_t i = 0; i < ndimen_p; i++) {
+  for (uInt i = 0; i < ndimen_p; i++) {
     if (Shape(i) < 0) {
       throw(ArrayShapeError(shape(), Shape,
 			    "ArrayBase::Array(const IPosition&)"
@@ -70,45 +70,7 @@ ArrayBase::ArrayBase (const ArrayBase& other)
   steps_p          (other.steps_p)
 {}
 
-ArrayBase::ArrayBase (ArrayBase&& source) noexcept
-: nels_p           (source.nels_p),
-  ndimen_p         (source.ndimen_p),
-  contiguous_p     (source.contiguous_p),
-  length_p         (source.length_p),
-  inc_p            (source.inc_p),
-  originalLength_p (source.originalLength_p),
-  steps_p          (source.steps_p)
-{
-  // Make source empty (self-assignment of move object is not allowed)
-  source.nels_p = 0;
-  source.ndimen_p = 0;
-  source.contiguous_p = true;
-  source.length_p = IPosition();
-  source.inc_p = IPosition();
-  source.originalLength_p = IPosition();
-  source.steps_p = IPosition();
-}
-
-ArrayBase::ArrayBase (ArrayBase&& source, const IPosition& shapeForSource) noexcept
-: nels_p           (source.nels_p),
-  ndimen_p         (source.ndimen_p),
-  contiguous_p     (source.contiguous_p),
-  length_p         (source.length_p),
-  inc_p            (source.inc_p),
-  originalLength_p (source.originalLength_p),
-  steps_p          (source.steps_p)
-{
-  // Set source to have given shape
-  source.nels_p = shapeForSource.product();
-  source.ndimen_p = shapeForSource.nelements();
-  source.contiguous_p = true;
-  source.length_p = shapeForSource;
-  source.inc_p = IPosition(shapeForSource.nelements(), 1);
-  source.originalLength_p = shapeForSource;
-  source.steps_p = IPosition();
-}
-
-ArrayBase& ArrayBase::assign (const ArrayBase& other)
+ArrayBase& ArrayBase::operator= (const ArrayBase& other)
 {
   if (this != &other) {
     nels_p           = other.nels_p;
@@ -128,55 +90,21 @@ ArrayBase& ArrayBase::assign (const ArrayBase& other)
   return *this;
 }
 
-ArrayBase& ArrayBase::operator=(ArrayBase&& source) noexcept
-{
-  nels_p = source.nels_p;
-  ndimen_p = source.ndimen_p;
-  contiguous_p = source.contiguous_p;
-  length_p = std::move(source.length_p);
-  inc_p = std::move(source.inc_p);
-  originalLength_p = std::move(source.originalLength_p);
-  steps_p = std::move(source.steps_p);
-  
-  // Make source empty (self-assignment of move object is not allowed)
-  source.nels_p = 0;
-  source.ndimen_p = 0;
-  source.contiguous_p = true;
-  source.length_p = IPosition();
-  source.inc_p = IPosition();
-  source.originalLength_p = IPosition();
-  source.steps_p = IPosition();
-  
-  return *this;
-}
-
-ArrayBase::~ArrayBase() noexcept
+ArrayBase::~ArrayBase()
 {}
 
-void ArrayBase::swap(ArrayBase& source) noexcept
-{
-  std::swap(nels_p, source.nels_p);
-  std::swap(ndimen_p, source.ndimen_p);
-  std::swap(contiguous_p, source.contiguous_p);
-  std::swap(length_p, source.length_p);
-  std::swap(inc_p, source.inc_p);
-  std::swap(originalLength_p, source.originalLength_p);
-  std::swap(steps_p, source.steps_p);
-}
-
-void ArrayBase::baseReform (ArrayBase& tmp, const IPosition& len, bool strict) const
+void ArrayBase::baseReform (ArrayBase& tmp, const IPosition& len, Bool strict) const
 {
   // Check if reform can be done.
-  long long prod = len.nelements()==0 ? 0 : len.product();
-  if (strict && prod != (long long)(nelements())) {
+  if (strict && len.product() != Int64(nelements())) {
     throw(ArrayConformanceError("ArrayBase::reform() - "
-          "total elements differ: " + to_string(len) + " vs " + to_string(shape())));
+				"total elements differ"));
   }
   // Return if the new shape equals the current one.
   if (len.isEqual(length_p)) {
     return;
   }
-  size_t newNdim = len.nelements();
+  uInt newNdim = len.nelements();
   // If the data is contiguous, a reform can simply be done
   // by inserting the new shape.
   if (contiguousStorage()) {
@@ -193,11 +121,11 @@ void ArrayBase::baseReform (ArrayBase& tmp, const IPosition& len, bool strict) c
   }
   // A reform of a non-contiguous array has to be done.
   // This is only possible if axes with length 1 are left out and/or added.
-  bool valid = true;
-  size_t oldPos=0;
-  size_t newPos=0;
-  int oldLen = length_p(0);
-  int newLen = len(0);
+  Bool valid = True;
+  uInt oldPos=0;
+  uInt newPos=0;
+  Int oldLen = length_p(0);
+  Int newLen = len(0);
   // Find the axes corresponding to the old shape.
   // copyAxes(i)<0 indicates that an axis with length 1 has been added.
   // When a shape array array is exhausted, its length variable is set
@@ -214,7 +142,7 @@ void ArrayBase::baseReform (ArrayBase& tmp, const IPosition& len, bool strict) c
       newPos++;
     } else {
       // A new axis with length>1 has no corresponding original axis.
-      valid = false;
+      valid = False;
     }
     oldLen = (oldPos >= length_p.nelements()  ?  0 : length_p(oldPos));
     newLen = (newPos >= len.nelements()  ?  0 : len(newPos));
@@ -234,12 +162,12 @@ void ArrayBase::baseReform (ArrayBase& tmp, const IPosition& len, bool strict) c
   tmp.originalLength_p = 1;
   // When an axis has been removed Inc and originalLength have to be adjusted
   // by multiplying them with the originalLength of the removed axes.
-  size_t startAxis = 0;
-  for (size_t i=0; i<newNdim; i++) {
+  uInt startAxis = 0;
+  for (uInt i=0; i<newNdim; i++) {
     if (copyAxes(i) >= 0) {
       tmp.inc_p(i) = inc_p(copyAxes(i));
       tmp.originalLength_p(i) = originalLength_p(copyAxes(i));
-      for (int j=startAxis; j<copyAxes(i); j++) {
+      for (Int j=startAxis; j<copyAxes(i); j++) {
 	tmp.inc_p(i) *= originalLength_p(j);
 	tmp.originalLength_p(i) *= originalLength_p(j);
       }
@@ -253,25 +181,25 @@ void ArrayBase::baseReform (ArrayBase& tmp, const IPosition& len, bool strict) c
 void ArrayBase::baseNonDegenerate (const ArrayBase& other,
 				   const IPosition& ignoreAxes)
 {
-  assert (this != &other);
-  assert (other.ndim() > 0);
+  AlwaysAssert (this != &other, AipsError);
+  AlwaysAssert(other.ndim() > 0, AipsError);
   // These data members are the same irrespective of the degenerate axes. 
   nels_p       = other.nels_p;
   contiguous_p = other.contiguous_p;
   // To remove degenerate axes use two passes - first find out how many axes
   // have to be kept.
-  size_t i;
-  size_t nd = other.ndim();
+  uInt i;
+  uInt nd = other.ndim();
   // First determine which axes have to be ignored, thus always be kept.
   // Do not count here, because in theory ignoreAxes can contain the
   // same axis more than once.
   IPosition keepAxes(nd, 0);
   for (i=0; i<ignoreAxes.nelements(); i++) {
-    assert (ignoreAxes(i) < int(nd));
+    AlwaysAssert (ignoreAxes(i) < Int(nd), AipsError);
     keepAxes(ignoreAxes(i)) = 1;
   }
   // Now count all axes to keep.
-  size_t count=0;
+  uInt count=0;
   for (i=0; i<nd; i++) {
     if (keepAxes(i) == 1) {
       count++;
@@ -285,17 +213,17 @@ void ArrayBase::baseNonDegenerate (const ArrayBase& other,
   // A special case - all axes have length=1
   if (count == 0) {
     ndimen_p = 1;
-    length_p.resize(1, false);
+    length_p.resize(1, False);
     length_p(0) = other.length_p(0);
-    inc_p.resize(1, false);
+    inc_p.resize(1, False);
     inc_p(0) = other.inc_p(0);
-    originalLength_p.resize(1, false);
+    originalLength_p.resize(1, False);
     originalLength_p(0) = other.originalLength_p(0);
   } else {
     ndimen_p = count;
-    length_p.resize(count, false);
-    inc_p.resize(count, false);
-    originalLength_p.resize(count, false);
+    length_p.resize(count, False);
+    inc_p.resize(count, False);
+    originalLength_p.resize(count, False);
     // Maybe we have no axes to remove
     if (count == other.ndim()){
       length_p = other.length_p;
@@ -303,7 +231,7 @@ void ArrayBase::baseNonDegenerate (const ArrayBase& other,
       inc_p = other.inc_p;
     } else {
       // OK, we have some axes to remove
-      size_t skippedVolume = 1;
+      uInt skippedVolume = 1;
       count = 0;
       for (i=0; i<nd; i++) {
 	if (keepAxes(i) == 1) {
@@ -322,11 +250,11 @@ void ArrayBase::baseNonDegenerate (const ArrayBase& other,
   baseMakeSteps();
 }
 
-void ArrayBase::baseAddDegenerate (ArrayBase& tmp, size_t numAxes)
+void ArrayBase::baseAddDegenerate (ArrayBase& tmp, uInt numAxes)
 {
-  const size_t newDim = ndim() + numAxes;
+  const uInt newDim = ndim() + numAxes;
   IPosition newLength(newDim), newInc(newDim), newOriginal(newDim);
-  size_t i;
+  uInt i;
   for (i=0; i < ndim(); i++) {
     newLength(i) = length_p(i);
     newOriginal(i) = originalLength_p(i);
@@ -347,18 +275,18 @@ void ArrayBase::baseAddDegenerate (ArrayBase& tmp, size_t numAxes)
   tmp.baseMakeSteps();
 }
 
-bool
+Bool
 ArrayBase::reformOrResize (const IPosition & newShape,
-                           bool resizeIfNeeded,
-			   size_t nReferences,
-			   long long nElementsAllocated,
-                           bool copyDataIfNeeded,
-                           size_t resizePercentage)
+                           Bool resizeIfNeeded,
+			   uInt nReferences,
+			   Int64 nElementsAllocated,
+                           Bool copyDataIfNeeded,
+                           uInt resizePercentage)
 {
-    assert(ok());
+    DebugAssert(ok(), ArrayError);
 
     if (newShape.isEqual (shape())){
-        return false; // No op
+        return False; // No op
     }
 
     // Check to see if the operation is legal in this context
@@ -368,14 +296,14 @@ ArrayBase::reformOrResize (const IPosition & newShape,
     // such as a vector to become a Matrix, etc.
 
     if (newShape.size() != shape().size()){
-        std::string message = "ArrayBase::reformOrResize() - Cannot change number of dimensions.";
+        String message = "ArrayBase::reformOrResize() - Cannot change number of dimensions.";
 	throw ArrayConformanceError (message);
     }
 
     // This operation only makes sense if the storage is contiguous.
 
     if (! contiguousStorage()){
-        std::string message = "ArrayBase::reformOrResize() - array must be contiguous";
+        String message = "ArrayBase::reformOrResize() - array must be contiguous";
         throw ArrayConformanceError(message);
     }
 
@@ -384,26 +312,27 @@ ArrayBase::reformOrResize (const IPosition & newShape,
     // performed.  
 
     if (nReferences != 1){
-        std::string message = "ArrayBase::reformOrResize() - array must not be shared during this call";
+        String message = "ArrayBase::reformOrResize() - array must not be shared during this call";
         throw ArrayConformanceError(message);
     }
 
-    bool resizeNeeded = (newShape.product() > nElementsAllocated);
+    Bool resizeNeeded = (newShape.product() > nElementsAllocated);
 
     if (resizeNeeded && ! resizeIfNeeded){
 
 	// User did not permit resizing but it is required so throw and exception.
 
-	std::string message = "ArrayBase::reformOrResize() - insufficient storage for reform: "
-			    "nElementInAllocation=" + std::to_string(nElementsAllocated) +
-          ", nElementsRequested=" + std::to_string(newShape.product());
+	String message =
+	    String::format ("ArrayBase::reformOrResize() - insufficient storage for reform: "
+			    "nElementInAllocation=%d, nElementsRequested=%d",
+			    nElementsAllocated, newShape.product());
 	throw ArrayConformanceError(message);
     }
 
     // The operation is legal, so perform it
     // =====================================
 
-    bool resetEnd = true; // Caller will need to reset the end iterator
+    Bool resetEnd = True; // Caller will need to reset the end iterator
 
     if (resizeNeeded){
 
@@ -414,7 +343,7 @@ ArrayBase::reformOrResize (const IPosition & newShape,
             // Perform an exact resize
 
             resize (newShape, copyDataIfNeeded);
-	    resetEnd = false;
+	    resetEnd = False;
 
         } else {
 
@@ -428,11 +357,11 @@ ArrayBase::reformOrResize (const IPosition & newShape,
 
             // Reform it
 
-            baseReform (* this, newShape, false);
+            baseReform (* this, newShape, False);
         }
     } else {
 
-        baseReform (* this, newShape, false);
+        baseReform (* this, newShape, False);
     }
 
     return resetEnd;
@@ -449,25 +378,25 @@ size_t ArrayBase::makeSubset (ArrayBase& out,
 {
   if (b.nelements() != ndim() || e.nelements() != ndim() ||
       i.nelements() != ndim()) {
-      std::ostringstream os;
+      ostringstream os;
       os << "ArrayBase::operator()(b,e,i) - ndim() b: " << b.nelements()
          << " e: " << e.nelements() << " i: "
          << i.nelements() << " differs from the array ndim " << ndim();
-      throw(ArrayError(os.str()));
+      throw(ArrayError(os));
   }
-  size_t j;
+  uInt j;
   for (j=0; j < ndim(); j++) {
     if (b(j) < 0 || b(j) > e(j)+1
     ||  e(j) >= length_p(j)  ||  i(j) < 1) {
-      std::ostringstream os;
-      os << "ArrayBase::operator()(b,e,i) - incorrectly specified\n";
-      os << "begin: " << b << '\n';
-      os << "end:   " << e << '\n';
-      os << "incr:  " << i << '\n';
-      os << '\n';
-      os << "array shape: " << length_p << '\n';
-      os << "required: b >= 0; b <= e; e < shape; i >= 0" << '\n';
-      throw(ArrayError(os.str()));
+      ostringstream os;
+      os << "ArrayBase::operator()(b,e,i) - incorrectly specified" << endl;
+      os << "begin: " << b << endl;
+      os << "end:   " << e << endl;
+      os << "incr:  " << i << endl;
+      os << endl;
+      os << "array shape: " << length_p << endl;
+      os << "required: b >= 0; b <= e; e < shape; i >= 0" << endl;
+      throw(ArrayError(os));
     }
   }
   size_t offs=0;
@@ -484,9 +413,9 @@ size_t ArrayBase::makeSubset (ArrayBase& out,
   return offs;
 }
 
-size_t ArrayBase::makeDiagonal (size_t firstAxis, long long diag)
+size_t ArrayBase::makeDiagonal (uInt firstAxis, Int64 diag)
 {
-  assert (firstAxis+1 < ndimen_p);
+  AlwaysAssert (firstAxis+1 < ndimen_p, AipsError);
   if (length_p[firstAxis] != length_p[firstAxis+1]) {
     throw ArrayConformanceError("ArrayBase::diagonal() - "
                                 "non-square matrix");
@@ -494,7 +423,7 @@ size_t ArrayBase::makeDiagonal (size_t firstAxis, long long diag)
   if (std::abs(diag) >= length_p[firstAxis])
     throw ArrayConformanceError("ArrayBase::diagonal() - "
                                 "diagonal out of range");
-  ///  cout<<length_p<<inc_p<<originalLength_p<<steps_p<<firstAxis<<'\n';
+  ///  cout<<length_p<<inc_p<<originalLength_p<<steps_p<<firstAxis<<endl;
   // Remove the first axis to use.
   ndimen_p--;
   // Set originalLength and stride to both axes.
@@ -502,7 +431,7 @@ size_t ArrayBase::makeDiagonal (size_t firstAxis, long long diag)
   ///  inc_p[firstAxis] *= inc_p[firstAxis+1];
   inc_p[firstAxis] += (inc_p[firstAxis+1] * originalLength_p[firstAxis]);
   originalLength_p[firstAxis] *= originalLength_p[firstAxis+1];
-  for (size_t i=firstAxis+1; i<ndimen_p; ++i) {
+  for (uInt i=firstAxis+1; i<ndimen_p; ++i) {
     length_p[i] = length_p[i+1];
     inc_p[i] = inc_p[i+1];
     originalLength_p[i] = originalLength_p[i+1];
@@ -522,7 +451,7 @@ size_t ArrayBase::makeDiagonal (size_t firstAxis, long long diag)
     offs = (-diag) * steps_p[firstAxis];
   }
   baseMakeSteps();
-  ///  cout<<length_p<<inc_p<<originalLength_p<<steps_p<<offs<<'\n';
+  ///  cout<<length_p<<inc_p<<originalLength_p<<steps_p<<offs<<endl;
   return offs;
 }
 
@@ -532,7 +461,7 @@ size_t ArrayBase::makeDiagonal (size_t firstAxis, long long diag)
 // </thrown>
 void ArrayBase::validateConformance (const ArrayBase& other) const
 {
-  assert(ok());
+  DebugAssert(ok(), ArrayError);
   if (! conform2(other)) {
     if (ndim() != other.ndim()) {
       throw(ArrayNDimError(ndim(), other.ndim(),
@@ -550,13 +479,13 @@ void ArrayBase::validateConformance (const ArrayBase& other) const
 // </thrown>
 void ArrayBase::validateIndex (const IPosition& i) const
 {
-  assert(ok());
+  DebugAssert(ok(), ArrayError);
   if (ndim() != i.nelements()) {
     throw(ArrayNDimError(ndim(), i.nelements(),
 			 "ArrayBase::validateIndex - ndims of index"
 			 " and array differ"));
   }
-  for (size_t j=0; j < ndim(); j++) {
+  for (uInt j=0; j < ndim(); j++) {
     if (i(j) < 0  ||  i(j) >= length_p(j)) {
       throw(ArrayIndexError(i, length_p));
     }
@@ -564,18 +493,18 @@ void ArrayBase::validateIndex (const IPosition& i) const
   // OK - normal return
 }
 
-void ArrayBase::validateIndex (size_t index) const
+void ArrayBase::validateIndex (uInt index) const
 {
   validateIndex (IPosition(1, index));
 }
-void ArrayBase::validateIndex (size_t index1, size_t index2) const
+void ArrayBase::validateIndex (uInt index1, uInt index2) const
 {
   IPosition inx(2);
   inx[0] = index1;
   inx[1] = index2;
   validateIndex (inx);
 }
-void ArrayBase::validateIndex (size_t index1, size_t index2, size_t index3) const
+void ArrayBase::validateIndex (uInt index1, uInt index2, uInt index3) const
 {
   IPosition inx(3);
   inx[0] = index1;
@@ -584,9 +513,14 @@ void ArrayBase::validateIndex (size_t index1, size_t index2, size_t index3) cons
   validateIndex (inx);
 }
 
-bool ArrayBase::copyVectorHelper (const ArrayBase& other)
+void ArrayBase::throwNdimVector()
 {
-  bool Conform = conform2(other);
+  throw ArrayError ("Expected dimensionality 1 for a Vector<T> object");
+}
+
+Bool ArrayBase::copyVectorHelper (const ArrayBase& other)
+{
+  Bool Conform = conform2(other);
   if (!Conform  &&  length_p(0) != 0) {
     validateConformance(other);  // We can't overwrite, so throw exception
   }
@@ -599,18 +533,18 @@ bool ArrayBase::copyVectorHelper (const ArrayBase& other)
   return Conform;
 }
 
-bool ArrayBase::isStorageContiguous() const
+Bool ArrayBase::isStorageContiguous() const
 {
-  int i;
-  int nd = ndim();
+  Int i;
+  Int nd = ndim();
   if (nd == 0) {
-    return true;
+    return True;
   }
   // If we have increments, we're definitely not contiguous (unless the axis
   // length is one!)
   for (i=0; i < nd; i++) {
     if ((inc_p(i) != 1) && (length_p(i) != 1)) {
-      return false;
+      return False;
     }
   }
   // If we don't fill up the region (except for the last dimension), then
@@ -635,11 +569,11 @@ bool ArrayBase::isStorageContiguous() const
   }
   for (i=0; i < nd - 1; i++) {
     if (length_p(i) != originalLength_p(i)) {
-      return false;
+      return False;
     }
   }
   // If we've made it here, we are contiguous!
-  return true;
+  return True;
 }
 
 void ArrayBase::baseMakeSteps()
@@ -647,8 +581,8 @@ void ArrayBase::baseMakeSteps()
   // No Assert since the Array may not be constructed yet when
   // calling this.
   steps_p.resize (ndimen_p);
-  int size = 1;
-  for (size_t i=0; i<inc_p.nelements(); i++) {
+  Int size = 1;
+  for (uInt i=0; i<inc_p.nelements(); i++) {
     steps_p(i) = inc_p(i) * size;
     size *= originalLength_p(i);
   }
@@ -656,46 +590,38 @@ void ArrayBase::baseMakeSteps()
 
 IPosition ArrayBase::endPosition() const
 {
-  assert(ok());
+  DebugAssert(ok(), ArrayError);
   IPosition tmp(ndim());
-  for (size_t i=0; i < ndim(); i++) {
+  for (uInt i=0; i < ndim(); i++) {
     tmp(i) = length_p(i) - 1;
   }
   return tmp;
 }
 
-bool ArrayBase::ok() const
+Bool ArrayBase::ok() const
 {
-  assert(ndimen_p == ndim());
-  assert(length_p.nelements() == ndim());
-  assert(inc_p.nelements() == ndim());
-  assert(originalLength_p.nelements() == ndim());
-  
   if (ndimen_p != ndim()) {
-    return false;
+    return False;
   }
   // We don't check for exact equality because sometimes for efficiency
   // the dimensionality of start et al can be greater than that which is
   // required (e.g. when making a slice.
   if (length_p.nelements() != ndim()) {
-    return false;
+    return False;
   }
   if (inc_p.nelements() != ndim()) {
-    return false;
+    return False;
   }
   if (originalLength_p.nelements() != ndim()) {
-    return false;
+    return False;
   }
-  size_t i;
+  uInt i;
   size_t count = 1;
   IPosition pos(ndimen_p, 0);
   for (i=0; i < ndim(); i++) {
-    assert(length_p(i) >= 0);
-    assert(inc_p(i) >= 1);
-    assert(originalLength_p(i) >= length_p(i));
     if (length_p(i) < 0  ||  inc_p(i) < 1
     ||  originalLength_p(i) < length_p(i)) {
-      return false;
+      return False;
     }
     count *= length_p(i);
     if (length_p(i) > 1) {
@@ -703,24 +629,21 @@ bool ArrayBase::ok() const
       size_t off = ArrayIndexOffset(ndim(), originalLength_p.storage(),
                                     inc_p.storage(), pos);
       pos(i) = 0;
-      assert(size_t(steps_p(i)) == off);
       if (size_t(steps_p(i)) != off) {
-	return false;
+	return False;
       }
     }
   }
   if (ndim() == 0) {
     count = 0;
   }
-  assert(count == nelements());
   if (count != nelements()) {
-    return false;
+    return False;
   }
-  assert(contiguous_p == isStorageContiguous());
   if (contiguous_p != isStorageContiguous()) {
-    return false;
+    return False;
   }
-  return true;
+  return True;
 }
 
 
@@ -730,14 +653,14 @@ void ArrayBase::checkVectorShape()
     // Check if all elements are 1 or nels_p. In this way we are sure that
     // only one axis remains (i.e. at most one axis has length > 1).
     // Keep original increment and length of the remaining axis.
-    int inc   = 1;
-    int orLen = 1;
-    int skippedVolume = 1;
-    for (size_t i=0; i<ndim(); ++i) {
+    Int inc   = 1;
+    Int orLen = 1;
+    Int skippedVolume = 1;
+    for (uInt i=0; i<ndim(); ++i) {
       if (length_p[i] == 1) {
 	skippedVolume *= originalLength_p(i);
       } else {
-	if (length_p[i] != int(nels_p)) {
+	if (length_p[i] != Int(nels_p)) {
 	  throw(ArrayNDimError(1, ndim(),
 			       "Vector<T>: ndim of other array > 1"));
 	}
@@ -769,19 +692,16 @@ void ArrayBase::checkMatrixShape()
     length_p.resize(2); 
     inc_p.resize(2);
     originalLength_p.resize(2);
+    int len = 1;
     if (ndim() == 0) {
+      len = 0;
       length_p(0) = 0;
-      length_p(1) = 0;
       inc_p(0) = 1;
-      inc_p(1) = 1;
       originalLength_p(0) = 0;
-      originalLength_p(1) = 0;
     }
-    else {
-      length_p(1) = (nelements() == 0) ? 0 : 1;
-      originalLength_p(1) = length_p(1);
-      inc_p(1) = 1;
-    }
+    length_p(1) = len;
+    inc_p(1) = 1;
+    originalLength_p(1) = len;
     ndimen_p = 2;
     baseMakeSteps();
   }
@@ -798,7 +718,7 @@ void ArrayBase::checkCubeShape()
     length_p.resize(3); 
     inc_p.resize(3);
     originalLength_p.resize(3);
-    int len = (nelements()==0) ? 0 : 1;
+    int len = 1;
     if (ndim() == 0) {
       len = 0;
       length_p(0) = 0;
@@ -818,39 +738,43 @@ void ArrayBase::checkCubeShape()
   }
 }
 
-std::unique_ptr<ArrayBase> ArrayBase::makeArray() const
+CountedPtr<ArrayBase> ArrayBase::makeArray() const
 {
   throw ArrayError ("ArrayBase::makeArray cannot be used");
 }
-void ArrayBase::resize(const IPosition&, bool)
+void ArrayBase::resize(const IPosition&, Bool)
 {
   throw ArrayError ("ArrayBase::resize cannot be used");
 }
-std::unique_ptr<ArrayPositionIterator> ArrayBase::makeIterator (size_t) const
+void ArrayBase::resize(const IPosition&, Bool, ArrayInitPolicy)
+{
+  throw ArrayError ("ArrayBase::resize cannot be used");
+}
+CountedPtr<ArrayPositionIterator> ArrayBase::makeIterator (uInt) const
 {
   throw ArrayError ("ArrayBase::makeIterator cannot be used");
 }
-std::unique_ptr<ArrayBase> ArrayBase::getSection (const Slicer&) const
+CountedPtr<ArrayBase> ArrayBase::getSection (const Slicer&) const
 {
   throw ArrayError ("ArrayBase::getSection cannot be used");
 }
-void ArrayBase::assignBase (const ArrayBase&, bool)
+void ArrayBase::assignBase (const ArrayBase&, Bool)
 {
   throw ArrayError ("ArrayBase::assign cannot be used");
 }
-void* ArrayBase::getVStorage (bool&)
+void* ArrayBase::getVStorage (Bool&)
 {
   throw ArrayError ("ArrayBase::getVStorage cannot be used");
 }
-const void* ArrayBase::getVStorage (bool&) const
+const void* ArrayBase::getVStorage (Bool&) const
 {
   throw ArrayError ("ArrayBase::getVStorage cannot be used");
 }
-void ArrayBase::putVStorage(void*&, bool)
+  void ArrayBase::putVStorage(void*&, Bool)
 {
   throw ArrayError ("ArrayBase::putVStorage cannot be used");
 }
-void ArrayBase::freeVStorage(const void*&, bool) const
+void ArrayBase::freeVStorage(const void*&, Bool) const
 {
   throw ArrayError ("ArrayBase::freeVStorage cannot be used");
 }
@@ -859,7 +783,7 @@ void throwArrayShapes (const IPosition& shape1,
                        const IPosition& shape2,
                        const char* name)
 {
-  throw ArrayConformanceError ("ArrayMath/Logical function " + std::string(name) +
+  throw ArrayConformanceError ("ArrayMath/Logical function " + String(name) +
                                ": array shapes " + shape1.toString() +
                                " and " + shape2.toString() + " differ");
 }

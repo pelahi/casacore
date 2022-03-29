@@ -25,11 +25,15 @@
 //#
 //# $Id$
 
-#ifndef CASA_MATRIXMATH_2_H
-#define CASA_MATRIXMATH_2_H
+#ifndef CASA_MATRIXMATH_H
+#define CASA_MATRIXMATH_H
 
-#include "Vector.h"
-#include "Matrix.h"
+
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/BasicSL/Complex.h>
+
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -52,18 +56,18 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 //
 //<group>
 template <class T> T innerProduct (const Vector<T> &x, const Vector<T> &y);
-std::complex<float> innerProduct (const Vector<std::complex<float>> &x, const Vector<std::complex<float>> &y);
-std::complex<double> innerProduct (const Vector<std::complex<double>> &x, const Vector<std::complex<double>> &y);
+Complex innerProduct (const Vector<Complex> &x, const Vector<Complex> &y);
+DComplex innerProduct (const Vector<DComplex> &x, const Vector<DComplex> &y);
 //</group>
 
 //
 // The magnitude/norm of a vector.
 //<group>
-int norm (const Vector<int> &x);
-float norm (const Vector<float> &x);
-double norm (const Vector<double> &x);
-float norm (const Vector<std::complex<float>> &x);
-double norm (const Vector<std::complex<double>> &x);
+Int norm (const Vector<Int> &x);
+Float norm (const Vector<Float> &x);
+Double norm (const Vector<Double> &x);
+Float norm (const Vector<Complex> &x);
+Double norm (const Vector<DComplex> &x);
 //</group>
 
 //
@@ -108,22 +112,22 @@ template <class T>
 // The infinity norm (or maximum value of the sum of the absolute values 
 // of the rows members of a matrix)
 // <group>
-int normI(const Matrix<int> &A);
-float normI(const Matrix<float> &A);
-double normI(const Matrix<double> &A);
-float normI(const Matrix<std::complex<float>> &A);
-double normI(const Matrix<std::complex<double>> &A);
+Int normI(const Matrix<Int> &A);
+Float normI(const Matrix<Float> &A);
+Double normI(const Matrix<Double> &A);
+Float normI(const Matrix<Complex> &A);
+Double normI(const Matrix<DComplex> &A);
 // </group>
 
 //
 // The one norm (or maximum value of the sum of the absolute values 
 // of the column members of a matrix)
 //<group>
-int norm1(const Matrix<int> &A);
-float norm1(const Matrix<float> &A);
-double norm1(const Matrix<double> &A);
-float norm1(const Matrix<std::complex<float>> &A);
-double norm1(const Matrix<std::complex<double>> &A);
+Int norm1(const Matrix<Int> &A);
+Float norm1(const Matrix<Float> &A);
+Double norm1(const Matrix<Double> &A);
+Float norm1(const Matrix<Complex> &A);
+Double norm1(const Matrix<DComplex> &A);
 //</group>
 
 //
@@ -134,9 +138,9 @@ template <class T> Matrix<T> transpose (const Matrix<T> &A);
 // Create a 3D rotation matrix (3x3).
 // Axis is 0,1,2 for x,y,z; angle is in radians.
 // <group>
-template <class T> Matrix<T> Rot3D(int axis, T angle);
-Matrix<double> Rot3D(int axis, double angle);
-Matrix<float> Rot3D(int axis, float angle);
+template <class T> Matrix<T> Rot3D(Int axis, T angle);
+Matrix<Double> Rot3D(Int axis, Double angle);
+Matrix<Float> Rot3D(Int axis, Float angle);
 // </group>
 
 // 
@@ -149,38 +153,49 @@ template <class T>
    Matrix<T> directProduct(const Matrix<T>& A, const Matrix<T>& B);
 
 //
+// The complex conjugate of the complex matrix A.
+//
+Matrix<Complex> conjugate (const Matrix<Complex> &A);
+
+//
+// The complex conjugate of the double precision complex matrix A.
+//
+Matrix<DComplex> conjugate (const Matrix<DComplex> &A);
+
+//
 // The conjugate/transpose or adjoint of the complex matrix A.
 //
-Matrix<std::complex<float>> adjoint (const Matrix<std::complex<float>> &A);
-Matrix<std::complex<double>> adjoint (const Matrix<std::complex<double>> &A);
+Matrix<Complex> adjoint (const Matrix<Complex> &A);
+Matrix<DComplex> adjoint (const Matrix<DComplex> &A);
 
 // define the adjoint operator as a plain old transpose when the Matrix is 
 // not complex valued. (for templating purposes)
-Matrix<int> adjoint (const Matrix<int> &A);
-Matrix<float> adjoint (const Matrix<float> &A);
-Matrix<double> adjoint (const Matrix<double> &A);
+Matrix<Int> adjoint (const Matrix<Int> &A);
+Matrix<Float> adjoint (const Matrix<Float> &A);
+Matrix<Double> adjoint (const Matrix<Double> &A);
 
 //
-// The product of a std::complex<float> Matrix and a Real Vector
+// The product of a Complex Matrix and a Real Vector
 //
-  Vector<std::complex<float>> product(const Matrix<std::complex<float>>&, const Vector<float>&);
+  Vector<Complex> product(const Matrix<Complex>&, const Vector<Float>&);
 
 //
-// The real part of a product of a std::complex<float> Matrix and a std::complex<float> Vector
+// The real part of a product of a Complex Matrix and a Complex Vector
 //
-  Vector<float> rproduct(const Matrix<std::complex<float>>&, const Vector<std::complex<float>>&);
+  Vector<Float> rproduct(const Matrix<Complex>&, const Vector<Complex>&);
 
 //
-// The real part of a product of a std::complex<float> Matrix and a std::complex<float> Matrix
+// The real part of a product of a Complex Matrix and a Complex Matrix
 //
-  Matrix<float> rproduct (const Matrix<std::complex<float>>&, const Matrix<std::complex<float>>&);
+  Matrix<Float> rproduct (const Matrix<Complex>&, const Matrix<Complex>&);
 
 // </group>
 
 
 } //# NAMESPACE CASACORE - END
 
-#include "MatrixMath.tcc"
-
+#ifndef CASACORE_NO_AUTO_TEMPLATES
+#include <casacore/casa/Arrays/MatrixMath.tcc>
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif
 

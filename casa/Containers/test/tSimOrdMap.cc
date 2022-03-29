@@ -45,8 +45,8 @@ void doit();
 int main () {
     try {
        doit();
-    } catch (std::exception& x) {
-	cout << "\nCaught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "\nCaught an exception: " << x.getMesg() << endl;
         return 1;
     } 
     return 0;          // successfully executed
@@ -99,8 +99,8 @@ void doit()
     name.rename (30,36);
     try {
 	name.rename (30,36);
-    } catch (std::exception& x) {
-	cout << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << x.getMesg() << endl;
     } 
     AlwaysAssert(name.ok(),AipsError);
     cout << name;

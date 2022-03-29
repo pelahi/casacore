@@ -316,7 +316,7 @@ uInt tConstructors(const String& msName)
     Bool thrown=False;
     try {
 	MeasurementSet badms("tMeasurementSet_tmp.badmsTable");
-    } catch (std::exception& x) {
+    } catch (AipsError& x) {
 	thrown = True;
     } 
     if (!thrown) errCount++;
@@ -327,7 +327,7 @@ uInt tConstructors(const String& msName)
     thrown=False;
     try {
 	MeasurementSet badms("tMeasurementSet_tmp.badmsTable","");
-    } catch (std::exception& x) {
+    } catch (AipsError& x) {
 	thrown = True;
     } 
     if (!thrown) errCount++;
@@ -342,7 +342,7 @@ uInt tConstructors(const String& msName)
     try {
 	Table badtab("tMeasurementSet_tmp.badmsTab;e","");
 	MeasurementSet badms(badtab);
-    } catch (std::exception& x) {
+    } catch (AipsError& x) {
 	thrown = True;
     } 
     if (!thrown) errCount++;
@@ -379,7 +379,7 @@ uInt tConstructors(const String& msName)
 	try {
 	    MSAntenna msant2b("tMeasurementSet_tmp.msant2","badAntTD",Table::Old);
 	    msant2b.markForDelete();
-	} catch (std::exception& x) {
+	} catch (AipsError& x) {
 	    thrown = True;
 	} 
 	// No exception is thrown here, even though the td name is wrong..
@@ -397,7 +397,7 @@ uInt tConstructors(const String& msName)
 	    SetupNewTable newtab("tMeasurementSet_tmp.msant3b",
 				 MSFeed::requiredTableDesc(),Table::New);
 	    MSAntenna msant3b(newtab,5);
-	} catch (std::exception& x) {
+	} catch (AipsError& x) {
 	    thrown = True;
 	} 
 	if (!thrown) errCount++;
@@ -425,7 +425,7 @@ uInt tConstructors(const String& msName)
 	    Table tab(newtab4);
 	    tab.markForDelete();
 	    MSAntenna msant4b(tab);
-	} catch (std::exception& x) {
+	} catch (AipsError& x) {
 	    thrown = True;
 	} 
 	if (!thrown) errCount++;
@@ -440,7 +440,7 @@ uInt tConstructors(const String& msName)
 		Table tab("tMeasurementSet_tmp.badmsantTable","badAntTD",Table::New);
 	    }
 	    MSAntenna msant5b("tMeasurementSet_tmp.badmsantTable");
-	} catch (std::exception& x) {
+	} catch (AipsError& x) {
 	    thrown = True;
 	} 
 	if (!thrown) errCount++;
@@ -453,7 +453,7 @@ uInt tConstructors(const String& msName)
 	    MSFeed msfeed("msfeed", Table::New);
 	    msfeed.markForDelete();
 	    MSAntenna msant6b(msfeed);
-	} catch (std::exception& x) {
+	} catch (AipsError& x) {
 	    thrown = True;
 	} 
 	if (!thrown) errCount++;
@@ -506,59 +506,6 @@ uInt tReferenceCopy(const String& msName, const String& refMSName)
     return errCount;
 }
 
-// test null MS
-
-uInt tNullMS(const String& msName)
-{
-  uInt errCount = 0;
-  {
-    // Test construction and destruction of null MS.
-    MeasurementSet ms;
-    if (! ms.isNull()) {
-      cout << "tNullMS: MS should be null" << endl;
-      errCount++;
-    }
-  }
-  MeasurementSet nullMS;
-  {
-    // Test copy construction of null MS.
-    MeasurementSet mscopy (nullMS);
-    if (! mscopy.isNull()) {
-      cout << "tNullMS: MS copy should be null" << endl;
-      errCount++;
-    }
-  }
-  {
-    // Test assigment of null MS to null MS
-    MeasurementSet ms;
-    ms = nullMS;
-    if (! ms.isNull()) {
-      cout << "tNullMS: assign to null MS should be null" << endl;
-      errCount++;
-    }
-  }
-  {
-    // Test assigment of null MS to non-null MS
-    MeasurementSet ms(msName);
-    ms = nullMS;
-    if (! ms.isNull()) {
-      cout << "tNullMS: assign to non-null MS should be null" << endl;
-      errCount++;
-    }
-  }
-  {
-    // Test assigment of non-null MS to null MS
-    MeasurementSet nms;
-    MeasurementSet ms(msName);
-    nms = ms;
-    if (nms.isNull()) {
-      cout << "tNullMS: assign to null MS should be non-null" << endl;
-      errCount++;
-    }
-  }
-  return errCount;
-}
-
 // test exceptions in constructions
 
 uInt tSetupNewTabError()
@@ -576,7 +523,7 @@ uInt tSetupNewTabError()
     Bool thrown = False;
     try {
 	MeasurementSet ms(setup,0);
-    } catch (std::exception& x) {
+    } catch (AipsError& x) {
 	thrown = True;
     } 
     if (!thrown) {
@@ -597,7 +544,7 @@ uInt tDestructorError(const String& sdmsName)
 	MeasurementSet ms(sdmsName);
 	// remove a column
 	ms.removeColumn(MS::columnName(MS::TIME));
-    } catch (std::exception& x) {
+    } catch (AipsError& x) {
 	thrown = True;
     } 
 
@@ -657,11 +604,6 @@ int main() {
     checkErrors(newErrors);
     errCount += newErrors;
 
-    cout << "\nTest null MS ... ";
-    newErrors = tNullMS(msName);
-    checkErrors(newErrors);
-    errCount += newErrors;
-    
     cout << "\nTest exceptions" << endl;
     cout << "in Constructors ... ";
     newErrors = tSetupNewTabError();
@@ -686,8 +628,8 @@ int main() {
     }
 
     return errCount;
-  } catch (std::exception& x) {
-      cerr << x.what() << endl;
+  } catch (AipsError& x) {
+      cerr << x.getMesg() << endl;
   } 
   return 1;
 }

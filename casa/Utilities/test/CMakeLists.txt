@@ -19,6 +19,7 @@ tPtrHolder
 tRegex_1
 tRegex2
 tRegex
+tRegister
 tSort_1
 tSort
 tStringDistance

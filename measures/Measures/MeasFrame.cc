@@ -28,8 +28,9 @@
 //# Includes
 #include <casacore/measures/Measures/MeasFrame.h>
 #include <casacore/casa/Exceptions/Error.h>
+#include <casacore/casa/Utilities/Register.h>
 #include <casacore/casa/Quanta/Quantum.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/measures/Measures/MCFrame.h>
 #include <casacore/measures/Measures/MEpoch.h>
 #include <casacore/measures/Measures/MPosition.h>
@@ -470,25 +471,25 @@ void MeasFrame::create() {
 void MeasFrame::fill(const Measure *in) {
   if (in) {
     uInt locker = 0;
-    if (dynamic_cast<const MEpoch*>(in)) {
+    if (in->type() == Register(static_cast<MEpoch *>(0))) {
       lock(locker);
       delete rep->epval;
       rep->epval = in->clone();
       unlock(locker);
       makeEpoch();
-    } else if (dynamic_cast<const MPosition*>(in)) {
+    } else if (in->type() == Register(static_cast<MPosition *>(0))) {
       lock(locker);
       delete rep->posval;
       rep->posval = in->clone();
       unlock(locker);
       makePosition();
-    } else if (dynamic_cast<const MDirection*>(in)) {
+    } else if (in->type() == Register(static_cast<MDirection *>(0))) {
       lock(locker);
       delete rep->dirval;
       rep->dirval = in->clone();
       unlock(locker);
       makeDirection();
-    } else if (dynamic_cast<const MRadialVelocity*>(in)) {
+    } else if (in->type() == Register(static_cast<MRadialVelocity *>(0))) {
       lock(locker);
       delete rep->radval;
       rep->radval = in->clone();

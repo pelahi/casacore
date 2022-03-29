@@ -17,7 +17,7 @@
 //# Inc., 675 Massachusetts Ave, Cambridge, MA 02139, USA.
 //#
 //# Correspondence concerning AIPS++ should be addressed as follows:
-//#        internet email: aips2-request@nrao.edu.
+//#        Internet email: aips2-request@nrao.edu.
 //#        Postal address: AIPS++ Project Office
 //#                        National Radio Astronomy Observatory
 //#                        520 Edgemont Road
@@ -27,55 +27,76 @@
 //# $Id$
 
 
-#include "AxesMapping.h"
-#include "Slicer.h"
+#include <casacore/casa/Arrays/AxesMapping.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/casa/Utilities/Assert.h>
+#include <casacore/casa/Exceptions/Error.h>
 
-#include <cassert>
-#include <stdexcept>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
-  
+
 AxesMapping::AxesMapping()
-: itsRemoved   (false),
-  itsReordered (false)
+: itsRemoved   (False),
+  itsReordered (False)
 {}
 
 AxesMapping::AxesMapping (const IPosition& oldToNew)
 : itsToNew     (oldToNew),
   itsToOld     (oldToNew.nelements(), -1),
-  itsRemoved   (false),
-  itsReordered (false)
+  itsRemoved   (False),
+  itsReordered (False)
 {
-  int naxes = itsToNew.nelements();
-  size_t nnew = 0;
-  for (int i=0; i<naxes; i++) {
+  Int naxes = itsToNew.nelements();
+  uInt nnew = 0;
+  for (Int i=0; i<naxes; i++) {
     if (itsToNew(i) < 0) {
-      itsRemoved = true;
+      itsRemoved = True;
     } else {
-      if (itsToNew(i) >= naxes)
-        throw std::runtime_error("itsToNew(i) >= naxes");
+      AlwaysAssert (itsToNew(i)<naxes, AipsError);
       itsToOld(itsToNew(i)) = i;
       nnew++;
     }
   }
-  for (size_t i=0; i<nnew; i++) {
-    if (itsToOld(i)<0)
-      throw std::runtime_error("itsToOld(i)<0");
+  for (uInt i=0; i<nnew; i++) {
+    AlwaysAssert (itsToOld(i)>=0, AipsError);
     if (i > 0  && itsToOld(i) < itsToOld(i-1)) {
-      itsReordered = true;
+      itsReordered = True;
     }
   }
   itsToOld.resize (nnew);
 }
 
+AxesMapping::AxesMapping (const AxesMapping& that)
+: itsToNew     (that.itsToNew),
+  itsToOld     (that.itsToOld),
+  itsRemoved   (that.itsRemoved),
+  itsReordered (that.itsReordered)
+{}
+
+AxesMapping& AxesMapping::operator= (const AxesMapping& that)
+{
+  if (this != &that) {
+    itsToNew.resize (that.itsToNew.nelements(), False);
+    itsToNew = that.itsToNew;
+    itsToOld.resize (that.itsToOld.nelements(), False);
+    itsToOld = that.itsToOld;
+    itsRemoved   = that.itsRemoved;
+    itsReordered = that.itsReordered;
+  }
+  return *this;
+}
+
+AxesMapping::~AxesMapping()
+{}
+
 IPosition AxesMapping::posToNew (const IPosition& pos) const
 {
-  size_t naxes = itsToNew.nelements();
-  assert (pos.nelements()==naxes);
+  uInt naxes = itsToNew.nelements();
+  DebugAssert (pos.nelements()==naxes, AipsError);
   IPosition newpos(itsToOld.nelements());
-  for (size_t i=0; i<naxes; i++) {
+  for (uInt i=0; i<naxes; i++) {
     if (itsToNew(i) < 0) {
-      if (pos(i)!=0) throw std::runtime_error("pos(i)!=0");
+      AlwaysAssert (pos(i)==0, AipsError);
     } else {
       newpos(itsToNew(i)) = pos(i);
     }
@@ -85,10 +106,10 @@ IPosition AxesMapping::posToNew (const IPosition& pos) const
 
 IPosition AxesMapping::posToOld (const IPosition& pos) const
 {
-  size_t naxes = itsToOld.nelements();
-  assert (pos.nelements()==naxes);
+  uInt naxes = itsToOld.nelements();
+  DebugAssert (pos.nelements()==naxes, AipsError);
   IPosition oldpos(itsToNew.nelements(), 0);
-  for (size_t i=0; i<naxes; i++) {
+  for (uInt i=0; i<naxes; i++) {
     oldpos(itsToOld(i)) = pos(i);
   }
   return oldpos;
@@ -96,13 +117,12 @@ IPosition AxesMapping::posToOld (const IPosition& pos) const
 
 IPosition AxesMapping::shapeToNew (const IPosition& shape) const
 {
-  size_t naxes = itsToNew.nelements();
-  assert (shape.nelements()==naxes);
+  uInt naxes = itsToNew.nelements();
+  DebugAssert (shape.nelements()==naxes, AipsError);
   IPosition newshape(itsToOld.nelements());
-  for (size_t i=0; i<naxes; i++) {
+  for (uInt i=0; i<naxes; i++) {
     if (itsToNew(i) < 0) {
-      if (shape(i)!=1)
-        throw std::runtime_error("shape(i)!=1");
+      AlwaysAssert (shape(i)==1, AipsError);
     } else {
       newshape(itsToNew(i)) = shape(i);
     }
@@ -112,10 +132,10 @@ IPosition AxesMapping::shapeToNew (const IPosition& shape) const
 
 IPosition AxesMapping::shapeToOld (const IPosition& shape) const
 {
-  size_t naxes = itsToOld.nelements();
-  assert (shape.nelements()==naxes);
+  uInt naxes = itsToOld.nelements();
+  DebugAssert (shape.nelements()==naxes, AipsError);
   IPosition oldshape(itsToNew.nelements(), 1);
-  for (size_t i=0; i<naxes; i++) {
+  for (uInt i=0; i<naxes; i++) {
     oldshape(itsToOld(i)) = shape(i);
   }
   return oldshape;

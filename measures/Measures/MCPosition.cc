@@ -41,12 +41,12 @@ uInt MCPosition::ToRef_p[N_Routes][3] = {
   {MPosition::ITRF,	MPosition::WGS84,	0},
   {MPosition::WGS84,	MPosition::ITRF,	0} };
 uInt MCPosition::FromTo_p[MPosition::N_Types][MPosition::N_Types];
-std::once_flag MCPosition::theirInitOnceFlag;
+CallOnce0 MCPosition::theirInitOnce;
 
 //# Constructors
 MCPosition::MCPosition() :
   DVEC1(0) {
-    std::call_once(theirInitOnceFlag, doFillState);
+    theirInitOnce(doFillState);
 }
 
 //# Destructor
@@ -178,7 +178,7 @@ void MCPosition::doConvert(MVPosition &in,
 }
 
 String MCPosition::showState() {
-  std::call_once(theirInitOnceFlag, doFillState);
+  theirInitOnce(doFillState);
   return MCBase::showState(MCPosition::FromTo_p[0],
 			   MPosition::N_Types, MCPosition::N_Routes,
 			   MCPosition::ToRef_p);

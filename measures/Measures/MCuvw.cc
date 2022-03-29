@@ -86,11 +86,11 @@ uInt MCuvw::ToRef_p[N_Routes][3] = {
   {Muvw::ICRS,			Muvw::J2000,	0},
   {Muvw::J2000,			Muvw::ICRS,	0} };
 uInt MCuvw::FromTo_p[Muvw::N_Types][Muvw::N_Types];
-std::once_flag MCuvw::theirInitOnceFlag;
+CallOnce0 MCuvw::theirInitOnce;
 
 //# Constructors
 MCuvw::MCuvw() : measMath() {
-    std::call_once(theirInitOnceFlag, doFillState);
+    theirInitOnce(doFillState);
 }
 
 //# Destructor
@@ -649,7 +649,7 @@ void MCuvw::doConvert(MVuvw &in,
 }
 
 String MCuvw::showState() {
-  std::call_once(theirInitOnceFlag, doFillState);
+  theirInitOnce(doFillState);
   return MCBase::showState(MCuvw::FromTo_p[0],
 			   Muvw::N_Types, MCuvw::N_Routes,
 			   MCuvw::ToRef_p);

@@ -25,12 +25,16 @@
 //#
 //# $Id: ArrayMathBase.h 21262 2012-09-07 12:38:36Z gervandiepen $
 
-#ifndef CASA_ARRAYMATHBASE_2_H
-#define CASA_ARRAYMATHBASE_2_H
+#ifndef CASA_ARRAYMATHBASE_H
+#define CASA_ARRAYMATHBASE_H
 
-#include "ArrayFwd.h"
+#include <casacore/casa/aips.h>
 
 namespace casacore {
+
+  //# Forward declarations.
+  template<typename T> class Array;
+
 
   // <summary>
   // Basic class for math on Array objects
@@ -55,6 +59,8 @@ namespace casacore {
     virtual ~ArrayFunctorBase() {}
     virtual RES operator() (const Array<T>&) const = 0;
   };
+
+  // </group>
 
 } //# end namespace
 

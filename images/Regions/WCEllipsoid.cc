@@ -378,7 +378,6 @@ WCEllipsoid* WCEllipsoid::fromRecord (
 			}
 			theta = qh.asQuantity();
 			// do not break, allow fall thru to default to get radii too.
-			CASACORE_FALLTHROUGH;
 		case NOT_SPECIAL:
 		default:
 			{
@@ -593,9 +592,9 @@ void WCEllipsoid::_checkUnits() const {
 	try {
 		checkAxes(_pixelAxes, _csys, units);
 	}
-	catch (std::exception& x) {
+	catch (AipsError& x) {
 		throw AipsError(
-			std::string(x.what()) + " Checking radii units"
+			x.getMesg() + " Checking radii units"
 		);
 	}
 	for (uInt i=0; i<units.size(); i++) {
@@ -604,9 +603,9 @@ void WCEllipsoid::_checkUnits() const {
 	try {
 		checkAxes(_pixelAxes, _csys, units);
 	}
-	catch (std::exception& x) {
+	catch (AipsError& x) {
 		throw AipsError(
-			std::string(x.what()) + " Checking center units"
+			x.getMesg() + " Checking center units"
 		);
 	}
 }

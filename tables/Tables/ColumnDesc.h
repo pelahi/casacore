@@ -34,9 +34,8 @@
 #include <casacore/tables/Tables/BaseColDesc.h>
 #include <casacore/casa/BasicSL/String.h>
 #include <casacore/casa/Arrays/IPosition.h>
-
+#include <casacore/casa/OS/Mutex.h>
 #include <map>
-#include <mutex>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -359,7 +358,7 @@ public:
 
 private:
     // A mutex for additions to the constructor map.
-    static std::mutex theirMutex;
+    static Mutex theirMutex;
   
     // Define a map which maps the name of the various XXColumnDesc
     // classes to a static function constructing them.

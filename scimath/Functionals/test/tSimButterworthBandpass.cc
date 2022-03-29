@@ -96,8 +96,8 @@ int main() {
 	rec2.get(RecordFieldId("maxOrder"), maxo);
 	AlwaysAssertExit(mino == 2 && maxo ==3);
     }
-    catch (std::exception& ex) {
-	cerr << "Exception: " << ex.what() << endl;
+    catch (AipsError& ex) {
+	cerr << "Exception: " << ex.getMesg() << endl;
 	exit(1);
     }
 

@@ -37,7 +37,7 @@
 #include <casacore/tables/DataMan/StandardStManAccessor.h>
 #include <casacore/tables/Tables/TableError.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/BasicSL/String.h>
 #include <casacore/casa/sstream.h>
 
@@ -62,7 +62,7 @@ void init (uInt aBucketSize,uInt aMode);
 void deleteRow(const uInt aRow);
 
 // reopen table, and throw away a few rows
-void deleteRows(const Vector<rownr_t>& aNrRows);
+void deleteRows(const Vector<uInt>& aNrRows);
 
 // delete a column
 void deleteColumn(const String aColumn);
@@ -100,7 +100,7 @@ int main (int argc, const char* argv[])
 	replaceStrings     ();
 	deleteRow          (2);
 	deleteRow          (40);
-        Vector<rownr_t> aNrRows(35);
+        Vector<uInt> aNrRows(35);
 	for (uInt i=0; i< 35; i++) {
 	  aNrRows(i) = i+3;
 	}
@@ -109,8 +109,8 @@ int main (int argc, const char* argv[])
 	addSmallColumn     ();
 	deleteColumn       ("Col-1");
 	addEmptyColumn     ();
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     return 0;                           // exit with success status
@@ -348,7 +348,7 @@ void deleteRow(const uInt aRow)
   info(aTable);
 }
 
-void deleteRows(const Vector<rownr_t>& aNrRows)
+void deleteRows(const Vector<uInt>& aNrRows)
 {
   Table aTable = Table("tSSMStringHandler_tmp.data", Table::Update);
 

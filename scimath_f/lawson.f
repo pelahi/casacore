@@ -23,7 +23,7 @@ C
       K = 0
       LDIAG = MIN0(M,N)
       IF (LDIAG.LE.0) GOTO 270
-        DO J=1,LDIAG
+        DO 80 J=1,LDIAG
           IF (J.EQ.1) GOTO 20
 C
 C     UPDATE SQUARED COLUMN LENGTHS AND FIND LMAX
@@ -39,13 +39,12 @@ C
 C     COMPUTE SQUARED COLUMN LENGTHS AND FIND LMAX
 C
    20     LMAX = J
-            DO L = J,N
+            DO 40 L = J,N
               H(L) = SZERO
-              DO I = J,M
-                H(L) = H(L) + A(I,L)**2
-              END DO
+              DO 30 I = J,M
+   30           H(L) = H(L) + A(I,L)**2
               IF (H(L).GT.H(LMAX)) LMAX = L
-            END DO
+   40       CONTINUE
           HMAX = H(LMAX)
 C
 C     LMAX HAS BEEN DETERMINED
@@ -55,24 +54,22 @@ C
    50     CONTINUE
           IP(J) = LMAX
           IF (IP(J).EQ.J) GOTO 70
-          DO I = 1,M
+          DO 60 I = 1,M
             TMP = A(I,J)
             A(I,J) = A(I,LMAX)
-            A(I,LMAX) = TMP
-          END DO
+   60       A(I,LMAX) = TMP
           H(LMAX) = H(J)
 C
 C     COMPUTE THE J-TH TRANSFORMATION AND APPLY IT TO A AND B.
 C
    70     CALL H12 (1,J,J+1,M,A(1,J),1,H(J),A(1,J+1),1,MDA,N-J)
-          CALL H12 (2,J,J+1,M,A(1,J),1,H(J),B,1,MDB,NB)
-        END DO
+   80     CALL H12 (2,J,J+1,M,A(1,J),1,H(J),B,1,MDB,NB)
 C
 C     DETERMINE THE PSEUDORANK, K, USING THE TOLERANCE, TAU.
 C
-        DO J = 1,LDIAG
-          IF (ABS(A(J,J)).LE.TAU) GOTO 100
-        END DO
+          DO 90 J = 1,LDIAG
+            IF (ABS(A(J,J)).LE.TAU) GOTO 100
+   90     CONTINUE
       K = LDIAG
       GOTO 110
   100 K = J - 1
@@ -81,33 +78,28 @@ C
 C     COMPUTE THE NORMS OF THE RESIDUAL VECTORS.
 C
       IF (NB.LE.0) GOTO 140
-        DO JB = 1,NB
+        DO 130 JB = 1,NB
           TMP = SZERO
           IF (KP1.GT.M) GOTO 130
-          DO I = KP1,M
-            TMP = TMP + B(I,JB)**2
-          END DO
+          DO 120 I = KP1,M
+  120       TMP = TMP + B(I,JB)**2
   130     RNORM(JB) = SQRT(TMP)
-        END DO
   140 CONTINUE
 C     SPECIAL FOR PSEUDORANK = 0
       IF (K.GT.0) GOTO 160
       IF (NB.LE.0) GOTO 270
-        DO JB = 1,NB
-          DO I = 1,N
-            B(I,JB) = SZERO
-          END DO
-        END DO
+        DO 150 JB = 1,NB
+          DO 150 I = 1,N
+  150       B(I,JB) = SZERO
       GOTO 270
 C
 C     IF THE PSEUDORANK IS LESS THAN N COMPUTE HOUSHOLDER
 C     DECOMPOSITION OF FIRST K ROWS.
 C
   160 IF (K.EQ.N) GOTO 180
-        DO II = 1,K
+        DO 170 II = 1,K
           I = KP1 - II
-          CALL H12 (1,I,KP1,N,A(I,1),MDA,G(I),A,MDA,1,I-1)
-        END DO
+  170     CALL H12 (1,I,KP1,N,A(I,1),MDA,G(I),A,MDA,1,I-1)
   180 CONTINUE
 C
 C
@@ -116,25 +108,21 @@ C
 C
 C     SOLVE THE K BY K TRIANGULAR SYSTEM
 C
-          DO L = 1,K
+          DO 210 L = 1,K
             SM = DZERO
             I = KP1 - L
             IF (I.EQ.K) GOTO 200
             IP1 = I + 1
-            DO J = IP1,K
-              SM = SM + A(I,J)*DBLE(B(J,JB))
-            END DO
+            DO 190 J = IP1,K
+  190         SM = SM + A(I,J)*DBLE(B(J,JB))
   200       SM1 = SM
-            B(I,JB) = (B(I,JB)-SM1)/A(I,I)
-          END DO
+  210       B(I,JB) = (B(I,JB)-SM1)/A(I,I)
 C
           IF (K.EQ.N) GOTO 240
-            DO J = KP1,N
-              B(J,JB) = SZERO
-            END DO
-            DO I = 1,K
-              CALL H12 (2,I,KP1,N,A(I,1),MDA,G(I),B(1,JB),1,MDB,1)
-            END DO
+            DO 220 J = KP1,N
+  220         B(J,JB) = SZERO
+            DO 230 I = 1,K
+  230         CALL H12 (2,I,KP1,N,A(I,1),MDA,G(I),B(1,JB),1,MDB,1)
 C
 C     RE-ORDER THE SOLUTION VECTOR TO COMPENSATE FOR THE
 C     COLUMN INTERCHANGES.
@@ -169,9 +157,8 @@ C
       ZERO=0.
       ONE=1.
       IF (N.LE.0) GO TO 120
-        DO J=1,N
-          X(J)=ZERO
-        END DO
+          DO 10 J=1,N
+   10     X(J)=ZERO
       XNORM=ZERO
       IF (M.LE.0) GO TO 110
 C
@@ -186,20 +173,17 @@ C     COPY G**T INTO FIRST N ROWS AND M COLUMNS OF E.
 C     COPY H**T INTO ROW N+1 OF E.
 C
       IW=0
-          DO J=1,M
-            DO I=1,N
+          DO 30 J=1,M
+              DO 20 I=1,N
               IW=IW+1
-              W(IW)=G(J,I)
-            END DO
+   20         W(IW)=G(J,I)
           IW=IW+1
-          W(IW)=H(J)
-        END DO
+   30     W(IW)=H(J)
       IF=IW+1
 C                                STORE N ZEROS FOLLOWED BY A ONE INTO F.
-        DO I=1,N
+          DO 40 I=1,N
           IW=IW+1
-          W(IW)=ZERO
-        END DO
+   40     W(IW)=ZERO
       W(IW+1)=ONE
 C
       NP1=N+1
@@ -219,27 +203,23 @@ C      IF (RNORM) 130, 130, 50
       IF (RNORM .LE. 0) GOTO 130
    50 FAC=ONE
       IW=IY-1
-          DO I=1,M
+          DO 60 I=1,M
           IW=IW+1
 C                               HERE WE ARE USING THE SOLUTION VECTOR Y.
-          FAC=FAC-H(I)*W(IW)
-        END DO
+   60     FAC=FAC-H(I)*W(IW)
 C
 C      IF (DIFF(ONE+FAC,ONE)) 130,130,70
       IF (DIFF(ONE+FAC,ONE) .LE. 0) GOTO 130
    70 FAC=ONE/FAC
-          DO J=1,N
+          DO 90 J=1,N
           IW=IY-1
-            DO I=1,M
+              DO 80 I=1,M
               IW=IW+1
 C                               HERE WE ARE USING THE SOLUTION VECTOR Y.
-              X(J)=X(J)+G(I,J)*W(IW)
-            END DO
-            X(J)=X(J)*FAC
-          END DO
-          DO J=1,N
-            XNORM=XNORM+X(J)**2
-          END DO
+   80         X(J)=X(J)+G(I,J)*W(IW)
+   90     X(J)=X(J)*FAC
+          DO 100 J=1,N
+  100     XNORM=XNORM+X(J)**2
       XNORM=SQRT(XNORM)
 C                             SUCCESSFUL RETURN.
   110 MODE=1
@@ -310,7 +290,7 @@ C
       DIMENSION A(MDA,N), B(1), X(1), W(1), ZZ(1)
       INTEGER INDEX(1)
       REAL      A, B, X, RNORM, W, ZZ, ZERO, ONE, TWO, FACTOR, SM,
-     $   WMAX, ASAVE, UP, DUMMY(1), UNORM, ZTEST, ALPHA, T, CC, SS
+     $   WMAX, ASAVE, UP, DUMMY, UNORM, ZTEST, ALPHA, T, CC, SS
       DOUBLE PRECISION DSVCMP, DSVTIM
       INTEGER   MDA, M, N, MODE, ITER, I, J, L, IZ1, IZ2, NSETP, NPP1,
      $   IZ, ITMAX, IZMAX, JZ, NEXT, IP, II, JJ
@@ -330,10 +310,9 @@ C
 C
 C                    INITIALIZE THE ARRAYS INDEX() AND X().
 C
-        DO I=1,N
+          DO 20 I=1,N
           X(I)=ZERO
-          INDEX(I)=I
-        END DO
+   20     INDEX(I)=I
 C
       IZ2=N
       IZ1=1
@@ -348,14 +327,12 @@ C
 C
 C         COMPUTE COMPONENTS OF THE DUAL (NEGATIVE GRADIENT) VECTOR W().
 C
-          DO IZ=IZ1,IZ2
+          DO 50 IZ=IZ1,IZ2
           J=INDEX(IZ)
           SM=ZERO
-              DO L=NPP1,M
-                SM=SM+A(L,J)*B(L)
-              END DO
-          W(J)=SM
-          END DO
+              DO 40 L=NPP1,M
+   40         SM=SM+A(L,J)*B(L)
+   50     W(J)=SM
 C                                   FIND LARGEST POSITIVE W(J).
    60 WMAX=ZERO
           DO 70 IZ=IZ1,IZ2
@@ -381,9 +358,8 @@ C
       CALL H12 (1,NPP1,NPP1+1,M,A(1,J),1,UP,DUMMY,1,1,0)
       UNORM=ZERO
       IF (NSETP.EQ.0) GO TO 100
-          DO L=1,NSETP
-            UNORM=UNORM+A(L,J)**2
-          END DO
+          DO 90 L=1,NSETP
+   90     UNORM=UNORM+A(L,J)**2
   100 UNORM=SQRT(UNORM)
 C      IF (DIFF(UNORM+ABS(A(NPP1,J))*FACTOR,UNORM)) 130,130,110
       IF (DIFF(UNORM+ABS(A(NPP1,J))*FACTOR,UNORM) .LE. 0) GOTO 130
@@ -391,9 +367,8 @@ C
 C     COL J IS SUFFICIENTLY INDEPENDENT.  COPY B INTO ZZ, UPDATE ZZ AND
 C   > SOLVE FOR ZTEST ( = PROPOSED NEW VALUE FOR X(J) ).
 C
-  110     DO L=1,M
-            ZZ(L)=B(L)
-          END DO
+  110     DO 120 L=1,M
+  120     ZZ(L)=B(L)
       CALL H12 (2,NPP1,NPP1+1,M,A(1,J),1,UP,ZZ,1,1,1)
       ZTEST=ZZ(NPP1)/A(NPP1,J)
 C
@@ -415,9 +390,8 @@ C     SET Z TO SET P.    UPDATE B,  UPDATE INDICES,  APPLY HOUSEHOLDER
 C     TRANSFORMATIONS TO COLS IN NEW SET Z,  ZERO SUBDIAGONAL ELTS IN
 C     COL J,  SET W(J)=0.
 C
-  140     DO L=1,M
-            B(L)=ZZ(L)
-          END DO
+  140     DO 150 L=1,M
+  150     B(L)=ZZ(L)
 C
       INDEX(IZ)=INDEX(IZ1)
       INDEX(IZ1)=J
@@ -426,16 +400,14 @@ C
       NPP1=NPP1+1
 C
       IF (IZ1.GT.IZ2) GO TO 170
-          DO JZ=IZ1,IZ2
-            JJ=INDEX(JZ)
-            CALL H12 (2,NSETP,NPP1,M,A(1,J),1,UP,A(1,JJ),1,MDA,1)
-          END DO
+          DO 160 JZ=IZ1,IZ2
+          JJ=INDEX(JZ)
+  160     CALL H12 (2,NSETP,NPP1,M,A(1,J),1,UP,A(1,JJ),1,MDA,1)
   170 CONTINUE
 C
       IF (NSETP.EQ.M) GO TO 190
-        DO L=NPP1,M
-          A(L,J)=ZERO
-        END DO
+          DO 180 L=NPP1,M
+  180     A(L,J)=ZERO
   190 CONTINUE
 C
       W(J)=ZERO
@@ -481,10 +453,9 @@ C
 C          OTHERWISE USE ALPHA WHICH WILL BE BETWEEN 0. AND 1. TO
 C          INTERPOLATE BETWEEN THE OLD X AND THE NEW ZZ.
 C
-          DO IP=1,NSETP
-            L=INDEX(IP)
-            X(L)=X(L)+ALPHA*(ZZ(IP)-X(L))
-          END DO
+          DO 250 IP=1,NSETP
+          L=INDEX(IP)
+  250     X(L)=X(L)+ALPHA*(ZZ(IP)-X(L))
 C
 C        MODIFY A AND B AND THE INDEX ARRAYS TO MOVE COEFFICIENT I
 C        FROM SET P TO SET Z.
@@ -494,16 +465,15 @@ C
 C
       IF (JJ.EQ.NSETP) GO TO 290
       JJ=JJ+1
-        DO J=JJ,NSETP
+          DO 280 J=JJ,NSETP
           II=INDEX(J)
           INDEX(J-1)=II
           CALL G1 (A(J-1,II),A(J,II),CC,SS,A(J-1,II))
           A(J,II)=ZERO
-          DO L=1,N
-            IF (L.NE.II) CALL G2 (CC,SS,A(J-1,L),A(J,L))
-          END DO
-          CALL G2 (CC,SS,B(J-1),B(J))
-        END DO
+              DO 270 L=1,N
+              IF (L.NE.II) CALL G2 (CC,SS,A(J-1,L),A(J,L))
+  270         CONTINUE
+  280     CALL G2 (CC,SS,B(J-1),B(J))
   290 NPP1=NSETP
       NSETP=NSETP-1
       IZ1=IZ1-1
@@ -524,9 +494,8 @@ C
 C         COPY B( ) INTO ZZ( ).  THEN SOLVE AGAIN AND LOOP BACK.
 C
 
-          DO I=1,M
-            ZZ(I)=B(I)
-          END DO
+          DO 310 I=1,M
+  310     ZZ(I)=B(I)
 C      ASSIGN 320 TO NEXT
       NEXT = 2
       GO TO 400
@@ -534,10 +503,9 @@ C      ASSIGN 320 TO NEXT
       GO TO 210
 C                      ******  END OF SECONDARY LOOP  ******
 C
-  330     DO IP=1,NSETP
-            I=INDEX(IP)
-            X(I)=ZZ(IP)
-          END DO
+  330     DO 340 IP=1,NSETP
+          I=INDEX(IP)
+  340     X(I)=ZZ(IP)
 C        ALL NEW COEFFS ARE POSITIVE.  LOOP BACK TO BEGINNING.
       GO TO 30
 C
@@ -548,28 +516,24 @@ C                     COMPUTE THE NORM OF THE FINAL RESIDUAL VECTOR.
 C
   350 SM=ZERO
       IF (NPP1.GT.M) GO TO 370
-          DO I=NPP1,M
-            SM=SM+B(I)**2
-          END DO
+          DO 360 I=NPP1,M
+  360     SM=SM+B(I)**2
       GO TO 390
-  370   DO J=1,N
-          W(J)=ZERO
-        END DO
+  370     DO 380 J=1,N
+  380     W(J)=ZERO
   390 RNORM=SQRT(SM)
       RETURN
 C
 C     THE FOLLOWING BLOCK OF CODE IS USED AS AN INTERNAL SUBROUTINE
 C     TO SOLVE THE TRIANGULAR SYSTEM, PUTTING THE SOLUTION IN ZZ().
 C
-  400     DO L=1,NSETP
-            IP=NSETP+1-L
-            IF (L.EQ.1) GO TO 420
-              DO II=1,IP
-                ZZ(II)=ZZ(II)-A(II,JJ)*ZZ(IP+1)
-              END DO
-  420       JJ=INDEX(IP)
-            ZZ(IP)=ZZ(IP)/A(IP,JJ)
-          END DO
+  400     DO 430 L=1,NSETP
+          IP=NSETP+1-L
+          IF (L.EQ.1) GO TO 420
+              DO 410 II=1,IP
+  410         ZZ(II)=ZZ(II)-A(II,JJ)*ZZ(IP+1)
+  420     JJ=INDEX(IP)
+  430     ZZ(IP)=ZZ(IP)/A(IP,JJ)
 C      GO TO NEXT, (200,320)
       GOTO (200, 320), NEXT
   440 FORMAT (35H0 NNLS QUITTING ON ITERATION COUNT.)
@@ -612,17 +576,15 @@ C
       CL=ABS(U(1,LPIVOT))
       IF (MODE.EQ.2) GO TO 60
 C                            ****** CONSTRUCT THE TRANSFORMATION. ******
-          DO J=L1,M
-            CL=AMAX1(ABS(U(1,J)),CL)
-          END DO
+          DO 10 J=L1,M
+   10     CL=AMAX1(ABS(U(1,J)),CL)
 C      IF (CL) 130,130,20
       IF (CL .LE. 0) GOTO 130
 
    20 CLINV=ONE/CL
       SM=(DBLE(U(1,LPIVOT))*CLINV)**2
-          DO J=L1,M
-            SM=SM+(DBLE(U(1,J))*CLINV)**2
-          END DO
+          DO 30 J=L1,M
+   30     SM=SM+(DBLE(U(1,J))*CLINV)**2
 C                              CONVERT DBLE. PREC. SM TO SNGL. PREC. SM1
       SM1=SM
       CL=CL*SQRT(SM1)
@@ -650,18 +612,16 @@ C      IF (B) 80,130,130
           I3=I2+INCR
           I4=I3
           SM=C(I2)*DBLE(UP)
-              DO I=L1,M
-                SM=SM+C(I3)*DBLE(U(1,I))
-                I3=I3+ICE
-              END DO
+              DO 90 I=L1,M
+              SM=SM+C(I3)*DBLE(U(1,I))
+   90         I3=I3+ICE
 C          IF (SM) 100,120,100
           IF (SM .EQ. 0) GOTO 120
   100     SM=SM*B
           C(I2)=C(I2)+SM*DBLE(UP)
-            DO I=L1,M
+              DO 110 I=L1,M
               C(I4)=C(I4)+SM*DBLE(U(1,I))
-              I4=I4+ICE
-            END DO
+  110         I4=I4+ICE
   120     CONTINUE
   130 RETURN
       END
@@ -732,9 +692,8 @@ C
       ZERO=0.D0
       ONE=1.D0
       IF (N.LE.0) GO TO 120
-        DO J=1,N
-          X(J)=ZERO
-        END DO
+          DO 10 J=1,N
+   10     X(J)=ZERO
       XNORM=ZERO
       IF (M.LE.0) GO TO 110
 C
@@ -749,20 +708,17 @@ C     COPY G**T INTO FIRST N ROWS AND M COLUMNS OF E.
 C     COPY H**T INTO ROW N+1 OF E.
 C
       IW=0
-          DO J=1,M
-            DO I=1,N
+          DO 30 J=1,M
+              DO 20 I=1,N
               IW=IW+1
-              W(IW)=G(J,I)
-            END DO
-            IW=IW+1
-            W(IW)=H(J)
-          END DO
+   20         W(IW)=G(J,I)
+          IW=IW+1
+   30     W(IW)=H(J)
       IF=IW+1
 C                                STORE N ZEROS FOLLOWED BY A ONE INTO F.
-          DO I=1,N
-            IW=IW+1
-            W(IW)=ZERO
-          END DO
+          DO 40 I=1,N
+          IW=IW+1
+   40     W(IW)=ZERO
       W(IW+1)=ONE
 C
       NP1=N+1
@@ -782,27 +738,23 @@ C      IF (RNORM) 130,130,50
       IF (RNORM .LE. 0) GOTO 130
    50 FAC=ONE
       IW=IY-1
-        DO I=1,M
+          DO 60 I=1,M
           IW=IW+1
 C                               HERE WE ARE USING THE SOLUTION VECTOR Y.
-          FAC=FAC-H(I)*W(IW)
-        END DO
+   60     FAC=FAC-H(I)*W(IW)
 C
 C      IF (DDIFF(ONE+FAC,ONE)) 130,130,70
       IF (DDIFF(ONE+FAC,ONE) .LE. 0) GOTO 130
    70 FAC=ONE/FAC
-          DO J=1,N
-            IW=IY-1
-            DO I=1,M
+          DO 90 J=1,N
+          IW=IY-1
+              DO 80 I=1,M
               IW=IW+1
 C                               HERE WE ARE USING THE SOLUTION VECTOR Y.
-              X(J)=X(J)+G(I,J)*W(IW)
-            END DO
-            X(J)=X(J)*FAC
-          END DO
-          DO J=1,N
-            XNORM=XNORM+X(J)**2
-          END DO
+   80         X(J)=X(J)+G(I,J)*W(IW)
+   90     X(J)=X(J)*FAC
+          DO 100 J=1,N
+  100     XNORM=XNORM+X(J)**2
       XNORM=SQRT(XNORM)
 C                             SUCCESSFUL RETURN.
   110 MODE=1
@@ -872,7 +824,6 @@ C
       SUBROUTINE DNNLS (A,MDA,M,N,B,X,RNORM,W,ZZ,INDEX,ITMAX,MODE)
       implicit double precision (a-h,o-z)
       DIMENSION A(MDA,N), B(1), X(1), W(1), ZZ(1)
-      DOUBLE PRECISION DUMMY(1)
       INTEGER INDEX(1)
       ZERO=0.D0
       ONE=1.D0
@@ -887,10 +838,9 @@ C
 C
 C                    INITIALIZE THE ARRAYS INDEX() AND X().
 C
-          DO I=1,N
-            X(I)=ZERO
-            INDEX(I)=I
-          END DO
+          DO 20 I=1,N
+          X(I)=ZERO
+   20     INDEX(I)=I
 C
       IZ2=N
       IZ1=1
@@ -905,22 +855,20 @@ C
 C
 C         COMPUTE COMPONENTS OF THE DUAL (NEGATIVE GRADIENT) VECTOR W().
 C
-        DO IZ=IZ1,IZ2
+          DO 50 IZ=IZ1,IZ2
           J=INDEX(IZ)
           SM=ZERO
-            DO L=NPP1,M
-              SM=SM+A(L,J)*B(L)
-            END DO
-          W(J)=SM
-        END DO
+              DO 40 L=NPP1,M
+   40         SM=SM+A(L,J)*B(L)
+   50     W(J)=SM
 C                                   FIND LARGEST POSITIVE W(J).
    60 WMAX=ZERO
-        DO 70 IZ=IZ1,IZ2
+          DO 70 IZ=IZ1,IZ2
           J=INDEX(IZ)
           IF (W(J).LE.WMAX) GO TO 70
           WMAX=W(J)
           IZMAX=IZ
-   70   CONTINUE
+   70     CONTINUE
 C
 C             IF WMAX .LE. 0. GO TO TERMINATION.
 C             THIS INDICATES SATISFACTION OF THE KUHN-TUCKER CONDITIONS.
@@ -938,9 +886,8 @@ C
       CALL DH12 (1,NPP1,NPP1+1,M,A(1,J),1,UP,DUMMY,1,1,0)
       UNORM=ZERO
       IF (NSETP.EQ.0) GO TO 100
-        DO L=1,NSETP
-          UNORM=UNORM+A(L,J)**2
-        END DO
+          DO 90 L=1,NSETP
+   90     UNORM=UNORM+A(L,J)**2
   100 UNORM=SQRT(UNORM)
 C      IF (DDIFF(UNORM+ABS(A(NPP1,J))*FACTOR,UNORM)) 130,130,110
       IF (DDIFF(UNORM+ABS(A(NPP1,J))*FACTOR,UNORM) .LE. 0) GOTO 130
@@ -948,9 +895,8 @@ C
 C     COL J IS SUFFICIENTLY INDEPENDENT.  COPY B INTO ZZ, UPDATE ZZ AND
 C   > SOLVE FOR ZTEST ( = PROPOSED NEW VALUE FOR X(J) ).
 C
-  110   DO L=1,M
-          ZZ(L)=B(L)
-        END DO
+  110     DO 120 L=1,M
+  120     ZZ(L)=B(L)
       CALL DH12 (2,NPP1,NPP1+1,M,A(1,J),1,UP,ZZ,1,1,1)
       ZTEST=ZZ(NPP1)/A(NPP1,J)
 C
@@ -972,9 +918,8 @@ C     SET Z TO SET P.    UPDATE B,  UPDATE INDICES,  APPLY HOUSEHOLDER
 C     TRANSFORMATIONS TO COLS IN NEW SET Z,  ZERO SUBDIAGONAL ELTS IN
 C     COL J,  SET W(J)=0.
 C
-  140   DO L=1,M
-          B(L)=ZZ(L)
-        END DO
+  140     DO 150 L=1,M
+  150     B(L)=ZZ(L)
 C
       INDEX(IZ)=INDEX(IZ1)
       INDEX(IZ1)=J
@@ -983,16 +928,14 @@ C
       NPP1=NPP1+1
 C
       IF (IZ1.GT.IZ2) GO TO 170
-        DO JZ=IZ1,IZ2
+          DO 160 JZ=IZ1,IZ2
           JJ=INDEX(JZ)
-          CALL DH12 (2,NSETP,NPP1,M,A(1,J),1,UP,A(1,JJ),1,MDA,1)
-        END DO
+  160     CALL DH12 (2,NSETP,NPP1,M,A(1,J),1,UP,A(1,JJ),1,MDA,1)
   170 CONTINUE
 C
       IF (NSETP.EQ.M) GO TO 190
-        DO L=NPP1,M
-          A(L,J)=ZERO
-        END DO
+          DO 180 L=NPP1,M
+  180     A(L,J)=ZERO
   190 CONTINUE
 C
       W(J)=ZERO
@@ -1038,10 +981,9 @@ C
 C          OTHERWISE USE ALPHA WHICH WILL BE BETWEEN 0. AND 1. TO
 C          INTERPOLATE BETWEEN THE OLD X AND THE NEW ZZ.
 C
-        DO IP=1,NSETP
+          DO 250 IP=1,NSETP
           L=INDEX(IP)
-          X(L)=X(L)+ALPHA*(ZZ(IP)-X(L))
-        END DO
+  250     X(L)=X(L)+ALPHA*(ZZ(IP)-X(L))
 C
 C        MODIFY A AND B AND THE INDEX ARRAYS TO MOVE COEFFICIENT I
 C        FROM SET P TO SET Z.
@@ -1051,16 +993,15 @@ C
 C
       IF (JJ.EQ.NSETP) GO TO 290
       JJ=JJ+1
-        DO J=JJ,NSETP
+          DO 280 J=JJ,NSETP
           II=INDEX(J)
           INDEX(J-1)=II
           CALL DG1 (A(J-1,II),A(J,II),CC,SS,A(J-1,II))
           A(J,II)=ZERO
               DO 270 L=1,N
-                IF (L.NE.II) CALL DG2 (CC,SS,A(J-1,L),A(J,L))
+              IF (L.NE.II) CALL DG2 (CC,SS,A(J-1,L),A(J,L))
   270         CONTINUE
-          CALL DG2 (CC,SS,B(J-1),B(J))
-        END DO
+  280     CALL DG2 (CC,SS,B(J-1),B(J))
   290 NPP1=NSETP
       NSETP=NSETP-1
       IZ1=IZ1-1
@@ -1081,9 +1022,8 @@ C
 C         COPY B( ) INTO ZZ( ).  THEN SOLVE AGAIN AND LOOP BACK.
 C
 
-          DO I=1,M
-            ZZ(I)=B(I)
-          END DO
+          DO 310 I=1,M
+  310     ZZ(I)=B(I)
 C      ASSIGN 320 TO NEXT
       NEXT = 2
       GO TO 400
@@ -1091,10 +1031,9 @@ C      ASSIGN 320 TO NEXT
       GO TO 210
 C                      ******  END OF SECONDARY LOOP  ******
 C
-  330     DO IP=1,NSETP
-            I=INDEX(IP)
-            X(I)=ZZ(IP)
-          END DO
+  330     DO 340 IP=1,NSETP
+          I=INDEX(IP)
+  340     X(I)=ZZ(IP)
 C        ALL NEW COEFFS ARE POSITIVE.  LOOP BACK TO BEGINNING.
       GO TO 30
 C
@@ -1105,28 +1044,24 @@ C                     COMPUTE THE NORM OF THE FINAL RESIDUAL VECTOR.
 C
   350 SM=ZERO
       IF (NPP1.GT.M) GO TO 370
-        DO I=NPP1,M
-          SM=SM+B(I)**2
-        END DO
+          DO 360 I=NPP1,M
+  360     SM=SM+B(I)**2
       GO TO 390
-  370   DO J=1,N
-          W(J)=ZERO
-        END DO
+  370     DO 380 J=1,N
+  380     W(J)=ZERO
   390 RNORM=SQRT(SM)
       RETURN
 C
 C     THE FOLLOWING BLOCK OF CODE IS USED AS AN INTERNAL SUBROUTINE
 C     TO SOLVE THE TRIANGULAR SYSTEM, PUTTING THE SOLUTION IN ZZ().
 C
-  400   DO L=1,NSETP
+  400     DO 430 L=1,NSETP
           IP=NSETP+1-L
           IF (L.EQ.1) GO TO 420
-            DO II=1,IP
-              ZZ(II)=ZZ(II)-A(II,JJ)*ZZ(IP+1)
-            END DO
+              DO 410 II=1,IP
+  410         ZZ(II)=ZZ(II)-A(II,JJ)*ZZ(IP+1)
   420     JJ=INDEX(IP)
-          ZZ(IP)=ZZ(IP)/A(IP,JJ)
-        END DO
+  430     ZZ(IP)=ZZ(IP)/A(IP,JJ)
 C      GO TO NEXT, (200,320)
       GOTO (200, 320), NEXT
   440 FORMAT (35H0 NNLS QUITTING ON ITERATION COUNT.)
@@ -1170,16 +1105,14 @@ C
       CL=ABS(U(1,LPIVOT))
       IF (MODE.EQ.2) GO TO 60
 C                            ****** CONSTRUCT THE TRANSFORMATION. ******
-        DO J=L1,M
-          CL=DMAX1(ABS(U(1,J)),CL)
-        END DO
+          DO 10 J=L1,M
+   10     CL=DMAX1(ABS(U(1,J)),CL)
 C      IF (CL) 130,130,20
       IF (CL .LE. 0) GOTO 130
    20 CLINV=ONE/CL
       SM=(DBLE(U(1,LPIVOT))*CLINV)**2
-        DO J=L1,M
-          SM=SM+(DBLE(U(1,J))*CLINV)**2
-        END DO
+          DO 30 J=L1,M
+   30     SM=SM+(DBLE(U(1,J))*CLINV)**2
 C                              CONVERT DBLE. PREC. SM TO SNGL. PREC. SM1
       SM1=SM
       CL=CL*SQRT(SM1)
@@ -1207,18 +1140,16 @@ C      IF (B) 80,130,130
           I3=I2+INCR
           I4=I3
           SM=C(I2)*DBLE(UP)
-            DO I=L1,M
+              DO 90 I=L1,M
               SM=SM+C(I3)*DBLE(U(1,I))
-              I3=I3+ICE
-            END DO
+   90         I3=I3+ICE
 C          IF (SM) 100,120,100
           IF (SM .EQ. 0) GOTO 120
   100     SM=SM*B
           C(I2)=C(I2)+SM*DBLE(UP)
-            DO I=L1,M
+              DO 110 I=L1,M
               C(I4)=C(I4)+SM*DBLE(U(1,I))
-              I4=I4+ICE
-            END DO
+  110         I4=I4+ICE
   120     CONTINUE
   130 RETURN
       END

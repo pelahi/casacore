@@ -119,8 +119,8 @@ int main()
     	  AlwaysAssert(allTrue(stokesStrings == expec), AipsError);
       }
 
-   } catch (const std::exception& x) {
-      cerr << "aipserror: error " << x.what() << endl;
+   } catch (const AipsError& x) {
+      cerr << "aipserror: error " << x.getMesg() << endl;
       return (1);
    }
 
@@ -383,7 +383,7 @@ void doit4(StokesCoordinate& lc)
    Coordinate* pC = 0;
    try {
       pC = lc.makeFourierCoordinate (axes, shape);
-   } catch (std::exception& x) {
+   } catch (AipsError& x) {
      failed = True;
    } 
    if (!failed) {

@@ -91,14 +91,15 @@ class FitsLogical {
 	friend ostream & operator << (ostream &o, const FitsLogical &);
     public:
 	FitsLogical() : v('\0') { }
-	FitsLogical(Bool x) : v(x == True ? 'T' : 'F') { }
+	FitsLogical(Bool x) { v = (x == True ? 'T' : 'F'); }
+	FitsLogical(const FitsLogical &x) : v(x.v) { }
+	FitsLogical & operator = (const FitsLogical &x) { 
+		v = x.v; return *this; }
 	FitsLogical & operator = (Bool x) { 
 		v = (x == True ? 'T' : 'F'); return *this; }
-  ///ARO 2021-02-20:
-  ///Removed the following function, because it seems incorrectly implemented and isn't used
-	///Bool isdefined() const { return v == '\0' ? True : False; }
+	Bool isdefined() const { return v == '\0' ? True : False; }
 	void undefine() { v = '\0'; }
-	operator Bool() const { return v == 'T'; }
+	operator Bool() { return (v == 'T' ? True : False); }
     protected:
 	char v;
 };
@@ -117,8 +118,11 @@ class FitsBit {
     public:
 	FitsBit() : bit_array(0) { }
 	FitsBit(unsigned char x) : bit_array(x) { }
+	FitsBit(const FitsBit &x) : bit_array(x.bit_array) { }
+	FitsBit & operator = (const FitsBit &x) { 
+		bit_array = x.bit_array; return *this; }
 	FitsBit & operator = (unsigned char x) { bit_array = x; return *this; }
-	operator unsigned char() const { return bit_array; }
+	operator unsigned char() { return bit_array; }
     protected:
 	unsigned char bit_array;
 };

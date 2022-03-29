@@ -50,12 +50,12 @@ TabVecRep<T>::~TabVecRep()
 
 
 template<class T>
-rownr_t TabVecRep<T>::nelem() const
+uInt TabVecRep<T>::nelem() const
     { return nrel_p; }
 
 
 template<class T>
-void TabVecRep<T>::validateConformance (rownr_t leng) const
+void TabVecRep<T>::validateConformance (uInt leng) const
 {
     if (nelements() != leng) {
 	throw TableVectorNonConform();
@@ -66,7 +66,7 @@ void TabVecRep<T>::validateConformance (rownr_t leng) const
 template<class T>
 void* TabVecRep<T>::newVec() const
 {
-    rownr_t nr = nelements();
+    uInt nr = nelements();
     TabVecTemp<T>* tmvp = new TabVecTemp<T>(nr);
     return tmvp;
 }
@@ -75,9 +75,9 @@ void* TabVecRep<T>::newVec() const
 template<class T>
 void TabVecRep<T>::assign (const TabVecRep<T>& that)
 {
-    rownr_t nr = that.nelements();
+    uInt nr = that.nelements();
     validateConformance (nr);
-    for (rownr_t i=0; i<nr; i++) {
+    for (uInt i=0; i<nr; i++) {
 	putVal (i, that.value(i));
     }
 }

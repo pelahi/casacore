@@ -56,14 +56,14 @@ void doIt (Bool doExcp)
 	try {
 	    SymLink symLink1(Path("tSymLink_tmp/isFile"));
 	}
-	catch (std::exception& x) {                                   // regular file
-	    cout << x.what() << endl;
+	catch (AipsError& x) {                                   // regular file
+	    cout << x.getMesg () << endl;
 	} 
 	try {
 	    SymLink symLink1(Path("tSymLink_tmp/isDir"));
 	}
-	catch (std::exception& x) {
-	    cout << x.what() << endl;                       // directory
+	catch (AipsError& x) {
+	    cout << x.getMesg () << endl;                       // directory
 	} 
     }
 
@@ -77,14 +77,14 @@ void doIt (Bool doExcp)
 	try {
 	    SymLink symLink1(Path("tSymLink_tmp/isDir/newB"));
 	}
-	catch (std::exception& x) {
-	    cout << x.what() << endl;                    // cannot create
+	catch (AipsError& x) {
+	    cout << x.getMesg () << endl;                    // cannot create
 	} 
 	try {
 	    newLink2.create("a");
 	}
-	catch (std::exception& x) {
-	    cout << x.what() << endl;                    // cannot create
+	catch (AipsError& x) {
+	    cout << x.getMesg () << endl;                    // cannot create
 	} 
     }
     file.setPermissions (0755);
@@ -118,8 +118,8 @@ void doIt (Bool doExcp)
 	try {
 	    linkA.followSymLink();
 	}
-	catch (std::exception& x) {
-	    cout << x.what() << endl;                       // endless loop
+	catch (AipsError& x) {
+	    cout << x.getMesg () << endl;                       // endless loop
 	} 
     }
     AlwaysAssertExit (linkI.followSymLink().originalName() == homeName);
@@ -133,8 +133,8 @@ void doIt (Bool doExcp)
 	try {
 	    linkI.followSymLink();
 	}
-	catch (std::exception& x) {
-	    cout << x.what() << endl;                       // endless loop
+	catch (AipsError& x) {
+	    cout << x.getMesg () << endl;                       // endless loop
 	} 
     }
 
@@ -178,8 +178,8 @@ void doIt (Bool doExcp)
     if (doExcp) {
 	try {
 	    test6.create ("a", False);
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;               // already existing
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;               // already existing
 	} 
     }
     SymLink test7("tSymLink_tmp/newLink2");
@@ -188,8 +188,8 @@ void doIt (Bool doExcp)
     if (doExcp) {
 	try {
 	    test7.create ("a");
-	} catch (std::exception& x) {
-	    cout << x.what() << endl;               // already existing
+	} catch (AipsError& x) {
+	    cout << x.getMesg() << endl;               // already existing
 	} 
     }
     rfile.remove();
@@ -204,8 +204,8 @@ int main (int argc, const char*[])
 {
     try {
 	doIt ( (argc<2));
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     cout << "OK" << endl;

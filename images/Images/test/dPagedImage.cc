@@ -83,8 +83,8 @@ int main(int argc, const char* argv[])
     testArrayofImagesAndAssignmentOperator();
     deleteFile(STANDARD);
     cout << "OK" << endl;
-  } catch (std::exception x) {
-    cerr << "Caught Exception: " << x.what() << endl;
+  } catch (AipsError x) {
+    cerr << "Caught Exception: " << x.getMesg() << endl;
   } 
   return 0;
 }

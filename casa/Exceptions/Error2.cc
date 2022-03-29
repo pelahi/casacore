@@ -35,7 +35,6 @@
 #ifdef USE_STACKTRACE
 # include <casacore/casa/System/AipsrcValue.h>
 # include <execinfo.h>
-# include <mutex>
 # define AddStackTrace() addStackTrace()
 #else
 # define AddStackTrace()
@@ -97,11 +96,11 @@ AipsError::~AipsError() noexcept
   // stack trace from last exception
   static String lastStackTrace = "*no-stack-trace*";
   // protects the lastMessage and lastStackTrace statics
-  static std::mutex  lastErrorMutex;
+  static Mutex  lastErrorMutex;
 
   void AipsError::getLastInfo (String & message, String & stackTrace)
   {
-    std::lock_guard<std::mutex> lock(lastErrorMutex);
+    ScopedMutexLock lock(lastErrorMutex);
     message = getLastMessage();
     stackTrace = getLastStackTrace();
   }
@@ -111,7 +110,7 @@ AipsError::~AipsError() noexcept
     { return CasaErrorTools::replaceStackAddresses (lastStackTrace); }
   void AipsError::clearLastInfo ()
   {
-    std::lock_guard<std::mutex> lock(lastErrorMutex);
+    ScopedMutexLock lock(lastErrorMutex);
     lastMessage = "*none*";
     lastStackTrace = "*no-stack-trace*";
   }
@@ -122,7 +121,7 @@ AipsError::~AipsError() noexcept
     // for later retrieval via casapy
     stackTrace = CasaErrorTools::generateStackTrace();
     {
-      std::lock_guard<std::mutex> lock(lastErrorMutex);
+      ScopedMutexLock lock(lastErrorMutex);
       lastMessage = message;
       lastStackTrace = stackTrace;
     }

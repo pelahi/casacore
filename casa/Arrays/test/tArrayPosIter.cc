@@ -27,183 +27,205 @@
 
 //# Includes
 
-#include "../ArrayPosIter.h"
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/ArrayPosIter.h>
+#include <casacore/casa/BasicSL/String.h>
+#include <casacore/casa/Utilities/Assert.h>
 
-#include <boost/test/unit_test.hpp>
+#include <casacore/casa/iostream.h>
 
 using namespace casacore;
 
-BOOST_AUTO_TEST_SUITE(array_pop_iter)
-
-BOOST_AUTO_TEST_CASE( zero_dim )
+int main()
 {
+  {   
+    cout << "\nBEGIN.  Testing ArrayPositionIterator.  0 dim. ......\n";
+
     IPosition shape(2);
     shape(0) = shape(1) = 5;
 
     ArrayPositionIterator ai (shape, 0);
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 2);
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 2);
     IPosition index (2);
-    size_t iloop;
+    uInt iloop;
 
     for ( iloop = 0; ! ai.pastEnd(); ai.next(), iloop++ ) {
         index = ai.pos();
-        BOOST_CHECK_EQUAL(index(0), iloop%5);
-        BOOST_CHECK_EQUAL(index(1), iloop/5);
-    }
-    BOOST_CHECK (iloop == 25);
-    BOOST_CHECK (!ai.atStart());
-    BOOST_CHECK (ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 2);
-    ai.origin();
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 2);
-}
+        cout << iloop << " [ " << index (0) << " " << index (1) << " ] \n";
 
-BOOST_AUTO_TEST_CASE( one_dim )
-{
+    }
+    AlwaysAssertExit (iloop == 25);
+    AlwaysAssertExit (!ai.atStart());
+    AlwaysAssertExit (ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 2);
+    ai.origin();
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 2);
+
+    cout << "END.  Testing ArrayPositionIterator.  0 dim. ......\n";
+  }
+
+  {   
+    cout << "\nBEGIN.  Testing ArrayPositionIterator.  1 dim. ......\n";
+
     IPosition shape(2);
     shape(0) = shape(1) = 5;
 
     ArrayPositionIterator ai (shape, 1);
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 2);
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 2);
     IPosition index (2);
-    size_t iloop;
+    uInt iloop;
 
     for ( iloop = 0; ! ai.pastEnd(); ai.next(), iloop++ ) {
         index = ai.pos();
-        BOOST_CHECK_EQUAL(index(0), 0);
-        BOOST_CHECK_EQUAL(index(1), iloop);
+        cout << iloop << " [ " << index (0) << " " << index (1) << " ] "
+             << "\n";
     }
-    BOOST_CHECK (iloop == 5);
-    BOOST_CHECK (!ai.atStart());
-    BOOST_CHECK (ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 2);
+    AlwaysAssertExit (iloop == 5);
+    AlwaysAssertExit (!ai.atStart());
+    AlwaysAssertExit (ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 2);
     ai.origin();
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 2);
-}
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 2);
 
-BOOST_AUTO_TEST_CASE( two_dim )
-{
+    cout << "END.  Testing ArrayPositionIterator.  1 dim. ......\n";
+  }
+
+  {   
+    cout << "\nBEGIN.  Testing ArrayPositionIterator.  2 dim. ......\n";
+
     IPosition shape(2);
     shape(0) = shape(1) = 5;
 
     ArrayPositionIterator ai (shape, 2);
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 2);
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 2);
     IPosition index (2);
-    size_t iloop;
+    uInt iloop;
 
     for ( iloop = 0; ! ai.pastEnd(); ai.next(), iloop++ ) {
         index = ai.pos();
-        BOOST_CHECK_EQUAL(index(0), 0);
-        BOOST_CHECK_EQUAL(index(1), 0);
+        cout << iloop << " [ " << index (0) << " " << index (1) << " ] "
+             << "\n";
     }
-    BOOST_CHECK (iloop == 1);
-    BOOST_CHECK (!ai.atStart());
-    BOOST_CHECK (ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 2);
+    AlwaysAssertExit (iloop == 1);
+    AlwaysAssertExit (!ai.atStart());
+    AlwaysAssertExit (ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 2);
     ai.origin();
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 2);
-}
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 2);
 
-BOOST_AUTO_TEST_CASE( dim_2 )
-{
+    cout << "END.  Testing ArrayPositionIterator.  2 dim. ......\n";
+  }
+
+  {   
+    cout << "\nBEGIN.  Testing ArrayPositionIterator.  dim 2 ......\n";
+
     IPosition shape(3);
     shape(0) = 5;
     shape(1) = 3;
     shape(2) = 7;
 
     ArrayPositionIterator ai (shape, 2);
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 3);
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 3);
     IPosition index (3);
-    size_t iloop;
+    uInt iloop;
 
     for ( iloop = 0; ! ai.pastEnd(); ai.next(), iloop++ ) {
         index = ai.pos();
-        BOOST_CHECK_EQUAL(index(0), 0);
-        BOOST_CHECK_EQUAL(index(1), 0);
-        BOOST_CHECK_EQUAL(index(2), iloop);
+        cout << iloop << " [ " << index (0) << " " << index (1)
+	     << " " << index(2) << " ] "
+             << "\n";
     }
-    BOOST_CHECK (iloop == 7);
-    BOOST_CHECK (!ai.atStart());
-    BOOST_CHECK (ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 3);
+    AlwaysAssertExit (iloop == 7);
+    AlwaysAssertExit (!ai.atStart());
+    AlwaysAssertExit (ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 3);
     ai.origin();
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 3);
-}
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 3);
 
-BOOST_AUTO_TEST_CASE( dim_0_1 )
-{
+    cout << "END.  Testing ArrayPositionIterator.  dim 2 ......\n";
+  }
+
+  {   
+    cout << "\nBEGIN.  Testing ArrayPositionIterator.  dim 0,1 ......\n";
+
     IPosition shape(3);
     shape(0) = 5;
     shape(1) = 3;
     shape(2) = 7;
 
     ArrayPositionIterator ai (shape, IPosition(1,2));
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 3);
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 3);
     IPosition index (3);
-    size_t iloop;
+    uInt iloop;
 
     for ( iloop = 0; ! ai.pastEnd(); ai.next(), iloop++ ) {
         index = ai.pos();
-        BOOST_CHECK_EQUAL(index(0), iloop%5);
-        BOOST_CHECK_EQUAL(index(1), iloop/5);
-        BOOST_CHECK_EQUAL(index(2), 0);
+        cout << iloop << " [ " << index (0) << " " << index (1)
+	     << " " << index(2) << " ] "
+             << "\n";
     }
-    BOOST_CHECK (iloop == 15);
-    BOOST_CHECK (!ai.atStart());
-    BOOST_CHECK (ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 3);
+    AlwaysAssertExit (iloop == 15);
+    AlwaysAssertExit (!ai.atStart());
+    AlwaysAssertExit (ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 3);
     ai.origin();
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 3);
-}
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 3);
 
-BOOST_AUTO_TEST_CASE( dim_2_0 )
-{
+    cout << "END.  Testing ArrayPositionIterator.  dim 0,1 ......\n";
+  }
+
+  {   
+    cout << "\nBEGIN.  Testing ArrayPositionIterator.  dim 2,0 ......\n";
+
     IPosition shape(3);
     shape(0) = 5;
     shape(1) = 3;
     shape(2) = 7;
 
-    ArrayPositionIterator ai (shape, IPosition(2,2,0), false);
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 3);
+    ArrayPositionIterator ai (shape, IPosition(2,2,0), False);
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 3);
     IPosition index (3);
-    size_t iloop;
+    uInt iloop;
 
     for ( iloop = 0; ! ai.pastEnd(); ai.next(), iloop++ ) {
         index = ai.pos();
-        BOOST_CHECK_EQUAL(index(0), iloop/7);
-        BOOST_CHECK_EQUAL(index(1), 0);
-        BOOST_CHECK_EQUAL(index(2), iloop%7);
+        cout << iloop << " [ " << index (0) << " " << index (1)
+	     << " " << index(2) << " ] "
+             << "\n";
     }
-    BOOST_CHECK (iloop == 35);
-    BOOST_CHECK (!ai.atStart());
-    BOOST_CHECK (ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 3);
+    AlwaysAssertExit (iloop == 35);
+    AlwaysAssertExit (!ai.atStart());
+    AlwaysAssertExit (ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 3);
     ai.origin();
-    BOOST_CHECK (ai.atStart());
-    BOOST_CHECK (!ai.pastEnd());
-    BOOST_CHECK (ai.ndim() == 3);
-}
+    AlwaysAssertExit (ai.atStart());
+    AlwaysAssertExit (!ai.pastEnd());
+    AlwaysAssertExit (ai.ndim() == 3);
 
-BOOST_AUTO_TEST_SUITE_END()
+    cout << "END.  Testing ArrayPositionIterator.  dim 2,0 ......\n";
+  }
+
+  return 0;
+}

@@ -25,33 +25,35 @@
 //#
 //# $Id: ArrayPartMath.tcc 21262 2012-09-07 12:38:36Z gervandiepen $
 
-#include "ArrayPartMath.h"
-#include "ArrayIter.h"
-#include "ArrayError.h"
+#include <casacore/casa/iostream.h>
 
-#include <cassert>
-#include <complex>
+#include <casacore/casa/Arrays/ArrayPartMath.h>
+#include <casacore/casa/Arrays/ArrayIter.h>
+#include <casacore/casa/Arrays/ArrayError.h>
+#include <casacore/casa/BasicMath/Math.h>
+#include <casacore/casa/Utilities/Assert.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
-template<typename T, typename Alloc> Array<T, Alloc> partialSums (const Array<T, Alloc>& array,
+
+template<class T> Array<T> partialSums (const Array<T>& array,
 					const IPosition& collapseAxes)
 {
   if (collapseAxes.nelements() == 0) {
     return array.copy();
   }
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   IPosition resShape, incr;
-  int nelemCont = 0;
-  size_t stax = partialFuncHelper (nelemCont, resShape, incr, shape,
+  Int nelemCont = 0;
+  uInt stax = partialFuncHelper (nelemCont, resShape, incr, shape,
 				 collapseAxes);
-  Array<T, Alloc> result (resShape);
+  Array<T> result (resShape);
   result = 0;
-  bool deleteData, deleteRes;
+  Bool deleteData, deleteRes;
   const T* arrData = array.getStorage (deleteData);
   const T* data = arrData;
   T* resData = result.getStorage (deleteRes);
@@ -61,30 +63,30 @@ template<typename T, typename Alloc> Array<T, Alloc> partialSums (const Array<T,
   // cont tells if any data are contiguous.
   // stax gives the first non-contiguous axis.
   // n0 gives the number of contiguous elements.
-  bool cont = true;
-  size_t n0 = nelemCont;
-  int incr0 = incr(0);
+  Bool cont = True;
+  uInt n0 = nelemCont;
+  Int incr0 = incr(0);
   if (nelemCont <= 1) {
-    cont = false;
+    cont = False;
     n0 = shape(0);
     stax = 1;
   }
   // Loop through all data and assemble as needed.
   IPosition pos(ndim, 0);
-  while (true) {
+  while (True) {
     if (cont) {
       T tmp = *res;
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	tmp += *data++;
       }
       *res = tmp;
     } else {
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	*res += *data++;
 	res += incr0;
       }
     }
-    size_t ax;
+    uInt ax;
     for (ax=stax; ax<ndim; ax++) {
       res += incr(ax);
       if (++pos(ax) < shape(ax)) {
@@ -101,24 +103,24 @@ template<typename T, typename Alloc> Array<T, Alloc> partialSums (const Array<T,
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialSumSqrs (const Array<T, Alloc>& array,
+template<class T> Array<T> partialSumSqrs (const Array<T>& array,
                                            const IPosition& collapseAxes)
 {
   if (collapseAxes.nelements() == 0) {
     return array.copy();
   }
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   IPosition resShape, incr;
-  int nelemCont = 0;
-  size_t stax = partialFuncHelper (nelemCont, resShape, incr, shape,
+  Int nelemCont = 0;
+  uInt stax = partialFuncHelper (nelemCont, resShape, incr, shape,
 				 collapseAxes);
-  Array<T, Alloc> result (resShape);
+  Array<T> result (resShape);
   result = 0;
-  bool deleteData, deleteRes;
+  Bool deleteData, deleteRes;
   const T* arrData = array.getStorage (deleteData);
   const T* data = arrData;
   T* resData = result.getStorage (deleteRes);
@@ -128,32 +130,32 @@ template<typename T, typename Alloc> Array<T, Alloc> partialSumSqrs (const Array
   // cont tells if any data are contiguous.
   // stax gives the first non-contiguous axis.
   // n0 gives the number of contiguous elements.
-  bool cont = true;
-  size_t n0 = nelemCont;
-  int incr0 = incr(0);
+  Bool cont = True;
+  uInt n0 = nelemCont;
+  Int incr0 = incr(0);
   if (nelemCont <= 1) {
-    cont = false;
+    cont = False;
     n0 = shape(0);
     stax = 1;
   }
   // Loop through all data and assemble as needed.
   IPosition pos(ndim, 0);
-  while (true) {
+  while (True) {
     if (cont) {
       T tmp = *res;
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	tmp += *data * *data;
         data++;
       }
       *res = tmp;
     } else {
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	*res += *data * *data;
         data++;
 	res += incr0;
       }
     }
-    size_t ax;
+    uInt ax;
     for (ax=stax; ax<ndim; ax++) {
       res += incr(ax);
       if (++pos(ax) < shape(ax)) {
@@ -170,24 +172,24 @@ template<typename T, typename Alloc> Array<T, Alloc> partialSumSqrs (const Array
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialProducts (const Array<T, Alloc>& array,
+template<class T> Array<T> partialProducts (const Array<T>& array,
 					    const IPosition& collapseAxes)
 {
   if (collapseAxes.nelements() == 0) {
     return array.copy();
   }
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   IPosition resShape, incr;
-  int nelemCont = 0;
-  size_t stax = partialFuncHelper (nelemCont, resShape, incr, shape,
+  Int nelemCont = 0;
+  uInt stax = partialFuncHelper (nelemCont, resShape, incr, shape,
 				 collapseAxes);
-  Array<T, Alloc> result (resShape);
+  Array<T> result (resShape);
   result = T(1);
-  bool deleteData, deleteRes;
+  Bool deleteData, deleteRes;
   const T* arrData = array.getStorage (deleteData);
   const T* data = arrData;
   T* resData = result.getStorage (deleteRes);
@@ -197,30 +199,30 @@ template<typename T, typename Alloc> Array<T, Alloc> partialProducts (const Arra
   // cont tells if any data are contiguous.
   // stax gives the first non-contiguous axis.
   // n0 gives the number of contiguous elements.
-  bool cont = true;
-  size_t n0 = nelemCont;
-  int incr0 = incr(0);
+  Bool cont = True;
+  uInt n0 = nelemCont;
+  Int incr0 = incr(0);
   if (nelemCont <= 1) {
-    cont = false;
+    cont = False;
     n0 = shape(0);
     stax = 1;
   }
   // Loop through all data and assemble as needed.
   IPosition pos(ndim, 0);
-  while (true) {
+  while (True) {
     if (cont) {
       T tmp = *res;
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	tmp *= *data++;
       }
       *res = tmp;
     } else {
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	*res *= *data++;
 	res += incr0;
       }
     }
-    size_t ax;
+    uInt ax;
     for (ax=stax; ax<ndim; ax++) {
       res += incr(ax);
       if (++pos(ax) < shape(ax)) {
@@ -237,56 +239,55 @@ template<typename T, typename Alloc> Array<T, Alloc> partialProducts (const Arra
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialMins (const Array<T, Alloc>& array,
+template<class T> Array<T> partialMins (const Array<T>& array,
 					const IPosition& collapseAxes)
 {
   if (collapseAxes.nelements() == 0) {
     return array.copy();
   }
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   IPosition resShape, incr;
-  int nelemCont = 0;
-  size_t stax = partialFuncHelper (nelemCont, resShape, incr, shape,
+  Int nelemCont = 0;
+  uInt stax = partialFuncHelper (nelemCont, resShape, incr, shape,
 				 collapseAxes);
-  Array<T, Alloc> result (resShape);
+  Array<T> result (resShape);
   result = 0;
-  bool deleteData, deleteRes;
+  Bool deleteData, deleteRes;
   const T* arrData = array.getStorage (deleteData);
   const T* data = arrData;
   T* resData = result.getStorage (deleteRes);
   T* res = resData;
   // Initialize the minima with the first value of collapsed axes.
   IPosition end(shape-1);
-  for (size_t i=0; i<collapseAxes.nelements(); i++) {
-    size_t axis = collapseAxes(i);
+  for (uInt i=0; i<collapseAxes.nelements(); i++) {
+    uInt axis = collapseAxes(i);
     end(axis) = 0;
   }
-  Array<T, Alloc> tmp(array);           // to get a non-const array for operator()
-  Array<T, Alloc> scratch(result);
-  result.assign_conforming( tmp(IPosition(ndim,0), end).reform (resShape) );
+  Array<T> tmp(array);           // to get a non-const array for operator()
+  result = tmp(IPosition(ndim,0), end).reform (resShape);
   // Find out how contiguous the data is, i.e. if some contiguous data
   // end up in the same output element.
   // cont tells if any data are contiguous.
   // stax gives the first non-contiguous axis.
   // n0 gives the number of contiguous elements.
-  bool cont = true;
-  size_t n0 = nelemCont;
-  int incr0 = incr(0);
+  Bool cont = True;
+  uInt n0 = nelemCont;
+  Int incr0 = incr(0);
   if (nelemCont <= 1) {
-    cont = false;
+    cont = False;
     n0 = shape(0);
     stax = 1;
   }
   // Loop through all data and assemble as needed.
   IPosition pos(ndim, 0);
-  while (true) {
+  while (True) {
     if (cont) {
       T tmp = *res;
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	if (*data < tmp) {
 	  tmp = *data;
 	}
@@ -294,7 +295,7 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMins (const Array<T,
       }
       *res = tmp;
     } else {
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	if (*data < *res) {
 	  *res = *data;
 	}
@@ -302,7 +303,7 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMins (const Array<T,
 	res += incr0;
       }
     }
-    size_t ax;
+    uInt ax;
     for (ax=stax; ax<ndim; ax++) {
       res += incr(ax);
       if (++pos(ax) < shape(ax)) {
@@ -319,55 +320,55 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMins (const Array<T,
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialMaxs (const Array<T, Alloc>& array,
+template<class T> Array<T> partialMaxs (const Array<T>& array,
 					const IPosition& collapseAxes)
 {
   if (collapseAxes.nelements() == 0) {
     return array.copy();
   }
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   IPosition resShape, incr;
-  int nelemCont = 0;
-  size_t stax = partialFuncHelper (nelemCont, resShape, incr, shape,
+  Int nelemCont = 0;
+  uInt stax = partialFuncHelper (nelemCont, resShape, incr, shape,
 				 collapseAxes);
-  Array<T, Alloc> result (resShape);
+  Array<T> result (resShape);
   result = 0;
-  bool deleteData, deleteRes;
+  Bool deleteData, deleteRes;
   const T* arrData = array.getStorage (deleteData);
   const T* data = arrData;
   T* resData = result.getStorage (deleteRes);
   T* res = resData;
   // Initialize the maxima with the first value of collapsed axes.
   IPosition end(shape-1);
-  for (size_t i=0; i<collapseAxes.nelements(); i++) {
-    size_t axis = collapseAxes(i);
+  for (uInt i=0; i<collapseAxes.nelements(); i++) {
+    uInt axis = collapseAxes(i);
     end(axis) = 0;
   }
-  Array<T, Alloc> tmp(array);           // to get a non-const array for operator()
-  result.assign_conforming( tmp(IPosition(ndim,0), end).reform (resShape) );
+  Array<T> tmp(array);           // to get a non-const array for operator()
+  result = tmp(IPosition(ndim,0), end).reform (resShape);
   // Find out how contiguous the data is, i.e. if some contiguous data
   // end up in the same output element.
   // cont tells if any data are contiguous.
   // stax gives the first non-contiguous axis.
   // n0 gives the number of contiguous elements.
-  bool cont = true;
-  size_t n0 = nelemCont;
-  int incr0 = incr(0);
+  Bool cont = True;
+  uInt n0 = nelemCont;
+  Int incr0 = incr(0);
   if (nelemCont <= 1) {
-    cont = false;
+    cont = False;
     n0 = shape(0);
     stax = 1;
   }
   // Loop through all data and assemble as needed.
   IPosition pos(ndim, 0);
-  while (true) {
+  while (True) {
     if (cont) {
       T tmp = *res;
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	if (*data > tmp) {
 	  tmp = *data;
 	}
@@ -375,7 +376,7 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMaxs (const Array<T,
       }
       *res = tmp;
     } else {
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	if (*data > *res) {
 	  *res = *data;
 	}
@@ -383,7 +384,7 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMaxs (const Array<T,
 	res += incr0;
       }
     }
-    size_t ax;
+    uInt ax;
     for (ax=stax; ax<ndim; ax++) {
       res += incr(ax);
       if (++pos(ax) < shape(ax)) {
@@ -400,19 +401,19 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMaxs (const Array<T,
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialMeans (const Array<T, Alloc>& array,
+template<class T> Array<T> partialMeans (const Array<T>& array,
 					 const IPosition& collapseAxes)
 {
   if (collapseAxes.nelements() == 0) {
     return array.copy();
   }
-  Array<T, Alloc> result = partialSums (array, collapseAxes);
-  size_t nr = result.nelements();
+  Array<T> result = partialSums (array, collapseAxes);
+  uInt nr = result.nelements();
   if (nr > 0) {
-    size_t factor = array.nelements() / nr;
-    bool deleteRes;
+    uInt factor = array.nelements() / nr;
+    Bool deleteRes;
     T* res = result.getStorage (deleteRes);
-    for (size_t i=0; i<nr; i++) {
+    for (uInt i=0; i<nr; i++) {
       res[i] /= 1.0 * factor;
     }
     result.putStorage (res, deleteRes);
@@ -420,39 +421,39 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMeans (const Array<T
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialVariances (const Array<T, Alloc>& array,
+template<class T> Array<T> partialVariances (const Array<T>& array,
 					     const IPosition& collapseAxes,
-					     const Array<T, Alloc>& means)
+					     const Array<T>& means)
 {
   return partialVariances (array, collapseAxes, means, 1);
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialVariances (const Array<T, Alloc>& array,
+template<class T> Array<T> partialVariances (const Array<T>& array,
 					     const IPosition& collapseAxes,
-					     const Array<T, Alloc>& means,
-                                             size_t ddof)
+					     const Array<T>& means,
+                                             uInt ddof)
 {
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   IPosition resShape, incr;
-  int nelemCont = 0;
-  size_t stax = partialFuncHelper (nelemCont, resShape, incr, shape,
+  Int nelemCont = 0;
+  uInt stax = partialFuncHelper (nelemCont, resShape, incr, shape,
 				 collapseAxes);
   if (! resShape.isEqual (means.shape())) {
-    throw ArrayError ("partialVariances: shape of means array mismatches "
+    throw AipsError ("partialVariances: shape of means array mismatches "
 		     "shape of result array");
   }
-  Array<T, Alloc> result (resShape);
+  Array<T> result (resShape);
   result = 0;
-  size_t nr = result.nelements();
-  int factor = int(array.nelements() / nr) - ddof;
+  uInt nr = result.nelements();
+  Int factor = Int(array.nelements() / nr) - ddof;
   if (factor <= 0) {
     return result;
   }
-  bool deleteData, deleteRes, deleteMean;
+  Bool deleteData, deleteRes, deleteMean;
   const T* arrData = array.getStorage (deleteData);
   const T* data = arrData;
   const T* meanData = means.getStorage (deleteMean);
@@ -464,34 +465,34 @@ template<typename T, typename Alloc> Array<T, Alloc> partialVariances (const Arr
   // cont tells if any data are contiguous.
   // stax gives the first non-contiguous axis.
   // n0 gives the number of contiguous elements.
-  bool cont = true;
-  size_t n0 = nelemCont;
-  int incr0 = incr(0);
+  Bool cont = True;
+  uInt n0 = nelemCont;
+  Int incr0 = incr(0);
   if (nelemCont <= 1) {
-    cont = false;
+    cont = False;
     n0 = shape(0);
     stax = 1;
   }
   // Loop through all data and assemble as needed.
   IPosition pos(ndim, 0);
-  while (true) {
+  while (True) {
     if (cont) {
       T tmp = *res;
       T tmpm = *mean;
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	T var = *data++ - tmpm;
 	tmp += var*var;
       }
       *res = tmp;
     } else {
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	T var = *data++ - *mean;
 	*res += var*var;
 	res += incr0;
 	mean += incr0;
       }
     }
-    size_t ax;
+    uInt ax;
     for (ax=stax; ax<ndim; ax++) {
       res += incr(ax);
       mean += incr(ax);
@@ -505,7 +506,7 @@ template<typename T, typename Alloc> Array<T, Alloc> partialVariances (const Arr
     }
   }
   res = resData;
-  for (size_t i=0; i<nr; i++) {
+  for (uInt i=0; i<nr; i++) {
     res[i] /= 1.0 * factor;
   }
   array.freeStorage (arrData, deleteData);
@@ -514,32 +515,32 @@ template<typename T, typename Alloc> Array<T, Alloc> partialVariances (const Arr
   return result;
 }
 
-template<typename T, typename Alloc>
-Array<std::complex<T>, Alloc> partialVariances (const Array<std::complex<T>, Alloc>& array,
-  const IPosition& collapseAxes, const Array<std::complex<T>, Alloc>& means,
-  size_t ddof)
+template<class T> Array<std::complex<T>> partialVariances (const Array<std::complex<T>>& array,
+                                                           const IPosition& collapseAxes,
+                                                           const Array<std::complex<T>>& means,
+                                                           uInt ddof)
 {
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
     return Array<std::complex<T>>();
   }
   IPosition resShape, incr;
-  int nelemCont = 0;
-  size_t stax = partialFuncHelper (nelemCont, resShape, incr, shape,
+  Int nelemCont = 0;
+  uInt stax = partialFuncHelper (nelemCont, resShape, incr, shape,
 				 collapseAxes);
   if (! resShape.isEqual (means.shape())) {
-    throw ArrayError ("partialVariances: shape of means array mismatches "
+    throw AipsError ("partialVariances: shape of means array mismatches "
 		     "shape of result array");
   }
   Array<std::complex<T>> result (resShape);
   result = 0;
-  size_t nr = result.nelements();
-  int factor = int(array.nelements() / nr) - ddof;
+  uInt nr = result.nelements();
+  Int factor = Int(array.nelements() / nr) - ddof;
   if (factor <= 0) {
     return result;
   }
-  bool deleteData, deleteRes, deleteMean;
+  Bool deleteData, deleteRes, deleteMean;
   const std::complex<T>* arrData = array.getStorage (deleteData);
   const std::complex<T>* data = arrData;
   const std::complex<T>* meanData = means.getStorage (deleteMean);
@@ -551,34 +552,34 @@ Array<std::complex<T>, Alloc> partialVariances (const Array<std::complex<T>, All
   // cont tells if any data are contiguous.
   // stax gives the first non-contiguous axis.
   // n0 gives the number of contiguous elements.
-  bool cont = true;
-  size_t n0 = nelemCont;
-  int incr0 = incr(0);
+  Bool cont = True;
+  uInt n0 = nelemCont;
+  Int incr0 = incr(0);
   if (nelemCont <= 1) {
-    cont = false;
+    cont = False;
     n0 = shape(0);
     stax = 1;
   }
   // Loop through all data and assemble as needed.
   IPosition pos(ndim, 0);
-  while (true) {
+  while (True) {
     if (cont) {
       std::complex<T> tmp = *res;
       std::complex<T> tmpm = *mean;
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
         std::complex<T> var = *data++ - tmpm;
 	tmp += var.real()*var.real() + var.imag()*var.imag();
       }
       *res = tmp;
     } else {
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
         std::complex<T> var = *data++ - *mean;
 	*res += var.real()*var.real() + var.imag()*var.imag();
 	res += incr0;
 	mean += incr0;
       }
     }
-    size_t ax;
+    uInt ax;
     for (ax=stax; ax<ndim; ax++) {
       res += incr(ax);
       mean += incr(ax);
@@ -592,7 +593,7 @@ Array<std::complex<T>, Alloc> partialVariances (const Array<std::complex<T>, All
     }
   }
   res = resData;
-  for (size_t i=0; i<nr; i++) {
+  for (uInt i=0; i<nr; i++) {
     res[i] /= 1.0 * factor;
   }
   array.freeStorage (arrData, deleteData);
@@ -601,28 +602,28 @@ Array<std::complex<T>, Alloc> partialVariances (const Array<std::complex<T>, All
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialAvdevs (const Array<T, Alloc>& array,
+template<class T> Array<T> partialAvdevs (const Array<T>& array,
 					  const IPosition& collapseAxes,
-					  const Array<T, Alloc>& means)
+					  const Array<T>& means)
 {
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   IPosition resShape, incr;
-  int nelemCont = 0;
-  size_t stax = partialFuncHelper (nelemCont, resShape, incr, shape,
+  Int nelemCont = 0;
+  uInt stax = partialFuncHelper (nelemCont, resShape, incr, shape,
 				 collapseAxes);
   if (! resShape.isEqual (means.shape())) {
-    throw ArrayError ("partialAvdevs: shape of means array mismatches "
+    throw AipsError ("partialAvdevs: shape of means array mismatches "
 		     "shape of result array");
   }
-  Array<T, Alloc> result (resShape);
+  Array<T> result (resShape);
   result = 0;
-  size_t nr = result.nelements();
-  size_t factor = array.nelements() / nr;
-  bool deleteData, deleteRes, deleteMean;
+  uInt nr = result.nelements();
+  uInt factor = array.nelements() / nr;
+  Bool deleteData, deleteRes, deleteMean;
   const T* arrData = array.getStorage (deleteData);
   const T* data = arrData;
   const T* meanData = means.getStorage (deleteMean);
@@ -634,32 +635,32 @@ template<typename T, typename Alloc> Array<T, Alloc> partialAvdevs (const Array<
   // cont tells if any data are contiguous.
   // stax gives the first non-contiguous axis.
   // n0 gives the number of contiguous elements.
-  bool cont = true;
-  size_t n0 = nelemCont;
-  int incr0 = incr(0);
+  Bool cont = True;
+  uInt n0 = nelemCont;
+  Int incr0 = incr(0);
   if (nelemCont <= 1) {
-    cont = false;
+    cont = False;
     n0 = shape(0);
     stax = 1;
   }
   // Loop through all data and assemble as needed.
   IPosition pos(ndim, 0);
-  while (true) {
+  while (True) {
     if (cont) {
       T tmp = *res;
       T tmpm = *mean;
-      for (size_t i=0; i<n0; i++) {
-	tmp += std::abs(*data++ - tmpm);
+      for (uInt i=0; i<n0; i++) {
+	tmp += fabs(*data++ - tmpm);
       }
       *res = tmp;
     } else {
-      for (size_t i=0; i<n0; i++) {
-	*res += std::abs(*data++ - *mean);
+      for (uInt i=0; i<n0; i++) {
+	*res += fabs(*data++ - *mean);
 	res += incr0;
 	mean += incr0;
       }
     }
-    size_t ax;
+    uInt ax;
     for (ax=stax; ax<ndim; ax++) {
       res += incr(ax);
       mean += incr(ax);
@@ -673,7 +674,7 @@ template<typename T, typename Alloc> Array<T, Alloc> partialAvdevs (const Array<
     }
   }
   res = resData;
-  for (size_t i=0; i<nr; i++) {
+  for (uInt i=0; i<nr; i++) {
     res[i] /= 1.0 * factor;
   }
   array.freeStorage (arrData, deleteData);
@@ -682,26 +683,26 @@ template<typename T, typename Alloc> Array<T, Alloc> partialAvdevs (const Array<
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialRmss (const Array<T, Alloc>& array,
+template<class T> Array<T> partialRmss (const Array<T>& array,
 					const IPosition& collapseAxes)
 {
   if (collapseAxes.nelements() == 0) {
     return array.copy();
   }
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   IPosition resShape, incr;
-  int nelemCont = 0;
-  size_t stax = partialFuncHelper (nelemCont, resShape, incr, shape,
+  Int nelemCont = 0;
+  uInt stax = partialFuncHelper (nelemCont, resShape, incr, shape,
 				 collapseAxes);
-  Array<T, Alloc> result (resShape);
+  Array<T> result (resShape);
   result = 0;
-  size_t nr = result.nelements();
-  size_t factor = array.nelements() / nr;
-  bool deleteData, deleteRes;
+  uInt nr = result.nelements();
+  uInt factor = array.nelements() / nr;
+  Bool deleteData, deleteRes;
   const T* arrData = array.getStorage (deleteData);
   const T* data = arrData;
   T* resData = result.getStorage (deleteRes);
@@ -711,32 +712,32 @@ template<typename T, typename Alloc> Array<T, Alloc> partialRmss (const Array<T,
   // cont tells if any data are contiguous.
   // stax gives the first non-contiguous axis.
   // n0 gives the number of contiguous elements.
-  bool cont = true;
-  size_t n0 = nelemCont;
-  int incr0 = incr(0);
+  Bool cont = True;
+  uInt n0 = nelemCont;
+  Int incr0 = incr(0);
   if (nelemCont <= 1) {
-    cont = false;
+    cont = False;
     n0 = shape(0);
     stax = 1;
   }
   // Loop through all data and assemble as needed.
   IPosition pos(ndim, 0);
-  while (true) {
+  while (True) {
     if (cont) {
       T tmp = *res;
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	tmp += *data * *data;
 	data++;
       }
       *res = tmp;
     } else {
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	*res += *data * *data;
 	data++;
 	res += incr0;
       }
     }
-    size_t ax;
+    uInt ax;
     for (ax=stax; ax<ndim; ax++) {
       res += incr(ax);
       if (++pos(ax) < shape(ax)) {
@@ -749,40 +750,40 @@ template<typename T, typename Alloc> Array<T, Alloc> partialRmss (const Array<T,
     }
   }
   res = resData;
-  for (size_t i=0; i<nr; i++) {
-    res[i] = T(std::sqrt (res[i] / factor));
+  for (uInt i=0; i<nr; i++) {
+    res[i] = T(sqrt (res[i] / factor));
   }
   array.freeStorage (arrData, deleteData);
   result.putStorage (resData, deleteRes);
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialMedians (const Array<T, Alloc>& array,
+template<class T> Array<T> partialMedians (const Array<T>& array,
 					   const IPosition& collapseAxes,
-					   bool takeEvenMean,
-					   bool inPlace)
+					   Bool takeEvenMean,
+					   Bool inPlace)
 {
   // Need to make shallow copy because operator() is non-const.
-  Array<T, Alloc> arr = array;
+  Array<T> arr = array;
   // Is there anything to collapse?
   if (collapseAxes.nelements() == 0) {
     return (inPlace  ?  array : array.copy());
   }
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   // Get the remaining axes.
   // It also checks if axes are specified correctly.
   IPosition resAxes = IPosition::otherAxes (ndim, collapseAxes);
-  size_t ndimRes = resAxes.nelements();
+  uInt ndimRes = resAxes.nelements();
   // Create the result shape.
   // Create blc and trc to step through the input array.
   IPosition resShape(ndimRes);
   IPosition blc(ndim, 0);
   IPosition trc(shape-1);
-  for (size_t i=0; i<ndimRes; ++i) {
+  for (uInt i=0; i<ndimRes; ++i) {
     resShape[i] = shape[resAxes[i]];
     trc[resAxes[i]] = 0;
   }
@@ -790,16 +791,16 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMedians (const Array
     resShape.resize(1);
     resShape[0] = 1;
   }
-  Array<T, Alloc> result (resShape);
-  bool deleteRes;
+  Array<T> result (resShape);
+  Bool deleteRes;
   T* resData = result.getStorage (deleteRes);
   T* res = resData;
-  std::vector<T> tmp;
+  Block<T> tmp;
   // Loop through all data and assemble as needed.
   IPosition pos(ndimRes, 0);
-  while (true) {
-    *res++ = median(arr(blc,trc), tmp, false, takeEvenMean, inPlace);
-    size_t ax;
+  while (True) {
+    *res++ = median(arr(blc,trc), tmp, False, takeEvenMean, inPlace);
+    uInt ax;
     for (ax=0; ax<ndimRes; ax++) {
       if (++pos(ax) < resShape(ax)) {
 	blc[resAxes[ax]]++;
@@ -818,32 +819,32 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMedians (const Array
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialMadfms (const Array<T, Alloc>& array,
+template<class T> Array<T> partialMadfms (const Array<T>& array,
                                          const IPosition& collapseAxes,
-                                         bool takeEvenMean,
-                                         bool inPlace)
+                                         Bool takeEvenMean,
+                                         Bool inPlace)
 {
   // Need to make shallow copy because operator() is non-const.
-  Array<T, Alloc> arr = array;
+  Array<T> arr = array;
   // Is there anything to collapse?
   if (collapseAxes.nelements() == 0) {
     return (inPlace  ?  array : array.copy());
   }
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   // Get the remaining axes.
   // It also checks if axes are specified correctly.
   IPosition resAxes = IPosition::otherAxes (ndim, collapseAxes);
-  size_t ndimRes = resAxes.nelements();
+  uInt ndimRes = resAxes.nelements();
   // Create the result shape.
   // Create blc and trc to step through the input array.
   IPosition resShape(ndimRes);
   IPosition blc(ndim, 0);
   IPosition trc(shape-1);
-  for (size_t i=0; i<ndimRes; ++i) {
+  for (uInt i=0; i<ndimRes; ++i) {
     resShape[i] = shape[resAxes[i]];
     trc[resAxes[i]] = 0;
   }
@@ -851,16 +852,16 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMadfms (const Array<
     resShape.resize(1);
     resShape[0] = 1;
   }
-  Array<T, Alloc> result (resShape);
-  bool deleteRes;
+  Array<T> result (resShape);
+  Bool deleteRes;
   T* resData = result.getStorage (deleteRes);
   T* res = resData;
-  std::vector<T> tmp;
+  Block<T> tmp;
   // Loop through all data and assemble as needed.
   IPosition pos(ndimRes, 0);
-  while (true) {
-    *res++ = madfm(arr(blc,trc), tmp, false, takeEvenMean, inPlace);
-    size_t ax;
+  while (True) {
+    *res++ = madfm(arr(blc,trc), tmp, False, takeEvenMean, inPlace);
+    uInt ax;
     for (ax=0; ax<ndimRes; ax++) {
       if (++pos(ax) < resShape(ax)) {
        blc[resAxes[ax]]++;
@@ -879,35 +880,35 @@ template<typename T, typename Alloc> Array<T, Alloc> partialMadfms (const Array<
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialFractiles (const Array<T, Alloc>& array,
+template<class T> Array<T> partialFractiles (const Array<T>& array,
 					     const IPosition& collapseAxes,
-					     float fraction,
-					     bool inPlace)
+					     Float fraction,
+					     Bool inPlace)
 {
   if (fraction < 0  ||  fraction > 1) {
-    throw(ArrayError("::fractile(const Array<T, Alloc>&) - fraction <0 or >1 "));
+    throw(ArrayError("::fractile(const Array<T>&) - fraction <0 or >1 "));
   }    
   // Need to make shallow copy because operator() is non-const.
-  Array<T, Alloc> arr = array;
+  Array<T> arr = array;
   // Is there anything to collapse?
   if (collapseAxes.nelements() == 0) {
     return (inPlace  ?  array : array.copy());
   }
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   // Get the remaining axes.
   // It also checks if axes are specified correctly.
   IPosition resAxes = IPosition::otherAxes (ndim, collapseAxes);
-  size_t ndimRes = resAxes.nelements();
+  uInt ndimRes = resAxes.nelements();
   // Create the result shape.
   // Create blc and trc to step through the input array.
   IPosition resShape(ndimRes);
   IPosition blc(ndim, 0);
   IPosition trc(shape-1);
-  for (size_t i=0; i<ndimRes; ++i) {
+  for (uInt i=0; i<ndimRes; ++i) {
     resShape[i] = shape[resAxes[i]];
     trc[resAxes[i]] = 0;
   }
@@ -915,16 +916,16 @@ template<typename T, typename Alloc> Array<T, Alloc> partialFractiles (const Arr
     resShape.resize(1);
     resShape[0] = 1;
   }
-  Array<T, Alloc> result (resShape);
-  bool deleteRes;
+  Array<T> result (resShape);
+  Bool deleteRes;
   T* resData = result.getStorage (deleteRes);
   T* res = resData;
-  std::vector<T> tmp;
+  Block<T> tmp;
   // Loop through all data and assemble as needed.
   IPosition pos(ndimRes, 0);
-  while (true) {
-    *res++ = fractile(arr(blc,trc), tmp, fraction, false, inPlace);
-    size_t ax;
+  while (True) {
+    *res++ = fractile(arr(blc,trc), tmp, fraction, False, inPlace);
+    uInt ax;
     for (ax=0; ax<ndimRes; ax++) {
       if (++pos(ax) < resShape(ax)) {
 	blc[resAxes[ax]]++;
@@ -943,32 +944,32 @@ template<typename T, typename Alloc> Array<T, Alloc> partialFractiles (const Arr
   return result;
 }
 
-template<typename T, typename Alloc> Array<T, Alloc> partialInterFractileRanges (const Array<T, Alloc>& array,
+template<class T> Array<T> partialInterFractileRanges (const Array<T>& array,
                                                        const IPosition& collapseAxes,
-                                                       float fraction,
-                                                       bool inPlace)
+                                                       Float fraction,
+                                                       Bool inPlace)
 {
   // Need to make shallow copy because operator() is non-const.
-  Array<T, Alloc> arr = array;
+  Array<T> arr = array;
   // Is there anything to collapse?
   if (collapseAxes.nelements() == 0) {
     return (inPlace  ?  array : array.copy());
   }
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<T, Alloc>();
+    return Array<T>();
   }
   // Get the remaining axes.
   // It also checks if axes are specified correctly.
   IPosition resAxes = IPosition::otherAxes (ndim, collapseAxes);
-  size_t ndimRes = resAxes.nelements();
+  uInt ndimRes = resAxes.nelements();
   // Create the result shape.
   // Create blc and trc to step through the input array.
   IPosition resShape(ndimRes);
   IPosition blc(ndim, 0);
   IPosition trc(shape-1);
-  for (size_t i=0; i<ndimRes; ++i) {
+  for (uInt i=0; i<ndimRes; ++i) {
     resShape[i] = shape[resAxes[i]];
     trc[resAxes[i]] = 0;
   }
@@ -976,16 +977,16 @@ template<typename T, typename Alloc> Array<T, Alloc> partialInterFractileRanges 
     resShape.resize(1);
     resShape[0] = 1;
   }
-  Array<T, Alloc> result (resShape);
-  bool deleteRes;
+  Array<T> result (resShape);
+  Bool deleteRes;
   T* resData = result.getStorage (deleteRes);
   T* res = resData;
-  std::vector<T> tmp;
+  Block<T> tmp;
   // Loop through all data and assemble as needed.
   IPosition pos(ndimRes, 0);
-  while (true) {
-    *res++ = interFractileRange(arr(blc,trc), tmp, fraction, false, inPlace);
-    size_t ax;
+  while (True) {
+    *res++ = interFractileRange(arr(blc,trc), tmp, fraction, False, inPlace);
+    uInt ax;
     for (ax=0; ax<ndimRes; ax++) {
       if (++pos(ax) < resShape(ax)) {
        blc[resAxes[ax]]++;
@@ -1005,13 +1006,13 @@ template<typename T, typename Alloc> Array<T, Alloc> partialInterFractileRanges 
 }
 
 
-template<typename T, typename Alloc, typename RES, typename RESAlloc>
-void partialArrayMath (Array<RES, RESAlloc>& res,
-                       const Array<T, Alloc>& a,
+template<typename T, typename RES>
+void partialArrayMath (Array<RES>& res,
+                       const Array<T>& a,
                        const IPosition& collapseAxes,
                        const ArrayFunctorBase<T,RES>& funcObj)
 {
-  ReadOnlyArrayIterator<T, Alloc> aiter(a, collapseAxes);
+  ReadOnlyArrayIterator<T> aiter(a, collapseAxes);
   IPosition shape(a.shape().removeAxes (collapseAxes));
   res.resize (shape);
   RES* data = res.data();
@@ -1022,25 +1023,25 @@ void partialArrayMath (Array<RES, RESAlloc>& res,
 }
 
 
-template <typename T, typename Alloc, typename RES, typename RESAlloc>
-void boxedArrayMath (Array<RES, RESAlloc>& result,
-                     const Array<T, Alloc>& array,
+template <typename T, typename RES>
+void boxedArrayMath (Array<RES>& result,
+                     const Array<T>& array,
                      const IPosition& boxShape,
                      const ArrayFunctorBase<T,RES>& funcObj)
 {
   const IPosition& shape = array.shape();
-  size_t ndim = shape.size();
+  uInt ndim = shape.size();
   IPosition fullBoxShape, resShape;
   fillBoxedShape (shape, boxShape, fullBoxShape, resShape);
   result.resize (resShape);
-  assert(result.contiguousStorage());
+  DebugAssert (result.contiguousStorage(), AipsError);
   RES* res = result.data();
   // Loop through all data and assemble as needed.
   IPosition blc(ndim, 0);
   IPosition trc(fullBoxShape-1);
-  while (true) {
+  while (True) {
     *res++ = funcObj (array(blc,trc));
-    size_t ax;
+    uInt ax;
     for (ax=0; ax<ndim; ++ax) {
       blc[ax] += fullBoxShape[ax];
       if (blc[ax] < shape[ax]) {
@@ -1059,17 +1060,17 @@ void boxedArrayMath (Array<RES, RESAlloc>& result,
   }
 }
 
-template <typename T, typename Alloc, typename RES, typename RESAlloc>
-void slidingArrayMath (Array<RES, RESAlloc>& result,
-                       const Array<T, Alloc>& array,
+template <typename T, typename RES>
+void slidingArrayMath (Array<RES>& result,
+                       const Array<T>& array,
                        const IPosition& halfBoxShape,
                        const ArrayFunctorBase<T,RES>& funcObj,
-                       bool fillEdge)
+                       Bool fillEdge)
 {
   const IPosition& shape = array.shape();
-  size_t ndim = shape.size();
+  uInt ndim = shape.size();
   IPosition boxEnd, resShape;
-  bool empty = fillSlidingShape (shape, halfBoxShape, boxEnd, resShape);
+  Bool empty = fillSlidingShape (shape, halfBoxShape, boxEnd, resShape);
   if (fillEdge) {
     result.resize (shape);
     result = RES();
@@ -1087,10 +1088,10 @@ void slidingArrayMath (Array<RES, RESAlloc>& result,
     IPosition blc(ndim, 0);
     IPosition trc(boxEnd);
     IPosition pos(ndim, 0);
-    while (true) {
+    while (True) {
       *iterarr = funcObj (array(blc,trc));
       ++iterarr;
-      size_t ax;
+      uInt ax;
       for (ax=0; ax<ndim; ++ax) {
         if (++pos[ax] < resShape[ax]) {
           blc[ax]++;

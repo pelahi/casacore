@@ -28,7 +28,6 @@
 #ifndef MS_MSFITSOUTPUT_H
 #define MS_MSFITSOUTPUT_H
 
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/casa/BasicSL/String.h>
 #include <casacore/casa/Quanta/Quantum.h>
 #include <casacore/ms/MeasurementSets/MeasurementSet.h>
@@ -38,11 +37,12 @@
 namespace casacore {
 
 //# Forward Declarations
-class File;
 class FitsOutput;
 template<class T> class ScalarColumn;
 class Table;
 template<class T> class Block;
+template<class T> class Vector;
+
 // <summary>
 // Write a MeasurementSet to a random group uvfits file.
 // </summary>
@@ -148,7 +148,7 @@ private:
     //    @param fieldidMap     fieldidMap[inp_fld] = output_fld, if inp_fld is selected
     //                                                -1 otherwise.
     //    @param asMultiSource  If true, write a multisource UVFITS file.
-    std::shared_ptr<FitsOutput> _writeMain(
+    FitsOutput* _writeMain(
         Int& refPixelFreq, Double& refFreq,
         Double& chanbw, const String& outFITSFile,
         const Block<Int>& spwidMap, Int nrspw,
@@ -159,7 +159,7 @@ private:
     // Write the FQ table.
     // If combineSpw is True, all spectral-windows are written in one
     // row of the FITS table.
-    static Bool _writeFQ(std::shared_ptr<FitsOutput> output, const MeasurementSet& ms,
+    static Bool writeFQ(FitsOutput *output, const MeasurementSet& ms,
         const Block<Int>& spwidMap, Int nrspw,
         Double refFreq, Int refPixelFreq,
         Double chanbw, Bool combineSpw,
@@ -168,42 +168,35 @@ private:
     );
 
     // Write the AN table.
-    static Bool _writeAN(
-        std::shared_ptr<FitsOutput> output, const MeasurementSet& ms,
+    static Bool writeAN(
+        FitsOutput *output, const MeasurementSet& ms,
         Double refFreq, Bool writeStation
     );
 
     // Write the SU table.
-    static Bool _writeSU(
-        std::shared_ptr<FitsOutput> output, const MeasurementSet& ms,
+    static Bool writeSU(
+        FitsOutput *output, const MeasurementSet& ms,
         const Block<Int>& fieldidMap, Int nrfield,
 		const Block<Int>& spwidMap, Int nrspw
     );
 
     // Write the TY table.
-    static Bool _writeTY(
-        std::shared_ptr<FitsOutput> output, const MeasurementSet& ms,
+    static Bool writeTY(
+        FitsOutput *output, const MeasurementSet& ms,
         const Table& syscal, const Block<Int>& spwidMap,
         uInt nrif, Bool combineSpw
     );
 
     // Write the GC table.
-    static Bool _writeGC(
-        std::shared_ptr<FitsOutput> output, const MeasurementSet& ms,
+    static Bool writeGC(
+        FitsOutput *output, const MeasurementSet& ms,
         const Table& syscal, const Block<Int>& spwidMap,
         uInt nrif, Bool combineSpw, Double sensitivity,
         Int refPixelFreq, Double refFreq, Double chanbw
     );
 
     // Write the WX table.
-    static Bool _writeWX(std::shared_ptr<FitsOutput> output, const MeasurementSet& ms);
-
-    // Write the SY table.
-    static Bool _writeSY(
-        std::shared_ptr<FitsOutput> output, const MeasurementSet& ms,
-        Table& syspower, Int nspw, const Block<Int>& spwIDMap,
-        Bool combineSpw
-    );
+    static Bool writeWX(FitsOutput *output, const MeasurementSet& ms);
 
     // Convert time to day and fraction.
     static void timeToDay(Int& day, Double& dayFraction, Double time);
@@ -216,7 +209,7 @@ private:
     );
 
     // Discern the antenna numbers that go into UVFITS
-    static void _handleAntNumbers(const MeasurementSet& ms,Vector<Int>& antnumbers);
+    static void handleAntNumbers(const MeasurementSet& ms,Vector<Int>& antnumbers);
 
     // Handle the SYSCAL table.
     // It skips the entries not needed and sorts it in the correct order.

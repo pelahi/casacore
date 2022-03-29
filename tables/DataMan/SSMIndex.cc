@@ -54,46 +54,24 @@ SSMIndex::~SSMIndex()
 
 void SSMIndex::get (AipsIO& anOs)
 {
-  uInt version = anOs.getstart("SSMIndex");
+  anOs.getstart("SSMIndex");
   anOs >> itsNUsed;
   anOs >> itsRowsPerBucket;
   anOs >> itsNrColumns;
   anOs >> itsFreeSpace;
-  if (version == 1) {
-    Block<uInt> tmp;
-    getBlock (anOs, tmp);
-    itsLastRow.resize (tmp.size());
-    for (size_t i=0; i<tmp.size(); ++i) {
-      itsLastRow[i] = tmp[i];
-    }
-  } else {
-    getBlock (anOs, itsLastRow);
-  }
+  getBlock (anOs, itsLastRow);
   getBlock (anOs, itsBucketNumber);
   anOs.getend();
 }
 
 void SSMIndex::put (AipsIO& anOs) const
 {
-  // Try to be forward compatible by trying to write the row numbers as uInt.
-  uInt version = 1;
-  if (itsNUsed > 0  &&  itsLastRow[itsNUsed-1] > DataManager::MAXROWNR32) {
-    version = 2;
-  }
-  anOs.putstart("SSMIndex", version);
+  anOs.putstart("SSMIndex", 1);
   anOs << itsNUsed;
   anOs << itsRowsPerBucket;
   anOs << itsNrColumns;
   anOs << itsFreeSpace;
-  if (version == 1) {
-    Block<uInt> tmp(itsNUsed);
-    for (uInt i=0; i<itsNUsed; ++i) {
-      tmp[i] = itsLastRow[i];
-    }
-    putBlock (anOs, tmp);
-  } else {
-    putBlock (anOs, itsLastRow, itsNUsed);
-  }
+  putBlock (anOs, itsLastRow, itsNUsed);
   putBlock (anOs, itsBucketNumber, itsNUsed);
   anOs.putend();
 }
@@ -105,10 +83,11 @@ void SSMIndex::showStatistics (ostream& anOs) const
   anOs << "Rows Per bucket    : " << itsRowsPerBucket << endl;
   anOs << "Nr of Columns      : " << itsNrColumns << endl;   
   if (itsNrColumns > 0 ) {
-    for (uInt i=0; i<itsNUsed; i++) {
+    for (uInt i=0;i < itsNUsed; i++) {
       anOs << "BucketNr["<<i<<"]  : " << itsBucketNumber[i]
 	   << " - LastRow["<<i<<"]   : " << itsLastRow[i] << endl;
     }
+
     anOs << "Freespace entries: " << itsFreeSpace.size() << endl;
     Int i=0;
     for (const auto& x : itsFreeSpace) {
@@ -130,21 +109,21 @@ void SSMIndex::setNrColumns (Int aNrColumns, uInt aSizeUsed)
   }
 }
 
-void SSMIndex::addRow (rownr_t aNrRows)
+void SSMIndex::addRow (uInt aNrRows)
 {
-  rownr_t lastRow=0;
+  uInt lastRow=0;
   if (aNrRows == 0 ) {
     return;
   }
 
   if (itsNUsed > 0 ) {
     lastRow = itsLastRow[itsNUsed-1]+1;
-    rownr_t usedLast = lastRow;
+    uInt usedLast = lastRow;
     if (itsNUsed > 1) {
       usedLast -= itsLastRow[itsNUsed-2]+1;
     }
-    uInt64 fitLast = itsRowsPerBucket-usedLast;
-    uInt64 toAdd = std::min(fitLast, aNrRows);
+    uInt fitLast = itsRowsPerBucket-usedLast;
+    uInt toAdd = min(fitLast, aNrRows);
     
     itsLastRow[itsNUsed-1] += toAdd;
     aNrRows -= toAdd;
@@ -177,7 +156,7 @@ void SSMIndex::addRow (rownr_t aNrRows)
   
   while (aNrRows > 0) {
     itsBucketNumber[itsNUsed] =itsSSMPtr->getNewBucket();
-    uInt toAdd = std::min (aNrRows, rownr_t(itsRowsPerBucket));
+    uInt toAdd = min (aNrRows, itsRowsPerBucket);
     lastRow += toAdd;
     aNrRows -= toAdd;
     itsLastRow[itsNUsed] = lastRow-1;
@@ -185,7 +164,7 @@ void SSMIndex::addRow (rownr_t aNrRows)
   }
 }
 
-Int SSMIndex::deleteRow (rownr_t aRowNr)
+Int SSMIndex::deleteRow (uInt aRowNr)
 {
   // Decrement the rowNrs of all the intervals after the row to be removed
   uInt anIndex = getIndex(aRowNr, String());
@@ -232,7 +211,7 @@ void SSMIndex::recreate()
 }
 
 
-uInt SSMIndex::getIndex (rownr_t aRowNumber, const String& colName) const
+uInt SSMIndex::getIndex (uInt aRowNumber, const String& colName) const
 {
   Bool isFound;
   uInt anIndex = binarySearchBrackets( isFound, itsLastRow, aRowNumber, 
@@ -332,8 +311,8 @@ void SSMIndex::addColumn (Int anOffset, uInt nbits)
   }
 }
 
-void SSMIndex::find (rownr_t aRowNumber, uInt& aBucketNr, 
-		     rownr_t& aStartRow, rownr_t& anEndRow,
+void SSMIndex::find (uInt aRowNumber, uInt& aBucketNr, 
+		     uInt& aStartRow, uInt& anEndRow,
                      const String& colName) const
 {
   uInt anIndex = getIndex(aRowNumber, colName);

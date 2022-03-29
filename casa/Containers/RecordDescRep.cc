@@ -365,7 +365,7 @@ Int RecordDescRep::fieldNumber (const String& fieldName) const
 
 String RecordDescRep::makeName (Int whichField) const
 {
-    char strc[13];
+    char strc[8];
     sprintf(strc, "*%i", whichField+1);
     return uniqueName (strc);
 }

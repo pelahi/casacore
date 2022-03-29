@@ -199,10 +199,10 @@ public:
 
   // Set the maximum cache size (in bytes).
   // 0 means no maximum.
-  void setMaximumCacheSize (uInt64 nbytes);
+  void setMaximumCacheSize (uInt nbytes);
 
   // Get the maximum cache size (in bytes).
-  uInt64 maximumCacheSize() const;
+  uInt maximumCacheSize() const;
 
   // Get the current cache size (in buckets).
   uInt cacheSize() const

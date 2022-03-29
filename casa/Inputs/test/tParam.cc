@@ -128,9 +128,9 @@ int main()
 
     cout << "OK" << endl;
 
-  } catch(std::exception& x) {
+  } catch(AipsError& x) {
     cout << "Caught exception" << endl;
-    cout << "Message is: " << x.what() << endl;
+    cout << "Message is: " << x.getMesg() << endl;
   }    
 }
 

@@ -56,34 +56,34 @@ SSMIndColumn::~SSMIndColumn()
 void SSMIndColumn::setMaxLength (uInt)
 {}
 
-void SSMIndColumn::doCreate (rownr_t aNrRows)
+void SSMIndColumn::doCreate (uInt aNrRows)
 {
     // Initialize and create new file.
     itsIosFile = itsSSMPtr->openArrayFile (ByteIO::New);
     addRow(aNrRows,0,False);
 }
 
-void SSMIndColumn::getFile (rownr_t)
+void SSMIndColumn::getFile (uInt)
 {
     // Initialize and open existing file.
     itsIosFile = itsSSMPtr->openArrayFile (itsSSMPtr->fileOption());
 }
 
-void SSMIndColumn::addRow (rownr_t aNewNrRows, rownr_t anOldNrRows, Bool doInit)
+void SSMIndColumn::addRow (uInt aNewNrRows, uInt anOldNrRows, Bool doInit)
 {
   // init the buckets to zero of needed
   if (doInit) {
-    rownr_t aRowNr=0;
-    rownr_t aNrRows=aNewNrRows;
+    uInt aRowNr=0;
+    uInt aNrRows=aNewNrRows;
 
     while (aNrRows > 0) {
-      rownr_t aStartRow;
-      rownr_t anEndRow;
-      char*   aValPtr;
+      uInt  aStartRow;
+      uInt  anEndRow;
+      char* aValPtr;
       aValPtr = itsSSMPtr->find (aRowNr, itsColNr, aStartRow, anEndRow,
                                  columnName());
       aRowNr = anEndRow+1;
-      rownr_t aNr = anEndRow-aStartRow+1;
+      uInt aNr = anEndRow-aStartRow+1;
       aNrRows -= aNr;
       memset(aValPtr, 0, aNr * itsExternalSizeBytes);
       itsSSMPtr->setBucketDirty();
@@ -106,7 +106,7 @@ void SSMIndColumn::setShapeColumn (const IPosition& aShape)
     isShapeFixed   = True;
 }
 
-void SSMIndColumn::setShape (rownr_t aRowNr, const IPosition& aShape)
+void SSMIndColumn::setShape (uInt aRowNr, const IPosition& aShape)
 {
   // Get the current entry. If none, make empty one.
   StIndArray* aPtr = getArrayPtr (aRowNr);
@@ -124,12 +124,12 @@ void SSMIndColumn::setShape (rownr_t aRowNr, const IPosition& aShape)
   }
 }
 
-StIndArray* SSMIndColumn::getArrayPtr (rownr_t aRowNr)
+StIndArray* SSMIndColumn::getArrayPtr (uInt aRowNr)
 {
-  Int64   anOffset;
-  rownr_t aStartRow;
-  rownr_t anEndRow;
-  char*   aValue;
+  Int64 anOffset;
+  uInt  aStartRow;
+  uInt  anEndRow;
+  char* aValue;
 
   aValue = itsSSMPtr->find (aRowNr, itsColNr, aStartRow, anEndRow,
                             columnName());
@@ -147,7 +147,7 @@ StIndArray* SSMIndColumn::getArrayPtr (rownr_t aRowNr)
 
 //# Get the shape for the array (if any) in the given row.
 //# Read shape if not read yet.
-StIndArray* SSMIndColumn::getShape (rownr_t aRowNr)
+StIndArray* SSMIndColumn::getShape (uInt aRowNr)
 {
     StIndArray* aPtr = getArrayPtr (aRowNr);
     if (aPtr == 0) {
@@ -160,24 +160,31 @@ StIndArray* SSMIndColumn::getShape (rownr_t aRowNr)
     return aPtr;
 }
 
-Bool SSMIndColumn::isShapeDefined (rownr_t aRowNr)
+Bool SSMIndColumn::isShapeDefined (uInt aRowNr)
     { return (getArrayPtr(aRowNr) == 0  ?  False : True); }
 
-uInt SSMIndColumn::ndim (rownr_t aRowNr)
+uInt SSMIndColumn::ndim (uInt aRowNr)
     { return getShape(aRowNr)->shape().nelements(); }
 
-IPosition SSMIndColumn::shape (rownr_t aRowNr)
+IPosition SSMIndColumn::shape (uInt aRowNr)
     { return getShape(aRowNr)->shape(); }
 
 Bool SSMIndColumn::canChangeShape() const
     { return (isShapeFixed  ?  False : True); }
 
 
-void SSMIndColumn::deleteRow(rownr_t aRowNr)
+Bool SSMIndColumn::canAccessSlice (Bool& reask) const
 {
-  char*   aValue;
-  rownr_t aSRow;
-  rownr_t anERow;
+    reask = False;
+    return True;
+}
+
+
+void SSMIndColumn::deleteRow(uInt aRowNr)
+{
+  char* aValue;
+  uInt  aSRow;
+  uInt  anERow;
   aValue = itsSSMPtr->find (aRowNr, itsColNr, aSRow, anERow, columnName());
   
   if (aRowNr < anERow) {
@@ -187,28 +194,46 @@ void SSMIndColumn::deleteRow(rownr_t aRowNr)
   }
 }
 
-void SSMIndColumn::getArrayV (rownr_t aRowNr, ArrayBase& arr)
-{
-  getShape(aRowNr)->getArrayV (*itsIosFile, arr, dtype());
-}
+void SSMIndColumn::getArrayStringV (uInt aRowNr, Array<String>* arr)
+    { getShape(aRowNr)->getArrayStringV (*itsIosFile, arr); }
 
-void SSMIndColumn::putArrayV (rownr_t aRowNr, const ArrayBase& arr)
-{
-  getShape(aRowNr)->putArrayV (*itsIosFile, arr, dtype());
-}
+void SSMIndColumn::putArrayStringV (uInt aRowNr, const Array<String>* arr)
+    { getShape(aRowNr)->putArrayStringV (*itsIosFile, arr); }
 
-void SSMIndColumn::getSliceV (rownr_t aRowNr, const Slicer& ns,
-                              ArrayBase& arr)
-{
-  getShape(aRowNr)->getSliceV (*itsIosFile, ns, arr, dtype());
-}
+void SSMIndColumn::getSliceStringV (uInt aRowNr, const Slicer& ns,
+				   Array<String>* arr)
+    { getShape(aRowNr)->getSliceStringV (*itsIosFile, ns, arr); }
 
-void SSMIndColumn::putSliceV (rownr_t aRowNr, const Slicer& ns,
-                              const ArrayBase& arr)
-{
-  getShape(aRowNr)->putSliceV (*itsIosFile, ns, arr, dtype());
-}
+void SSMIndColumn::putSliceStringV (uInt aRowNr, const Slicer& ns,
+				   const Array<String>* arr)
+    { getShape(aRowNr)->putSliceStringV (*itsIosFile, ns, arr); }
     
+
+#define SSMIndColumn_GETPUT(T,NM) \
+void SSMIndColumn::aips_name2(getArray,NM) (uInt aRowNr, Array<T>* arr) \
+    { getShape(aRowNr)->aips_name2(getArray,NM) (*itsIosFile, arr); } \
+void SSMIndColumn::aips_name2(putArray,NM) (uInt aRowNr, const Array<T>* arr) \
+    { getShape(aRowNr)->aips_name2(putArray,NM) \
+	                                                (*itsIosFile, arr); } \
+void SSMIndColumn::aips_name2(getSlice,NM) \
+                             (uInt aRowNr, const Slicer& ns, Array<T>* arr) \
+    { getShape(aRowNr)->aips_name2(getSlice,NM) (*itsIosFile, ns, arr); } \
+void SSMIndColumn::aips_name2(putSlice,NM) \
+                        (uInt aRowNr, const Slicer& ns, const Array<T>* arr) \
+    { getShape(aRowNr)->aips_name2(putSlice,NM) (*itsIosFile, ns, arr); }
+
+SSMIndColumn_GETPUT(Bool,BoolV)
+SSMIndColumn_GETPUT(uChar,uCharV)
+SSMIndColumn_GETPUT(Short,ShortV)
+SSMIndColumn_GETPUT(uShort,uShortV)
+SSMIndColumn_GETPUT(Int,IntV)
+SSMIndColumn_GETPUT(uInt,uIntV)
+SSMIndColumn_GETPUT(Int64,Int64V)
+SSMIndColumn_GETPUT(float,floatV)
+SSMIndColumn_GETPUT(double,doubleV)
+SSMIndColumn_GETPUT(Complex,ComplexV)
+SSMIndColumn_GETPUT(DComplex,DComplexV)
+
 
 void SSMIndColumn::init()
 {

@@ -3,7 +3,7 @@
 #
 project(casacore)
 
-cmake_minimum_required (VERSION 2.8.10)
+cmake_minimum_required (VERSION 2.6.0)
 include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
@@ -20,13 +20,13 @@ if (POLICY CMP0074)
 endif()
 
 set(PROJECT_VERSION_MAJOR 3)
-set(PROJECT_VERSION_MINOR 4)
+set(PROJECT_VERSION_MINOR 3)
 set(PROJECT_VERSION_PATCH 0)
-set(PROJECT_VERSION
+set(PROJECT_VERSION 
   "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
 # Increment the PROJECT_SOVERSION every time you update VERSION_MINOR!
-SET(PROJECT_SOVERSION 6)
+SET(PROJECT_SOVERSION 5)
 
 SET(NO_SOVERSION FALSE CACHE BOOL "do not add version information to shared libraries")
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -39,15 +39,14 @@ set(CPACK_PACKAGE_CONTACT "Malte Marquarding") #required
 set(CPACK_PACKAGE_VENDOR "https://github.com/casacore/casacore")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Astronomical data processing library")
 
+enable_language (Fortran)
+
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # By default build only Python2 bindings
 option (BUILD_PYTHON "Build the python bindings" YES)
 option (BUILD_PYTHON3 "Build the python3 bindings" NO)
-
 option (BUILD_DEPRECATED "build and install deprecated classes (such as Map)" NO)
-option (BUILD_FFTPACK_DEPRECATED "build FFTPack" NO)
-option (BUILD_DYSCO "Build the Dysco compression storage manager" YES)
 
 # By default build shared libraries
 option (ENABLE_SHARED "Build shared libraries" YES)
@@ -63,11 +62,12 @@ if (HAVE_O_DIRECT)
     add_definitions(-DHAVE_O_DIRECT)
 endif()
 
-# By default do not use ADIOS2, HDF5
+# By default do not use ADIOS2, HDF5, FFTW3
 option (ENABLE_TABLELOCKING "Make locking for concurrent table access possible" YES)
 option (USE_READLINE "Build readline support" YES)
 option (USE_ADIOS2 "Build ADIOS2 " NO)
 option (USE_HDF5 "Build HDF5 " NO)
+option (USE_FFTW3 "Use FFTW instead of FFTPack" NO)
 option (USE_THREADS "Use Mutex thread synchronization" YES)
 option (USE_OPENMP "Use OpenMP threading" NO)
 option (USE_MPI "Use MPI for parallel IO" NO)
@@ -95,9 +95,9 @@ if( CASA_BUILD )
    if( NOT DATA_DIR )
       set(DATA_DIR "%CASAROOT%/data")
    endif( )
+   set(USE_FFTW3 ON)
    set(USE_OPENMP ON)
    set(USE_THREADS ON)
-   set(BUILD_FFTPACK_DEPRECATED ON)
    set(BUILD_PYTHON OFF)
    set(Boost_NO_BOOST_CMAKE 1)
    if (EXISTS "/opt/casa/02/include/python2.7")
@@ -213,10 +213,46 @@ else()
     message(FATAL_ERROR "Casacore build requires a c++11 compatible compiler")
 endif (HAS_CXX11)
 
-# Ensure clang is not complaining about unused arguments.
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS "-Qunused-arguments ${CMAKE_CXX_FLAGS}")
-    set(CMAKE_C_FLAGS "-Qunused-arguments ${CMAKE_C_FLAGS}")
+# use faster fortran rules for complex operations, removes restoring complex
+# infinities if naive computation results in NAN + NAN * I
+#Handling complex multiplication and division with correct treating of complex
+#infinities (one element Inf regardless of the other) according to the C is
+#complicated.
+#E.g. a = NaN + 1e30 i; a * a is not NaN but a complex infinity (-Inf - NaN).
+#
+#Treating this situation correctly has large performance impact. In GCC's
+#implementation it is about 4 times slower than the naive implementation, with
+#vectorization enabled the impact is even larger.
+#As correct treatment of complex infinities when NaN appear in results is seldom
+#accounted for, or not required and most other languages do not have these
+#rules, the correct treatmeant can be disabled with the -fcx-fortran-rules flag.
+#This changes the semantics to those of the FORTRAN language which is removes
+#the need for rescuing the result when NaN appear. Python also follows FORTRAN
+#rules.
+#Additionally the correct behavior is not implemented in all compilers,
+#most notably clang which is the default compiler on MacOS. So turning off
+#correct treatment with GCC does not only make our code faster but also behave
+#the same on more compilers.
+#
+#This has measurable impact on e.g. applycal where the cpu performance improves
+#by about 20%.
+# For one reason or another the check on the compiler flag has no
+# effect; it still adds the option which fails for clang.
+if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    check_cxx_compiler_flag(-fcx-fortran-rules HAS_GXX_FORTRAN_RULES)
+    check_c_compiler_flag(-fcx-fortran-rules HAS_GCC_FORTRAN_RULES)
+    # added before cmake flags so it can be disabled with
+    # -fno-cx-fortran-rules for testing
+    if (HAS_GXX_FORTRAN_RULES)
+        set(CMAKE_CXX_FLAGS "-fcx-fortran-rules ${CMAKE_CXX_FLAGS}")
+    endif()
+    if (HAS_GCC_FORTRAN_RULES)
+        set(CMAKE_C_FLAGS "-fcx-fortran-rules ${CMAKE_C_FLAGS}")
+    endif()
+else()
+    # Ensure clang is not complaining about unused arguments.
+    set(CMAKE_CXX_FLAGS "-Qunused-arguments ${CMAKE_CXX_FLAGS}")    
+    set(CMAKE_C_FLAGS "-Qunused-arguments ${CMAKE_C_FLAGS}")    
 endif()
 
 # Since 2015, we need pwrite and pwrite (POSIX 2001)
@@ -225,12 +261,6 @@ check_function_exists(pwrite HAVE_PWRITE)
 if (NOT (HAVE_PREAD AND HAVE_PWRITE))
         message(FATAL_ERROR "Casacore requires pread and pwrite functionality" )
 endif (NOT (HAVE_PREAD AND HAVE_PWRITE))
-
-# Since 2020, we need GCC 4.9 for regex support
-# Additionally we need cmake 2.8.10 for CMAKE_CXX_COMPILER_VERSION
-if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
-    message(FATAL_ERROR "Casacore requires at least gcc-4.9")
-endif()
 
 # FindHDF5 uses environment variables, so set it if needed.
 if (HDF5_ROOT_DIR)
@@ -241,9 +271,8 @@ endif (HDF5_ROOT_DIR)
 if (NOT MODULE)
    set (MODULE all)
 endif (NOT MODULE)
-set (_usebison NO)
-set (_uselapack NO)
-set (_usefortran NO)
+set (_usebison YES)
+set (_uselapack YES)
 set (_usefits NO)
 set (_usewcs NO)
 set (_modules casa)
@@ -254,7 +283,6 @@ if (NOT ${MODULE} STREQUAL "casa")
     if (NOT ${MODULE} STREQUAL "tables")
         set (_modules ${_modules} scimath_f scimath measures meas)
         set (_uselapack YES)
-        set (_usefortran YES)
         if (NOT ${MODULE} STREQUAL "measures")
             if (${MODULE} STREQUAL "ms")
                 set (_modules ${_modules} ms derivedmscal)
@@ -289,47 +317,12 @@ endif (BUILD_PYTHON3)
 # Determine which external packages to use.
 include (CTest)
 
-if (_usefortran)
-  enable_language (Fortran)
-
-  # use faster fortran rules for complex operations, removes restoring complex
-  # infinities if naive computation results in NAN + NAN * I
-  #Handling complex multiplication and division with correct treating of complex
-  #infinities (one element Inf regardless of the other) according to the C is
-  #complicated.
-  #E.g. a = NaN + 1e30 i; a * a is not NaN but a complex infinity (-Inf - NaN).
-  #
-  #Treating this situation correctly has large performance impact. In GCC's
-  #implementation it is about 4 times slower than the naive implementation, with
-  #vectorization enabled the impact is even larger.
-  #As correct treatment of complex infinities when NaN appear in results is seldom
-  #accounted for, or not required and most other languages do not have these
-  #rules, the correct treatmeant can be disabled with the -fcx-fortran-rules flag.
-  #This changes the semantics to those of the FORTRAN language which is removes
-  #the need for rescuing the result when NaN appear. Python also follows FORTRAN
-  #rules.
-  #Additionally the correct behavior is not implemented in all compilers,
-  #most notably clang which is the default compiler on MacOS. So turning off
-  #correct treatment with GCC does not only make our code faster but also behave
-  #the same on more compilers.
-  #
-  #This has measurable impact on e.g. applycal where the cpu performance improves
-  #by about 20%.
-  # For one reason or another the check on the compiler flag has no
-  # effect; it still adds the option which fails for clang.
-  if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-      check_cxx_compiler_flag(-fcx-fortran-rules HAS_GXX_FORTRAN_RULES)
-      check_c_compiler_flag(-fcx-fortran-rules HAS_GCC_FORTRAN_RULES)
-      # added before cmake flags so it can be disabled with
-      # -fno-cx-fortran-rules for testing
-      if (HAS_GXX_FORTRAN_RULES)
-          set(CMAKE_CXX_FLAGS "-fcx-fortran-rules ${CMAKE_CXX_FLAGS}")
-      endif()
-      if (HAS_GCC_FORTRAN_RULES)
-          set(CMAKE_C_FLAGS "-fcx-fortran-rules ${CMAKE_C_FLAGS}")
-      endif()
-  endif()
-endif()
+# Decrease test timeout. Valgrind times are excessive and need much more.
+#set (CTEST_TEST_TIMEOUT 150 CACHE STRING
+#    "Maximum ctest -S time allowed before CTest will kill the test." FORCE)
+# Already a cache var. It can be overridden using ctest --timeout N
+#set (DART_TESTING_TIMEOUT 150 CACHE STRING
+#    "Maximum ctest time allowed before CTest will kill the test." FORCE)
 
 find_package (DL)
 if (USE_READLINE)
@@ -354,11 +347,13 @@ endif (_usebison STREQUAL YES)
 if (_uselapack STREQUAL YES)
     find_package (BLAS REQUIRED)
     find_package (LAPACK REQUIRED)
-    if (FFTW3_DISABLE_THREADS)
-        find_package (FFTW3 COMPONENTS single double REQUIRED)
-    else()
-        find_package (FFTW3 COMPONENTS single double threads REQUIRED)
-    endif (FFTW3_DISABLE_THREADS)
+    if (USE_FFTW3)
+        if (FFTW3_DISABLE_THREADS)
+            find_package (FFTW3 COMPONENTS single double REQUIRED)
+        else()
+            find_package (FFTW3 COMPONENTS single double threads)
+        endif (FFTW3_DISABLE_THREADS)
+    endif (USE_FFTW3)
 endif (_uselapack STREQUAL YES)
 if (_usefits STREQUAL YES)
     find_package (CFITSIO 3.030 REQUIRED) # Should pad to three decimal digits
@@ -371,12 +366,9 @@ if (_usewcs STREQUAL YES)
       message(WARNING "Casacore is not compatible with wcslib 5.14, see issue gh-384.")
     endif (WCSLIB_VERSION_STRING STREQUAL "5.14")
 endif (_usewcs STREQUAL YES)
-
+ 
 # Set the include directories and HAVE compiler variables
 include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
-if (BUILD_DYSCO)
-    add_definitions(-DHAVE_DYSCO)
-endif (BUILD_DYSCO)
 if (WCSLIB_FOUND)
     include_directories (${WCSLIB_INCLUDE_DIRS})
     add_definitions (-DWCSLIB_VERSION_MAJOR=${WCSLIB_VERSION_MAJOR} -DWCSLIB_VERSION_MINOR=${WCSLIB_VERSION_MINOR})
@@ -394,18 +386,16 @@ if (ADIOS2_FOUND)
     add_definitions(-DHAVE_ADIOS2)
 endif (ADIOS2_FOUND)
 if (HDF5_FOUND)
-    # Use BEFORE to achieve that HDF5 is not taken from /usr/local/include
-    ##include_directories (BEFORE ${HDF5_INCLUDE_DIRS})
     include_directories (${HDF5_INCLUDE_DIRS})
     add_definitions(-DHAVE_HDF5)
 endif (HDF5_FOUND)
-
-include_directories (${FFTW3_INCLUDE_DIRS})
-add_definitions(-DHAVE_FFTW3)
-if (NOT FFTW3_DISABLE_THREADS)
-    add_definitions(-DHAVE_FFTW3_THREADS)
-endif (NOT FFTW3_DISABLE_THREADS)
-
+if (FFTW3_FOUND)
+    include_directories (${FFTW3_INCLUDE_DIRS})
+    add_definitions(-DHAVE_FFTW3)
+    if (NOT FFTW3_DISABLE_THREADS)
+        add_definitions(-DHAVE_FFTW3_THREADS)
+    endif (NOT FFTW3_DISABLE_THREADS)
+endif (FFTW3_FOUND)
 if (DL_FOUND)
     add_definitions(-DHAVE_DL)
 endif (DL_FOUND)
@@ -536,8 +526,8 @@ add_subdirectory (build-tools)
 foreach (module ${_modules})
     add_subdirectory (${module})
     set_target_properties(
-      casa_${module}
-      PROPERTIES
+      casa_${module} 
+      PROPERTIES 
           VERSION "${LIB_VERSION}"
           SOVERSION "${LIB_SOVERSION}"
     )
@@ -581,9 +571,7 @@ message (STATUS "ADIOS2 library? ....... = ${ADIOS2_LIBRARIES}")
 message (STATUS "HDF5 library? ......... = ${HDF5_hdf5_LIBRARY}")
 message (STATUS "FFTW3 library? ........ = ${FFTW3_LIBRARIES}")
 
-message (STATUS "BUILD_FFTPACK_DEPRECATED= ${BUILD_FFTPACK_DEPRECATED}")
 message (STATUS "BUILD_DEPRECATED ...... = ${BUILD_DEPRECATED}")
-message (STATUS "BUILD_DYSCO ........... = ${BUILD_DYSCO}")
 message (STATUS "BUILD_PYTHON .......... = ${BUILD_PYTHON}")
 message (STATUS "BUILD_PYTHON3 ......... = ${BUILD_PYTHON3}")
 
@@ -612,6 +600,7 @@ endif (BUILD_PYTHON3)
 #  ENABLE_TABLELOCKING           YES
 #  USE_ADIOS2                    NO
 #  USE_HDF5                      NO
+#  USE_FFTW3                     NO
 #  USE_THREADS                   YES
 #  USE_OPENMP                    NO
 #  USE_MPI                       NO
@@ -626,7 +615,7 @@ endif (BUILD_PYTHON3)
 #                                or msfits  (fits,ms,msfits,derivedmscal)
 #                                or images  (fits,lattices,mirlib,coordinates,images)
 #                                - all
-#
+# 
 # List of possibly used external packages and where
 #  CFITSIO      fits
 #  WCSLIB       coordinates
@@ -639,7 +628,7 @@ endif (BUILD_PYTHON3)
 #  ADIOS2       tables (optional)
 #  LAPACK       scimath
 #  BLAS         scimath
-#  FFTW         scimath
+#  FFTW         scimath (optional)
 #  BOOST        python (Boost-Python only)
 #  PYTHON       python
 #  NUMPY        python

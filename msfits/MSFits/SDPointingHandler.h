@@ -33,7 +33,6 @@
 #include <casacore/casa/Containers/RecordField.h>
 #include <casacore/measures/Measures/MDirection.h>
 #include <casacore/casa/Arrays/Matrix.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -42,6 +41,8 @@ class MeasurementSet;
 class MSPointing;
 class MSPointingColumns;
 class Record;
+
+template <class T> class Vector;
 
 // <summary>
 // </summary>

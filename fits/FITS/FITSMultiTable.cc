@@ -197,9 +197,10 @@ Vector<String> FITSMultiTable::filesInTimeRange(const String &directoryName,
     Vector<Double> allStartTimes(nfiles);
     uInt count = 0;
     // If this is still in use in the year 3xxx, it will fail!
-    DirectoryIterator diriter(dir,
-			      Regex("^[12][0-9][0-9][0-9]_[0-9][0-9]_[0-9][0-9]_"
-				     "[0-9][0-9]:[0-9][0-9]:[0-9][0-9].*\\.fits$"));
+    DirectoryIterator diriter(dir, 
+			      String("^[12][0-9][0-9][0-9]_[0-9][0-9]_[0-9][0-9]_"
+				     "[0-9][0-9]:[0-9][0-9]:[0-9][0-9]") + ".*" + 
+			      String(".fits$"));
 
     while (!diriter.pastEnd()) {
 	allfiles(count) = diriter.name();;

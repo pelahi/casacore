@@ -30,7 +30,6 @@
 #include <casacore/casa/aips.h>
 #include <casacore/measures/Measures/Stokes.h>
 #include <casacore/casa/BasicSL/String.h>
-#include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/iostream.h>
 
@@ -63,8 +62,8 @@ int main() {
 			cout <<  " --- receptor2 = ";
 			cout << Stokes::receptor2(Stokes::type(polint));
 			cout << endl;
-		} catch(std::exception& x) {
-			cout << " Caught exception of receptor correctly: "<<x.what()<<endl;
+		} catch(AipsError& x) {
+			cout << " Caught exception of receptor correctly: "<<x.getMesg()<<endl;
 		}
 
 		polstr="XY";
@@ -100,8 +99,8 @@ int main() {
 			cout <<  " --- receptor2 = ";
 			cout << Stokes::receptor2(Stokes::type(polstr)) ;
 			cout << endl;
-		} catch(std::exception& x) {
-			cout << " Caught exception of receptor correctly: "<<x.what()<<endl;
+		} catch(AipsError& x) {
+			cout << " Caught exception of receptor correctly: "<<x.getMesg()<<endl;
 		}
 		for (uInt i=0;i<Stokes::NumberOfTypes;i++) {
 			if (Stokes::fromFITSValue(Stokes::FITSValue(Stokes::type(i)))
@@ -122,7 +121,7 @@ int main() {
 		AlwaysAssert(Stokes::allNames(True).size() == Stokes::NumberOfTypes, AipsError);
 		cout << "ok" << endl;
 	}
-	catch (std::exception&) {
+	catch (AipsError&) {
 		cout << "fail" << endl;
 
 	}

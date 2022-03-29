@@ -28,10 +28,11 @@
 //# Includes
 #include <casacore/measures/Measures/MDoppler.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Quanta/MVFrequency.h>
 #include <casacore/casa/Quanta/Quantum.h>
 #include <casacore/casa/Utilities/Assert.h>
+#include <casacore/casa/Utilities/Register.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -78,8 +79,12 @@ const String &MDoppler::showMe() {
     return name;
 }
 
+uInt MDoppler::type() const {
+  return Register(static_cast<MDoppler *>(0));
+}
+
 void MDoppler::assure(const Measure &in) {
-  if (!dynamic_cast<const MDoppler*>(&in)) {
+  if (in.type() != Register(static_cast<MDoppler *>(0))) {
     throw(AipsError("Illegal Measure type argument: " +
 		    MDoppler::showMe()));
   }
@@ -192,7 +197,7 @@ Bool MDoppler::giveMe(MDoppler::Ref &mr, const String &in) {
 }
 
 Bool MDoppler::setOffset(const Measure &in) {
-  if (!dynamic_cast<const MDoppler*>(&in)) return False;
+  if (in.type() != Register(static_cast<MDoppler *>(0))) return False;
   ref.set(in);
   return True;
 }
@@ -213,6 +218,9 @@ const String &MDoppler::getDefaultType() const {
 
 String MDoppler::getRefString() const {
   return MDoppler::showType(ref.getType());
+}
+uInt MDoppler::myType() {
+  return Register(static_cast<MDoppler *>(0));
 }
 
 Quantity MDoppler::get(const Unit &un) const {

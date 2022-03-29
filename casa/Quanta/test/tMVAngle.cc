@@ -26,7 +26,6 @@
 //# $Id: tMVAngle.cc 21335 2013-03-28 14:20:18Z gervandiepen $
 
 #include <casacore/casa/aips.h>
-#include <casacore/casa/BasicMath/Math.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/Quanta/MVAngle.h>
@@ -101,8 +100,8 @@ int main ()
     AlwaysAssertExit (! testMUS (q, "1d0m["));
     AlwaysAssertExit (testMUS (q, "1d0m[", 1, False));
     AlwaysAssertExit (testMUS (q, "1d1m5.7[", 1+1./60+5.7/3600, False));
-  } catch (std::exception& x) {
-    cout << "Unexpected exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << "Unexpected exception: " << x.getMesg() << endl;
     return 1;
   } 
   return 0;

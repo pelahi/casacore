@@ -31,6 +31,7 @@
 #include <casacore/casa/Containers/RecordDesc.h>
 #include <casacore/casa/Arrays/Array.h>
 #include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Utilities/Register.h>
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/Utilities/Assert.h>
 
@@ -702,10 +703,17 @@ RecordNotice::RecordNotice (NoticeType changeType, uInt fieldNumber)
   fieldNumber_p (fieldNumber)
 {}
 
-bool RecordNotice::operator== (const Notice& that) const
+uInt RecordNotice::type() const
 {
-    if (typeid(*this) != typeid(that)) {
-	return false;
+    // This function returns the "Notice" type, retrieved
+    // from the "type registry".
+    return Register(this);
+}
+
+int RecordNotice::operator== (const Notice& that) const
+{
+    if (type() != that.type()) {
+	return 0;
     }
     return (changeType_p  == ((const RecordNotice&)that).changeType_p)
 	&& (fieldNumber_p == ((const RecordNotice&)that).fieldNumber_p);

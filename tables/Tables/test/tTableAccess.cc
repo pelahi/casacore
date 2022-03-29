@@ -39,7 +39,7 @@
 #include <casacore/tables/DataMan/TiledColumnStMan.h>
 #include <casacore/tables/DataMan/ForwardCol.h>
 #include <casacore/casa/Arrays/Array.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Utilities/Regex.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/Exceptions/Error.h>
@@ -150,7 +150,7 @@ void readTable (const Table& tab)
 {
   readSca<Int> (tab);
   readArr<Int> (tab);
-  Vector<rownr_t> rownrs(1,1);
+  Vector<uInt> rownrs(1,1);
   Table tab2 = tab(rownrs);
   readSca<Int> (tab2);
   readArr<Int> (tab2);
@@ -176,8 +176,8 @@ int main()
 {
   try {
     doIt();
-  } catch (std::exception& x) {
-    cout << "Caught an exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << "Caught an exception: " << x.getMesg() << endl;
     return 1;
   } 
   return 0;                           // exit with success status

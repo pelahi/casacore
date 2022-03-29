@@ -32,7 +32,6 @@
 #include <casacore/casa/aips.h>
 #include <casacore/scimath/Mathematics/GaussianBeam.h>
 #include <casacore/lattices/Lattices/TiledShape.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/casa/Utilities/PtrHolder.h>
 #include <casacore/casa/Utilities/CountedPtr.h>
 
@@ -40,7 +39,9 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 //# Forward Declarations
 template <class T> class ImageInterface;
+template <class T> class Vector;
 template <class T> class Quantum;
+template <class T> class MaskedArray;
 template <class T> class PtrHolder;
 class CoordinateSystem;
 class Coordinate;

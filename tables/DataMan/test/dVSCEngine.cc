@@ -46,19 +46,16 @@ VSCExampleVSCEngine::VSCExampleVSCEngine()
 
 VSCExampleVSCEngine::VSCExampleVSCEngine (const String& sourceColumnName,
 					  const String& xTargetColumnName,
-					  const String& yTargetColumnName,
-					  const String& zTargetColumnName)
+					  const String& yTargetColumnName)
 : VSCEngine<VSCExample> (sourceColumnName),
   xTargetName_p (xTargetColumnName),
-  yTargetName_p (yTargetColumnName),
-  zTargetName_p (zTargetColumnName)
+  yTargetName_p (yTargetColumnName)
 {}
 
 VSCExampleVSCEngine::VSCExampleVSCEngine (const VSCExampleVSCEngine& that)
 : VSCEngine<VSCExample> (that),
   xTargetName_p (that.xTargetName_p),
-  yTargetName_p (that.yTargetName_p),
-  zTargetName_p (that.zTargetName_p)
+  yTargetName_p (that.yTargetName_p)
 {}
 
 VSCExampleVSCEngine::~VSCExampleVSCEngine()
@@ -67,8 +64,7 @@ VSCExampleVSCEngine::~VSCExampleVSCEngine()
 DataManager* VSCExampleVSCEngine::clone() const
 {
     DataManager* dmPtr = new VSCExampleVSCEngine (sourceColumnName(),
-                                                  xTargetName_p, yTargetName_p,
-                                                  zTargetName_p);
+					       xTargetName_p, yTargetName_p);
     if (dmPtr == 0) {
 	throw (AllocError ("VSCExampleVSCEngine::clone()", 1));
     }
@@ -77,12 +73,11 @@ DataManager* VSCExampleVSCEngine::clone() const
 
 
 // Store the target column names in the keywords of this column.
-void VSCExampleVSCEngine::create64 (rownr_t)
+void VSCExampleVSCEngine::create (uInt)
 {
     TableColumn src (table(), sourceColumnName());
     src.rwKeywordSet().define ("_xTargetName", xTargetName_p);
     src.rwKeywordSet().define ("_yTargetName", yTargetName_p);
-    src.rwKeywordSet().define ("_zTargetName", zTargetName_p);
 }
 
 // Prepare the engine by allocating column objects
@@ -93,23 +88,19 @@ void VSCExampleVSCEngine::prepare()
     TableColumn src (table(), sourceColumnName());
     xTargetName_p = src.keywordSet().asString ("_xTargetName");
     yTargetName_p = src.keywordSet().asString ("_yTargetName");
-    zTargetName_p = src.keywordSet().asString ("_zTargetName");
     colx.attach (table(), xTargetName_p);
     coly.attach (table(), yTargetName_p);
-    colz.attach (table(), zTargetName_p);
 }
 
-void VSCExampleVSCEngine::get (rownr_t rownr, VSCExample& value)
+void VSCExampleVSCEngine::get (uInt rownr, VSCExample& value)
 {
     colx.get (rownr, value.x());
     coly.get (rownr, value.y());
-    colz.get (rownr, value.z());
 }
-void VSCExampleVSCEngine::put (rownr_t rownr, const VSCExample& value)
+void VSCExampleVSCEngine::put (uInt rownr, const VSCExample& value)
 {
     colx.put (rownr, value.x());
     coly.put (rownr, value.y());
-    colz.put (rownr, value.z());
 }
 
 

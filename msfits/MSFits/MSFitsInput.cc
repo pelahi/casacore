@@ -62,7 +62,6 @@
 #include <casacore/casa/OS/File.h>
 #include <casacore/casa/OS/HostInfo.h>
 #include <casacore/casa/Quanta/MVTime.h>
-#include <casacore/tables/Tables/ArrColDesc.h>
 #include <casacore/tables/Tables/ArrayColumn.h>
 #include <casacore/tables/DataMan/IncrementalStMan.h>
 #include <casacore/tables/Tables/ScalarColumn.h>
@@ -70,7 +69,6 @@
 #include <casacore/tables/Tables/SetupNewTab.h>
 #include <casacore/tables/DataMan/StandardStMan.h>
 #include <casacore/tables/Tables/Table.h>
-#include <casacore/tables/Tables/TableUtil.h>
 #include <casacore/tables/Tables/TableDesc.h>
 #include <casacore/tables/Tables/TableInfo.h>
 #include <casacore/tables/Tables/TableLock.h>
@@ -293,7 +291,7 @@ MSFitsInput::MSFitsInput(const String& msFile, const String& fitsFile,
         }
         else {
 
-            if (_checkInput(*_infile)) {
+            if (checkInput(*_infile)) {
                 if (_infile->hdutype() == FITS::PrimaryGroupHDU) {
                     _priGroup.attach(*_infile);
                 }
@@ -359,7 +357,7 @@ void MSFitsInput::readRandomGroupUVFits(Int obsType) {
         }
         catch(const AipsError& ex) {
             _log << LogOrigin("MSFitsInput", __func__)
-		        << ex.what()
+		        << ex.getMesg()
 		        << LogIO::EXCEPTION;
         }
     }
@@ -370,12 +368,12 @@ void MSFitsInput::readRandomGroupUVFits(Int obsType) {
         }
         catch(const AipsError& ex) {
             _log << LogOrigin("MSFitsInput", __func__)
-               << ex.what()
+               << ex.getMesg()
                << LogIO::EXCEPTION;
         }
     }
     // now handle the BinaryTable extensions for the subtables
-    Bool haveAn = False, haveField = False, haveSpW = False, haveSysPower = False;
+    Bool haveAn = False, haveField = False, haveSpW = False;
     while (_infile->rectype() != FITS::EndOfFile && !_infile->err()) {
         if (_infile->hdutype() != FITS::BinaryTableHDU) {
             _log << LogOrigin("MSFitsInput", __func__)
@@ -412,10 +410,6 @@ void MSFitsInput::readRandomGroupUVFits(Int obsType) {
                 if (haveSpW) {
                     updateSpectralWindowTable();
                 }
-            }
-            else if (type.contains("SY") && ! haveSysPower) {
-                haveSysPower = True;
-                _fillSysPowerTable(binTab);
             }
             else {
                 _log << LogOrigin("MSFitsInput", __func__)
@@ -522,9 +516,6 @@ void MSFitsInput::readPrimaryTableUVFits(Int obsType) {
                     //    updateSpectralWindowTable();
                     //}
                 } 
-                else if (type.contains("SY")) {
-                    _fillSysPowerTable(*bt);
-                }
                 else if (type.contains("UV")) {
                     //showBinaryTable(*bt);
                     //fillOtherUVTables(*bt, *fqTab);
@@ -546,7 +537,7 @@ void MSFitsInput::readPrimaryTableUVFits(Int obsType) {
                     }
                     catch(const AipsError& ex) {
                         _log << LogOrigin("MSFitsInput", __func__)
-                               << ex.what() 
+                               << ex.getMesg() 
                                << LogIO::EXCEPTION;
                     }
                     //fillPointingTable();
@@ -554,7 +545,7 @@ void MSFitsInput::readPrimaryTableUVFits(Int obsType) {
                     fillFeedTable();
 
                     moreToDo = false;
-                }
+        }
                 else {
                     _infile->skip_hdu();
                     _log << LogOrigin("MSFitsInput", __func__)
@@ -594,9 +585,9 @@ void MSFitsInput::readFitsFile(Int obsType) {
     		_ms.relinquishAutoLocks(True);
     		// detach to close
     		_ms = MeasurementSet();
-    		TableUtil::deleteTable(name, True);
+    		Table::deleteTable(name, True);
     	}
-    	ThrowCc(ex.what());
+    	ThrowCc(ex.getMesg());
     }
 }
 
@@ -605,14 +596,14 @@ MSFitsInput::~MSFitsInput() {
     delete _msc;
 }
 
-Bool MSFitsInput::_checkInput(FitsInput& infile) {
+Bool MSFitsInput::checkInput(FitsInput& infile) {
     // Check that we have a valid UV fits file
     if (infile.rectype() != FITS::HDURecord) {
-        _log << LogOrigin("MSFitsInput", __func__)
+        _log << LogOrigin("MSFitsInput", "checkInput")
                << "file does not start with standard hdu record."
                << LogIO::EXCEPTION;
     }
-    _log << LogOrigin("MSFitsInput", __func__)
+    _log << LogOrigin("MSFitsInput", "checkInput")
            << LogIO::DEBUG1
            << "infile.hdutype(): " << infile.hdutype() 
            << LogIO::POST;
@@ -621,7 +612,7 @@ Bool MSFitsInput::_checkInput(FitsInput& infile) {
     if (infile.hdutype() != FITS::PrimaryGroupHDU &&
         infile.hdutype() != FITS::PrimaryArrayHDU &&
          infile.hdutype() != FITS::PrimaryTableHDU) {
-        _log << LogOrigin("MSFitsInput", __func__)
+        _log << LogOrigin("MSFitsInput", "checkInput")
                << "Error, neither primary group nor primary table"
                << LogIO::EXCEPTION;
     }
@@ -630,7 +621,7 @@ Bool MSFitsInput::_checkInput(FitsInput& infile) {
          dataType != FITS::SHORT &&
          dataType != FITS::LONG &&
          dataType != FITS::BYTE) {
-        _log << LogOrigin("MSFitsInput", __func__)
+        _log << LogOrigin("MSFitsInput", "checkInput")
                << "Error, this class handles only FLOAT, SHORT, LONG and BYTE data "
                << "(BITPIX=-32,16,32,8) at present" << LogIO::EXCEPTION;
     }
@@ -1139,34 +1130,13 @@ void MSFitsInput::fillMSMainTableColWise(Int& nField, Int& nSpW) {
     }
     // get index for baseline
     Int iBsln = getIndex(pType, "BASELINE");
-    // get indices for subarray, antenna1 and antenna2
-    Int iSubarr = getIndex(pType, "SUBARRAY");
-    Int iAnt1 = getIndex(pType, "ANTENNA1");
-    Int iAnt2 = getIndex(pType, "ANTENNA2");
     // get indices for time
     Int iTime0 = getIndex(pType, "DATE", 0);
     Int iTime1 = getIndex(pType, "DATE", 1);
     // get index for source
     Int iSource = getIndex(pType, "SOURCE");
-    if ( iSource == -1 ) {
-        _log << LogOrigin("MSFitsInput", __func__)
-             << LogIO::NORMAL
-             << "SOURCE not found in";
-        for ( auto p = pType.begin( ); p != pType.end( ); ++p )
-            _log << " " << *p ;
-        _log << LogIO::POST;
-    }
-
     // get index for Freq
     Int iFreq = getIndex(pType, "FREQSEL");
-    if ( iFreq == -1 ) {
-        _log << LogOrigin("MSFitsInput", __func__)
-             << LogIO::NORMAL
-             << "FREQSEL not found in";
-        for ( auto p = pType.begin( ); p != pType.end( ); ++p )
-            _log << " " << *p ;
-        _log << LogIO::POST;
-    }
 
     // get index for Integration time
     Int iInttim = getIndex(pType, "INTTIM");
@@ -1228,7 +1198,7 @@ void MSFitsInput::fillMSMainTableColWise(Int& nField, Int& nSpW) {
         time *= C::day;
 
         // Extract fqid
-        Int freqId = iFreq > 0 ? Int(_priGroup.parm(iFreq)) : 1;
+        Int freqId = Int(_priGroup.parm(iFreq));
 
         // Extract field Id
         Int fieldId = 0;
@@ -1236,18 +1206,8 @@ void MSFitsInput::fillMSMainTableColWise(Int& nField, Int& nSpW) {
             // make 0-based
             fieldId = (Int) _priGroup.parm(iSource) - 1;
         }
-        Int arrayId = 0;
-        std::pair<Int, Int> ants;
-        if (iBsln >= 0) {
-            Float baseline = _priGroup.parm(iBsln);
-            ants = _extractAntennas(baseline);
-            arrayId = Int(100.0 * (baseline - Int(baseline) + 0.001));
-        } else {
-            Int antenna1 = _priGroup.parm(iAnt1);
-            Int antenna2 = _priGroup.parm(iAnt2);
-            ants = _extractAntennas(antenna1, antenna2);
-            arrayId = _priGroup.parm(iSubarr);
-        }
+        Float baseline = _priGroup.parm(iBsln);
+        Int arrayId = Int(100.0 * (baseline - Int(baseline) + 0.001));
         _nArray = max(_nArray, arrayId + 1);
         for (Int k = 0; k < nif; ++k) {
             Int index = group * nif + k;
@@ -1256,6 +1216,7 @@ void MSFitsInput::fillMSMainTableColWise(Int& nField, Int& nSpW) {
             uvw(1, index) = _priGroup.parm(iV) * C::c;
             uvw(2, index) = _priGroup.parm(iW) * C::c;
             // Convert from units of seconds to meters
+            std::pair<Int, Int> ants = _extractAntennas(baseline);
             ant1[index] = ants.first;
             ant2[index] = ants.second;
         }
@@ -1475,33 +1436,13 @@ void MSFitsInput::fillMSMainTable(Int& nField, Int& nSpW) {
     }
     // get index for baseline
     Int iBsln = getIndex(pType, "BASELINE");
-    // get indices for subarray, antenna1 and antenna2
-    Int iSubarr = getIndex(pType, "SUBARRAY");
-    Int iAnt1 = getIndex(pType, "ANTENNA1");
-    Int iAnt2 = getIndex(pType, "ANTENNA2");
     // get indices for time
     Int iTime0 = getIndex(pType, "DATE", 0);
     Int iTime1 = getIndex(pType, "DATE", 1);
     // get index for source
     Int iSource = getIndex(pType, "SOURCE");
-    if ( iSource == -1 ) {
-        _log << LogOrigin("MSFitsInput", __func__)
-             << LogIO::NORMAL
-             << "SOURCE not found in";
-        for ( auto p = pType.begin( ); p != pType.end( ); ++p )
-            _log << " " << *p ;
-        _log << LogIO::POST;
-    }
     // get index for Freq
     Int iFreq = getIndex(pType, "FREQSEL");
-    if ( iFreq == -1 ) {
-        _log << LogOrigin("MSFitsInput", __func__)
-             << LogIO::NORMAL
-             << "FREQSEL not found in";
-        for ( auto p = pType.begin( ); p != pType.end( ); ++p )
-            _log << " " << *p ;
-        _log << LogIO::POST;
-    }
 
     // get index for Integration time
     Int iInttim = getIndex(pType, "INTTIM");
@@ -1557,7 +1498,7 @@ void MSFitsInput::fillMSMainTable(Int& nField, Int& nSpW) {
         time *= C::day;
 
         // Extract fqid
-        Int freqId = iFreq > 0 ? Int(_priGroup.parm(iFreq)) : 1;
+        Int freqId = Int(_priGroup.parm(iFreq));
 
         // Extract field Id
         Int fieldId = 0;
@@ -1574,19 +1515,10 @@ void MSFitsInput::fillMSMainTable(Int& nField, Int& nSpW) {
         uvw *= C::c;
 
         // Extract array/baseline/antenna info
-        Int arrayId = 0;
-        std::pair<Int, Int> ants;
-        if (iBsln >= 0) {
-            Float baseline = _priGroup.parm(iBsln);
-            ants = _extractAntennas(baseline);
-            arrayId = Int(100.0 * (baseline - Int(baseline) + 0.001));
-        } else {
-            Int antenna1 = _priGroup.parm(iAnt1);
-            Int antenna2 = _priGroup.parm(iAnt2);
-            ants = _extractAntennas(antenna1, antenna2);
-            arrayId = _priGroup.parm(iSubarr);
-        }
+        Float baseline = _priGroup.parm(iBsln);
+        Int arrayId = Int(100.0 * (baseline - Int(baseline) + 0.001));
         _nArray = max(_nArray, arrayId + 1);
+        std::pair<Int, Int> ants = _extractAntennas(baseline);
         Int ant1 = ants.first;
         Int ant2 = ants.second;
         // Ensure arrayId-specific params are of correct length:
@@ -1756,141 +1688,6 @@ void MSFitsInput::fillMSMainTable(Int& nField, Int& nSpW) {
     // fill the receptorAngle with defaults, just in case there is no AN table
     _receptorAngle = 0;
 }
-
-void MSFitsInput::_fillSysPowerTable(BinaryTable& bt) {
-    static const Regex trailing(" *$"); // trailing blanks
-    const TableRecord btKeywords = bt.getKeywords();
-    const auto nIF = btKeywords.asInt("NO_IF");
-    ThrowIf(nIF > 1, "Currently SYSPOWER tables with only a single IF may be imported");
-    ThrowIf(nIF == 0, "Number of IFs in SY table cannot be 0");
-    const auto nPol = btKeywords.asInt("NO_POL");
-    Table syTab = bt.fullTable();
-    //syTab.tableDesc().show();
-    const static String name = "SYSPOWER";
-    const String casaTableName = _ms.tableName() + "/" + name;
-    {
-        // table creation code copied from casa ASDM2MSFiller.cc
-        TableDesc tableDesc;
-        // Key columns.
-        tableDesc.comment() = "System calibration from Cal diode demodulation (EVLA).";
-        tableDesc.addColumn(ScalarColumnDesc<Int>("ANTENNA_ID", "Antenna identifier."));
-        tableDesc.addColumn(ScalarColumnDesc<Int>("FEED_ID", "Feed's index."));
-        tableDesc.addColumn(ScalarColumnDesc<Int>("SPECTRAL_WINDOW_ID", "Spectral window identifier."));
-        tableDesc.addColumn(ScalarColumnDesc<Double>("TIME", "Midpoint of time measurement."));
-        tableDesc.addColumn(ScalarColumnDesc<Float>("INTERVAL", "Interval of measurement."));
-        // Data columns.
-        tableDesc.addColumn(ArrayColumnDesc<Float>("SWITCHED_DIFF", "Switched power difference (cal on - off)."));
-        tableDesc.addColumn(ArrayColumnDesc<Float>("SWITCHED_SUM", "Switched power sum (cal on + off)."));
-        tableDesc.addColumn(ArrayColumnDesc<Float>("REQUANTIZER_GAIN", "Requantizer gain."));
-        SetupNewTable tableSetup(casaTableName, tableDesc, Table::New);
-        _ms.rwKeywordSet().defineTable(name, Table(tableSetup));
-        _ms.rwKeywordSet().asTable(name).flush();
-    }
-    Table casaTable(casaTableName, Table::Update);
-    casaTable.addRow(syTab.nrow() * nIF);
-    ScalarColumn<Double> timeCol(syTab, "TIME");
-    ScalarColumn<Float> timeIntCol(syTab, "TIME INTERVAL");
-    ScalarColumn<Int> antNoCol(syTab, "ANTENNA NO.");
-    ScalarColumn<Int> freqIDCol(syTab, "FREQ ID");
-    if (nIF == 1) {
-        ScalarColumn<Float> powerDif1Col(syTab, "POWER DIF1");
-        ScalarColumn<Float> powerSum1Col(syTab, "POWER SUM1");
-        ScalarColumn<Float> postGain1Col(syTab, "POST GAIN1");
-        ScalarColumn<Float> powerDif2Col;
-        ScalarColumn<Float> powerSum2Col;
-        ScalarColumn<Float> postGain2Col;
-        if (nPol == 2) {
-            powerDif2Col = ScalarColumn<Float>(syTab, "POWER DIF2");
-            powerSum2Col = ScalarColumn<Float>(syTab, "POWER SUM2");
-            postGain2Col = ScalarColumn<Float>(syTab, "POST GAIN2");
-        }
-        _doFillSysPowerSingleIF(
-            casaTableName, timeCol, timeIntCol,
-            antNoCol, freqIDCol, powerDif1Col,
-            powerSum1Col, postGain1Col, powerDif2Col,
-            powerSum2Col, postGain2Col 
-        );
-    }
-    else {
-        ArrayColumn<Float> powerDif1Col(syTab, "POWER DIF1");
-        ArrayColumn<Float> powerSum1Col(syTab, "POWER SUM1");
-        ArrayColumn<Float> postGain1Col(syTab, "POST GAIN1");
-    }
-}
-
-void MSFitsInput::_doFillSysPowerSingleIF(
-    const String& casaTableName, const ScalarColumn<Double>& timeCol,
-    const ScalarColumn<Float>& intervalCol,
-    const ScalarColumn<Int>& antNoCol, const ScalarColumn<Int>& freqIDCol,
-    const ScalarColumn<Float>& powerDif1Col,
-    const ScalarColumn<Float>& powerSum1Col,
-    const ScalarColumn<Float>& postGain1Col,
-    const ScalarColumn<Float>& powerDif2Col,
-    const ScalarColumn<Float>& powerSum2Col,
-    const ScalarColumn<Float>& postGain2Col
-) {
-    Table casaTable(casaTableName, Table::Update);
-    const auto nrow = timeCol.nrow();
-    const auto npol = powerDif2Col.nrow() == 0 ? 1 : 2;
-    {
-        ScalarColumn<Int> sysPowerAnt(casaTable, "ANTENNA_ID");
-        const auto antVals = antNoCol.getColumn() - 1;
-        sysPowerAnt.putColumn(antVals);
-    }
-    {
-        ScalarColumn<Int> sysPowerFeed(casaTable, "FEED_ID");
-        const Vector<Int> feedVals(nrow, 0);
-        sysPowerFeed.putColumn(feedVals);
-    }
-    {
-        ScalarColumn<Int> sysPowerSpw(casaTable, "SPECTRAL_WINDOW_ID");
-        const auto spwVals = freqIDCol.getColumn() - 1;
-        sysPowerSpw.putColumn(spwVals);
-    }
-    {
-        ScalarColumn<Double> sysPowerTime(casaTable, "TIME");
-        const auto timeVals = timeCol.getColumn() * C::day;
-        sysPowerTime.putColumn(timeVals);
-    }
-    {
-        ScalarColumn<Float> sysPowerInterval(casaTable, "INTERVAL");
-        const auto intervalVals = intervalCol.getColumn() * (float)C::day;
-        sysPowerInterval.putColumn(intervalVals);
-    }
-    {
-        ArrayColumn<Float> sysPowerDiff(casaTable, "SWITCHED_DIFF");
-        Array<Float> diffs(IPosition(2, npol, nrow));
-        for (uInt i=0; i<nrow; ++i) {
-            diffs(IPosition(2, 0, i)) = powerDif1Col(i);
-            if (npol == 2) {
-                diffs(IPosition(2, 1, i)) = powerDif2Col(i);
-            }
-        }
-        sysPowerDiff.putColumn(diffs);
-    }
-    {
-        ArrayColumn<Float> sysPowerSum(casaTable, "SWITCHED_SUM");
-        Array<Float> sums(IPosition(2, npol, nrow));
-        for (uInt i=0; i<nrow; ++i) {
-            sums(IPosition(2, 0, i)) = powerSum1Col(i);
-            if (npol == 2) {
-                sums(IPosition(2, 1, i)) = powerSum2Col(i);
-            }
-        }
-        sysPowerSum.putColumn(sums);
-    }
-    {
-        ArrayColumn<Float> sysPowerGain(casaTable, "REQUANTIZER_GAIN");
-        Array<Float> gains(IPosition(2, npol, nrow));
-        for (uInt i=0; i<nrow; ++i) {
-            gains(IPosition(2, 0, i)) = postGain1Col(i);
-            if (npol == 2) {
-                gains(IPosition(2, 1, i)) = postGain2Col(i);
-            }
-        }
-        sysPowerGain.putColumn(gains);
-    }
-}  
 
 void MSFitsInput::fillAntennaTable(BinaryTable& bt) {
     static const Regex trailing(" *$"); // trailing blanks
@@ -2256,9 +2053,9 @@ void MSFitsInput::fillSpectralWindowTable(BinaryTable& bt, Int nSpW)
       colIFFreq.getColumn(ifFreq);
       colChWidth.getColumn(chWidth);
       colTotalBandwidth.getColumn(totalBandwidth);
-    }catch(std::exception& x) {
+    }catch(AipsError& x) {
       _log << LogOrigin("MSFitsInput", "fillSpectralWindowTable")
-             << LogIO::DEBUG1 << x.what() << LogIO::POST;
+             << LogIO::DEBUG1 << x.getMesg() << LogIO::POST;
     }
     catch(...) {
       _log << LogOrigin("MSFitsInput", "fillSpectralWindowTable")
@@ -2451,8 +2248,8 @@ void MSFitsInput::fillFieldTable(BinaryTable& bt, Int nField) {
     	);
     	sysvel.getColumn(_sysVel);
     }
-    catch (const std::exception& x) {
-    	ThrowIf(throwImmediately, x.what());
+    catch (const AipsError& x) {
+    	ThrowIf(throwImmediately, x.getMesg());
     	if(noif>1){
     		_log << LogOrigin("MSFitsInput", __func__) << LogIO::WARN
     				<< x.what() << ": " << "Inconsistent setup of RESTFREQ and LSRVEL columns." << endl
@@ -3223,9 +3020,6 @@ void MSFitsInput::fillMSMainTable(BinaryTable& bt) {
     }
 
     Int iBsln = getIndex(TType, "BASELINE");
-    Int iSubarr = getIndex(TType, "SUBARRAY");
-    Int iAnt1 = getIndex(TType, "ANTENNA1");
-    Int iAnt2 = getIndex(TType, "ANTENNA2");
     Int iTime0 = getIndex(TType, "DATE");
     Int iSource = getIndex(TType, "SOURCE");
     Int iFreq = getIndex(TType, "FREQSEL");
@@ -3269,17 +3063,8 @@ void MSFitsInput::fillMSMainTable(BinaryTable& bt) {
             ScalarColumn<Float> colUU(tb, TType(iU));
             ScalarColumn<Float> colVV(tb, TType(iV));
             ScalarColumn<Float> colWW(tb, TType(iW));
-            ScalarColumn<Float> colBL;
-            ScalarColumn<Float> colSubarr, colAnt1, colAnt2;
+            ScalarColumn<Float> colBL(tb, TType(iBsln));
             ArrayColumn<Float> colVis(tb, TType(iVis));
-
-            if (iBsln >= 0) {
-              colBL = ScalarColumn<Float>(tb, TType(iBsln));
-            } else {
-              colSubarr = ScalarColumn<Float>(tb, TType(iSubarr));
-              colAnt1 = ScalarColumn<Float>(tb, TType(iAnt1));
-              colAnt2 = ScalarColumn<Float>(tb, TType(iAnt2));
-            }
 
             Int visL = 1;
             for (uInt i = 0; i < _nPixel.nelements(); i++)
@@ -3314,19 +3099,10 @@ void MSFitsInput::fillMSMainTable(BinaryTable& bt) {
             uvw *= C::c;
 
             // Extract array/baseline/antenna info
-            Int arrayId;
-            std::pair<Int, Int> ants;
-            if (iBsln >= 0) {
-                Float baseline = colBL.asfloat(0);
-                ants = _extractAntennas(baseline);
-                arrayId = Int(100.0 * (baseline - Int(baseline) + 0.001));
-            } else {
-                Int antenna1 = _priGroup.parm(iAnt1);
-                Int antenna2 = _priGroup.parm(iAnt2);
-                ants = _extractAntennas(antenna1, antenna2);
-                arrayId = _priGroup.parm(iSubarr) - 1;
-            }
+            Float baseline = colBL.asfloat(0);
+            Int arrayId = Int(100.0 * (baseline - Int(baseline) + 0.001));
             _nArray = max(_nArray, arrayId + 1);
+            std::pair<Int, Int> ants = _extractAntennas(baseline);
             Int ant1 = ants.first;
             Int ant2 = ants.second;
 
@@ -3478,9 +3254,9 @@ void MSFitsInput::fillMSMainTable(BinaryTable& bt) {
             }
             meter.update((group + 1) * 1.0);
         }
-        catch (const std::exception& x) {
+        catch (const AipsError& x) {
             _log << LogOrigin("MSFitsInput", "fillMSMainTable")
-                    << "Exception while filling MS main table. " << x.what()
+                    << "Exception while filling MS main table. " << x.getMesg()
                     << LogIO::EXCEPTION;
         }
 
@@ -3507,7 +3283,9 @@ void MSFitsInput::fillMSMainTable(BinaryTable& bt) {
     }
 }
 
-std::pair<Int, Int> MSFitsInput::_extractAntennas(Int ant1, Int ant2) {
+std::pair<Int, Int> MSFitsInput::_extractAntennas(Float baseline) {
+    Int ant1 = Int(baseline) / 256;
+    Int ant2 = Int(baseline) - ant1 * 256;
     _nAntRow = max(_nAntRow, ant1);
     _nAntRow = max(_nAntRow, ant2);
     _uniqueAnts.insert(ant1);
@@ -3516,12 +3294,6 @@ std::pair<Int, Int> MSFitsInput::_extractAntennas(Int ant1, Int ant2) {
     ant1--;
     ant2--;
     return make_pair(ant1, ant2);
-}
-
-std::pair<Int, Int> MSFitsInput::_extractAntennas(Float baseline) {
-    Int ant1 = Int(baseline) / 256;
-    Int ant2 = Int(baseline) - ant1 * 256;
-    return _extractAntennas(ant1, ant2);
 }
 
 void MSFitsInput::fillObservationTable(ConstFitsKeywordList& kwl) {
@@ -3681,7 +3453,7 @@ void MSFitsInput::fillSourceTable() {
                 sourceIndex.sourceId() = fid;
                 sourceIndex.spectralWindowId() = spwIds(spwId);
 
-                Vector<rownr_t> rows = sourceIndex.getRowNumbers();
+                Vector<uInt> rows = sourceIndex.getRowNumbers();
                 if (rows.nelements() == 0) {
                     _ms.source().addRow();
                     Int j = _ms.source().nrow() - 1;
@@ -3754,7 +3526,7 @@ void MSFitsInput::fillSourceTable() {
                 MSSourceIndex sourceIndex(_ms.source());
                 sourceIndex.sourceId() = lastFieldId;
                 sourceIndex.spectralWindowId() = spwId;
-                Vector<rownr_t> rows = sourceIndex.getRowNumbers();
+                Vector<uInt> rows = sourceIndex.getRowNumbers();
                 if (rows.nelements() == 0) {
                     _ms.source().addRow();
                     Int j = _ms.source().nrow() - 1;
@@ -3979,7 +3751,6 @@ void MSFitsInput::fillFieldTable(double ra, double dec, String source) {
     msField.flagRow().put(0, False);
 
 }
-        
 
 } //# NAMESPACE CASACORE - END
 

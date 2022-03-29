@@ -1483,8 +1483,8 @@ int main() {
     }
 
     cout << "---------------------------------------------------" << endl;
-  } catch (std::exception& x) {
-    cout << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << x.getMesg() << endl;
   }
   return 0;
 }

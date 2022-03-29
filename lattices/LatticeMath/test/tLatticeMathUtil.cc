@@ -61,9 +61,9 @@ int main()
 
      doCollapse();
 
-  } catch (const std::exception& x) {
+  } catch (const AipsError& x) {
     cout<< "FAIL"<< endl;
-    cerr << x.what() << endl;
+    cerr << x.getMesg() << endl;
     return 1;
   } 
   cout<< "OK"<< endl;

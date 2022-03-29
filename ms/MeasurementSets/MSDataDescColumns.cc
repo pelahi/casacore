@@ -67,18 +67,17 @@ attachOptionalCols(const MSDataDescription& msDataDesc)
 }
 
 
-Int64 MSDataDescColumns::match(uInt spwId, uInt polId, Int64 tryRow) {
-  rownr_t r = nrow();
+Int MSDataDescColumns::match(uInt spwId, uInt polId, Int tryRow) {
+  uInt r = nrow();
   if (r == 0) return -1;
   const Int spw = spwId;
   const Int pol = polId;
   // Main matching loop
   if (tryRow >= 0) {
-    const rownr_t tr = tryRow;
+    const uInt tr = tryRow;
     if (tr >= r) {
       throw(AipsError("MSDataDescColumns::match(...) - "
-                      "row " + String::toString(tr) +
-                      " you suggest is too big"));
+                      "the row you suggest is too big"));
     }
     if (!flagRow()(tr) &&
 	spectralWindowId()(tr) == spw && 

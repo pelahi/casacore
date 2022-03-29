@@ -35,8 +35,7 @@
 #include <casacore/tables/Tables/TableRecord.h>
 #include <casacore/tables/Tables/ArrayColumn.h>
 #include <casacore/casa/Containers/RecordField.h>
-
-#include <mutex>
+#include <casacore/casa/OS/Mutex.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -224,9 +223,9 @@ private:
 
   //# Data members
   // Object to ensure safe multi-threaded lazy single initialization
-  static std::once_flag theirCallOnceFlags[N_Files];
+  static CallOnce theirCallOnce[N_Files];
   // Mutex for thread-safety (other than initialization).
-  static std::mutex theirMutex;
+  static Mutex theirMutex;
   // Tables present
   static Table t[N_Files];
   // Data column descriptor

@@ -35,10 +35,6 @@
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
-//# Forward Declarations.
-class IPosition;
-
-
 //# This header file defines the error classes belonging to the table
 //# descriptor class and its associated classes.
 
@@ -366,12 +362,6 @@ public:
     // This constructor appends ": Table array conformance error"
     // to the given message.
     TableArrayConformanceError (const String& message,Category c=CONFORMANCE);
-    // This constructor appends ": Table array conformance error"
-    // to the given message with the given and expected shape.
-    TableArrayConformanceError (const String& message,
-                                const IPosition& shape,
-                                const IPosition& expectedShape,
-                                Category c=CONFORMANCE);
     ~TableArrayConformanceError () noexcept;
 };
 

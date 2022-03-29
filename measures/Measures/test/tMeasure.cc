@@ -210,12 +210,6 @@ int main()
 	    " to " << tgsref << endl <<
 		" as " << tconv6() << endl;
 
-    {
-        MDirection j2000;
-        bool success = j2000.setRefString("J2000 ");
-        cout << boolalpha << success << endl;
-    }
-
     {	
 	MeasFrame b1900((MEpoch(Quantity(MeasData::MJDB1900,"d"))));
 	MDirection lsr1900(Quantity(270,"deg"),
@@ -404,8 +398,8 @@ int main()
 	
     };	
 
-    } catch (std::exception& x) {
-	cout << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << x.getMesg() << endl;
     } 
 
     try {
@@ -418,8 +412,8 @@ int main()
         MeasFrame mftbm(tbm);
 	cout << mftbm << endl;
 
-    } catch (std::exception& x) {
-	cout << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << x.getMesg() << endl;
     } 
 
     try {
@@ -730,9 +724,9 @@ int main()
 	    MFrequency::showType(MFrequency::Undefined) << " should not be possible." << endl;
 	  isok = False;
 	}
-	catch(const std::exception& x){
+	catch(const AipsError& x){
 	  // expected error
-	  cout << x.what() << endl;
+	  cout << x.getMesg() << endl;
 	}
         try {
 	  MFrequency::Convert backw;
@@ -742,9 +736,9 @@ int main()
 	  cout << MFrequency::showType(MFrequency::Undefined) << " to " <<
 	    MFrequency::showType(i) << " should not be possible." << endl;
 	}
-	catch(const std::exception& x){
+	catch(const AipsError& x){
 	  // expected error
-	  cout << x.what() << endl;
+	  cout << x.getMesg() << endl;
 	}
 	  
       };
@@ -825,8 +819,8 @@ int main()
       };
     }
 
-    } catch (std::exception& x) {
-      cout << x.what() << endl;
+    } catch (AipsError& x) {
+      cout << x.getMesg() << endl;
     } 
 
     return 0;

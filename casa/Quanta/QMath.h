@@ -31,11 +31,13 @@
 
 //# Includes
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/casa/BasicSL/Complex.h>
 #include <casacore/casa/Quanta/Quantum.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
+
+//# Forward Declarations
+template <class T> class Array;
 
 //# Typedefs
 
@@ -46,7 +48,6 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 // <use visibility=export>
 
 // <reviewed reviewer="UNKNOWN" date="before2004/08/25" tests="tQuantum">
-// </reviewed>
 //
 // <prerequisite>
 //   <li> <linkto class=Unit>Unit</linkto>
@@ -66,7 +67,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 // </srcblock>
 //
 // A unit is a string of known unit fields separated
-// by a space or a . (to indicate multiply) or a / (to indicate divide).
+// by 'space' or '.' (to indicate multiply) or '/' (to indicate divide).
 // See the <linkto class=Unit>Unit</linkto> class for details.
 // Example: km/s/(Mpc.s)2  is identical to km.s-1.Mpc-2.s-2
 //
@@ -89,7 +90,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 //   <li> unary <src>-(Quantum<T>)</src>
 //   <li> <src>+=Quantum<T>; +=T; -=Quantum<T>; -=T;</src>
 //   <li> <src>*=Quantum<T>, *=T; /=Quantum<T>; /=T;</src>
-//   <li> <src>+,-,*,/</src> for <src>Quantum<T>,Quantum<T>; T,Quantum<T>; Quantum<T>,T;</src>
+//   <li> <src>+/-/*//</src> for <src>Quantum<T>,Quantum<T>; T,Quantum<T>; Quantum<T>,T;</src>
 //   <li> <src>abs, ceil, floor(Quantum<T>)</src>
 //   <li> <src>pow(Quantum<T>, Int);</src>
 //   <li> <src>sin, cos, tan(Quantum<T>)</src> with proper unit handling

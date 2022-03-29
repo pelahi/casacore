@@ -31,7 +31,6 @@
 
 //# Includes
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/images/Images/ImageInterface.h>
 #include <casacore/casa/Arrays/AxesSpecifier.h>
 
@@ -42,6 +41,7 @@ class IPosition;
 class LattRegionHolder;
 class Slicer;
 template <class T> class SubLattice;
+template <class T> class Array;
 class LatticeNavigator;
 template <class T> class LatticeIterInterface;
 class String;

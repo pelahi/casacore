@@ -93,7 +93,7 @@ int main () {
 		        // quantities don't have conformant units
 		        QVector<Double> qv(vq);
 		    }
-		    catch (const std::exception& x) {
+		    catch (const AipsError& x) {
 		        thrown = True;
 		    }
 		    AlwaysAssert(thrown, AipsError);
@@ -112,8 +112,8 @@ int main () {
 
 
 	}
-	catch (const std::exception& x) {
-		cerr << x.what() << endl;
+	catch (const AipsError& x) {
+		cerr << x.getMesg() << endl;
 		return 1;
 	}
 	return 0;

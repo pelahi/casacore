@@ -29,7 +29,6 @@
 #include <casacore/tables/TaQL/MArrayUtil.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/Utilities/Assert.h>
 #include <iostream>
 
 using namespace casacore;

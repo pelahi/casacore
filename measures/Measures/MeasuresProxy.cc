@@ -85,7 +85,7 @@ Bool MeasuresProxy::doFrame(const String &in) {
       return False;
     }
     frame_p.set(*pcomet_p);
-  } catch (std::exception& x) {
+  } catch (AipsError& x) {
     return False;
   } 
   return True;
@@ -342,7 +342,7 @@ Bool MeasuresProxy::makeMeasure(String &error, MeasureHolder &out,
       error += "No measure created; probably unknow measure type\n";
       return False;
     }
-  } catch (std::exception& x) {
+  } catch (AipsError& x) {
     error += "Cannot convert due to missing frame information\n";
     return False;
   }
@@ -397,7 +397,7 @@ Bool MeasuresProxy::toUvw(String &error, MeasureHolder &out,
       dot[j] *= C::pi/180/240./1.002737909350795;
     }
 
-  } catch (std::exception& x) {
+  } catch (AipsError& x) {
     error += "Cannot convert baseline to uvw: frame "
       "information missing";
     return False;
@@ -717,9 +717,9 @@ Quantum<Vector<Double> > MeasuresProxy::posangle(const Record& lrec,
   y.getRefPtr()->set(frame_p);
   if (x.isModel()) x = MDirection::Convert(x, MDirection::DEFAULT)();
   if (y.isModel()) y = MDirection::Convert(y, MDirection::DEFAULT)();
-  if (x.getRef().getType() != y.getRef().getType()) {
+  if (x.getRefPtr()->getType() != y.getRefPtr()->getType()) {
     y = MDirection::Convert(y, MDirection::castType
-			    (x.getRef().getType()))();
+			    (x.getRefPtr()->getType()))();
   }
   return \
     Quantum<Vector<Double> >(
@@ -736,9 +736,9 @@ Quantum<Vector<Double> > MeasuresProxy::separation(const Record& lrec, const Rec
   y.getRefPtr()->set(frame_p);
   if (x.isModel()) x = MDirection::Convert(x, MDirection::DEFAULT)();
   if (y.isModel()) y = MDirection::Convert(y, MDirection::DEFAULT)();
-  if (x.getRef().getType() != y.getRef().getType()) {
+  if (x.getRefPtr()->getType() != y.getRefPtr()->getType()) {
 	y = MDirection::Convert(y, MDirection::castType
-				(x.getRef().getType()))();
+				(x.getRefPtr()->getType()))();
   }
   return \
     Quantum<Vector<Double> >(

@@ -98,9 +98,9 @@ int main() {
       two.push(one.popVal());
     }
   } catch (EmptyStackError& x) {
-    cout << "EmptyStackError: " << x.what() << endl;
-  } catch (std::exception& x) {
-    cout << "AipsError: " << x.what() << endl;
+    cout << "EmptyStackError: " << x.getMesg() << endl;
+  } catch (AipsError& x) {
+    cout << "AipsError: " << x.getMesg() << endl;
   } 
 
   Stack<int> three = two;
@@ -109,17 +109,17 @@ int main() {
       two.pop();
     }
   } catch (EmptyStackError& x) {
-    cout << "EmptyStackError: " <<  x.what() << endl;
-  } catch (std::exception& x) {
-    cout << "AipsError: " << x.what() << endl;
+    cout << "EmptyStackError: " <<  x.getMesg() << endl;
+  } catch (AipsError& x) {
+    cout << "AipsError: " << x.getMesg() << endl;
   } 
 
   try {
     one.top();
   } catch (EmptyStackError& x) {
-    cout << "EmptyStackError: " << x.what() << endl;
-  } catch (std::exception& x) {
-    cout << "AipsError: " << x.what() << endl;
+    cout << "EmptyStackError: " << x.getMesg() << endl;
+  } catch (AipsError& x) {
+    cout << "AipsError: " << x.getMesg() << endl;
   } 
 
   cout << three.popVal() << endl;

@@ -30,7 +30,6 @@
 
 //# Includes
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/tables/Tables/PlainColumn.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
@@ -39,6 +38,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 class ColumnSet;
 template<class T> class ScalarColumnDesc;
 class AipsIO;
+template<class T> class Vector;
+
 
 // <summary>
 // Access to a table column containing scalars
@@ -102,52 +103,65 @@ public:
 
     ~ScalarColumnData();
 
+    // Ask if the data manager can handle a column.
+    Bool canAccessScalarColumn (Bool& reask) const;
+
+    // Ask if the data manager can handle some cells in a column.
+    Bool canAccessScalarColumnCells (Bool& reask) const;
+
     // Initialize the rows from startRownr till endRownr (inclusive)
     // with the default value defined in the column description.
-    virtual void initialize (rownr_t startRownr, rownr_t endRownr);
+    void initialize (uInt startRownr, uInt endRownr);
 
     // Test if the given cell contains a defined value.
-    virtual Bool isDefined (rownr_t rownr) const;
+    Bool isDefined (uInt rownr) const;
 
     // Get the value from a particular cell.
-    virtual void get (rownr_t rownr, void*) const;
+    void get (uInt rownr, void*) const;
 
     // Get the array of all values in the column.
     // The length of the buffer pointed to by dataPtr must match
     // the actual length. This is checked by ScalarColumn.
-    virtual void getScalarColumn (ArrayBase& dataPtr) const;
+    void getScalarColumn (void* dataPtr) const;
 
     // Get the array of some values in the column (on behalf of RefColumn).
     // The length of the buffer pointed to by dataPtr must match
     // the actual length. This is checked by ScalarColumn.
-    virtual void getScalarColumnCells (const RefRows& rownrs,
-                                       ArrayBase& dataPtr) const;
+    void getScalarColumnCells (const RefRows& rownrs, void* dataPtr) const;
 
     // Put the value in a particular cell.
     // The length of the buffer pointed to by dataPtr must match
     // the actual length. This is checked by ScalarColumn.
-    virtual void put (rownr_t rownr, const void* dataPtr);
+    void put (uInt rownr, const void* dataPtr);
 
     // Put the array of all values in the column.
     // The length of the buffer pointed to by dataPtr must match
     // the actual length. This is checked by ScalarColumn.
-    virtual void putScalarColumn (const ArrayBase& dataPtr);
+    void putScalarColumn (const void* dataPtr);
 
     // Put the array of some values in the column (on behalf on RefColumn).
     // The length of the buffer pointed to by dataPtr must match
     // the actual length. This is checked by ScalarColumn.
-    virtual void putScalarColumnCells (const RefRows& rownrs,
-                                       const ArrayBase& dataPtr);
+    void putScalarColumnCells (const RefRows& rownrs, const void* dataPtr);
 
-    // Add the sort key to the Sort object on behalf of the Table sort function.
+    // Add this column and its data to the Sort object.
+    // It may allocate some storage on the heap, which will be saved
+    // in the argument dataSave.
+    // The function freeSortKey must be called to free this storage.
+    // <thrown>
+    //   <li> TableInvSort
+    // </thrown>
     // <group>
-    virtual void makeSortKey (Sort&, CountedPtr<BaseCompare>& cmpFunc, Int order,
-                              CountedPtr<ArrayBase>& dataSave);
+    void makeSortKey (Sort&, CountedPtr<BaseCompare>& cmpFunc, Int order,
+		      const void*& dataSave);
     // Do it only for the given row numbers.
     void makeRefSortKey (Sort&, CountedPtr<BaseCompare>& cmpFunc, Int order,
-			 const Vector<rownr_t>& rownrs,
-                         CountedPtr<ArrayBase>& dataSave);
+			 const Vector<uInt>& rownrs, const void*& dataSave);
     // </group>
+
+    // Free storage on the heap allocated by makeSortkey().
+    // The pointer will be set to zero.
+    void freeSortKey (const void*& dataSave);
 
     // Allocate value buffers for the table iterator.
     // Also get a comparison object if undefined.

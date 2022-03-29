@@ -127,7 +127,7 @@ void testExpr()
   try {
     cout<<"try as expr2"<<endl;
     ImageOpener::openExpr ("float('tImageExpr_tmp:imgexpr2' + 1)", nodes);
-  } catch (const std::exception& x) {
+  } catch (const AipsError& x) {
     cout << "Expected exception: " << x.what() << endl;
     exc = True;
   }
@@ -136,7 +136,7 @@ void testExpr()
   try {
     cout<<"try as expr3"<<endl;
     ImageOpener::openExpr ("float(tImageExpr_tmp:imgexpr2)", nodes);
-  } catch (const std::exception& x) {
+  } catch (const AipsError& x) {
     cout << "Expected exception: " << x.what() << endl;
     exc = True;
   }
@@ -147,8 +147,8 @@ void testExpr()
 int main() {
   try {
     testExpr();
-  } catch (const std::exception& x) {
-    cerr << x.what() << endl;
+  } catch (const AipsError& x) {
+    cerr << x.getMesg() << endl;
     return 1;
   } 
   cout << "OK" << endl;

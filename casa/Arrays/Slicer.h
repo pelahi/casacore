@@ -25,12 +25,13 @@
 //#
 //# $Id$
 
-#ifndef CASA_SLICER_2_H
-#define CASA_SLICER_2_H
+#ifndef CASA_SLICER_H
+#define CASA_SLICER_H
 
 
 //# Includes
-#include "IPosition.h"
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/IPosition.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -176,8 +177,8 @@ class Slice;
 //   // first, a fragment from the application program:
 //   IPosition start (1,10), end (1, Slicer::MimicSource);
 //   Slicer slicer (start, end);
-//   MyVector <int> v0 (100);
-//   MyVector <int> v1 = v0 (slicer);
+//   MyVector <Int> v0 (100);
+//   MyVector <Int> v1 = v0 (slicer);
 //   //....
 //   // second, a fragment from a constructor of the library class "MyVector":
 //   // the MyVector class will construct v1 as a reference to
@@ -204,13 +205,13 @@ class Slice;
 // 1k on a side, but covering the same region as the original.
 //
 // <srcblock>
-//   Image <float>  image ("N5364.fits");   // a 4-d VLA map, 4096 x 4096 x 3 x 1
+//   Image <Float>  image ("N5364.fits");   // a 4-d VLA map, 4096 x 4096 x 3 x 1
 //   IPosition start (4,0,0,0,0), stride (4,4,4,1,1);
 //   IPosition end   (4, Slicer::MimicSource, Slicer::MimicSource, 
 //                    Slicer::MimicSource, Slicer::MimicSource);
 //   Slicer smartSlicer (start, end, stride);
 //   // assume proper declarations...
-//   Image <float> subImage = image (smartSlicer);
+//   Image <Float> subImage = image (smartSlicer);
 // </srcblock>
 //  
 // </example>
@@ -233,10 +234,10 @@ class Slice;
 // <srcblock>
 //   // preliminaries: create a cube and assign values to all elements --
 //   //  this will be "source" array
-//   Cube <int> bigCube (IPosition (3, 100, 100, 100));
+//   Cube <Int> bigCube (IPosition (3, 100, 100, 100));
 //   assignValues (bigCube);
 //   // declare a smaller cube, the destination array.
-//   Cube <int> smallCube (IPosition (3, 10, 10, 10));
+//   Cube <Int> smallCube (IPosition (3, 10, 10, 10));
 //
 //   //  example 1: use Slice objects to extract a subcube -- the first
 //   //   ten elements along each axis
@@ -354,11 +355,17 @@ public:
 	    LengthOrLast endInterpretation = endIsLength);
     // </group>
 
+    // Copy constructor (copy semantics).
+    Slicer (const Slicer&);
+
+    // Assignment (copy semantics).
+    Slicer& operator= (const Slicer&);
+
     // Equality
-    bool operator==(const Slicer&) const;
+    Bool operator==(const Slicer&) const;
 
     // Return the number of dimensions of the Slicer.
-    size_t ndim() const;
+    uInt ndim() const;
 
     // This function checks all of the start, length (or end),
     // and stride IPositions, and fills in missing values by
@@ -390,7 +397,7 @@ public:
     const IPosition& length() const;
 
     // Are all values fixed (i.e., no MimicSource given)?
-    bool isFixed() const;
+    Bool isFixed() const;
 
     // Set the start and end positions. No explicit checking is done that
     // the input parameters make sense, so you must be certain if you
@@ -416,13 +423,13 @@ private:
     IPosition    end_p;
     IPosition    stride_p;
     IPosition    len_p;         // Length of input
-    bool         fixed_p;       // no MimicSource used
+    Bool         fixed_p;       // no MimicSource used
 
     // Define a private constructor taking an ssize_t.
     // This is to prevent the user from the unexpected and meaningless
     // Slicer that would result when the ssize_t argument is promoted to
     // an IPosition.
-    // Slicer (ssize_t);
+    Slicer (ssize_t);
 
     // Check the given start, end/length and stride.
     // Fill in the length or end.
@@ -443,10 +450,10 @@ private:
 // Print the contents of the specified Slicer to the specified stream.
 std::ostream& operator << (std::ostream& stream, const Slicer& slicer);
 // </group>
-std::string to_string(const Slicer& slicer);
 
 
-inline size_t Slicer::ndim() const
+
+inline uInt Slicer::ndim() const
     { return start_p.nelements(); }
 
 inline const IPosition& Slicer::start() const
@@ -461,7 +468,7 @@ inline const IPosition& Slicer::stride() const
 inline const IPosition& Slicer::length() const
     { return len_p; }
 
-inline bool Slicer::isFixed() const
+inline Bool Slicer::isFixed() const
     { return fixed_p; }
 
 

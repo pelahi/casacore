@@ -27,12 +27,10 @@
 
 #ifndef CASA_APPSTATE_H
 #define CASA_APPSTATE_H
-
-#include <casacore/casa/aips.h>
-
 #include <string>
 #include <list>
-#include <mutex>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/OS/Mutex.h>
 
 namespace casacore {
 
@@ -64,16 +62,6 @@ public:
     // get the list of directories in the data path...
     virtual std::list<std::string> dataPath( ) const {
         static std::list<std::string> result;
-        return result;
-    }
-
-    // Get AppState specified directory for (IERS) measures data.
-    //
-    // If data is not found in the specified directory and the
-    // specified directiory name is nonempty (size > 0), an
-    // exception will be thrown in findTab.
-    virtual std::string measuresDir( ) const {
-        static std::string result;
         return result;
     }
 
@@ -134,8 +122,8 @@ class AppStateSource {
 public:
 
     static void initialize(AppState *init) {
-        static std::mutex mutex_p;
-        std::lock_guard<std::mutex> lock(mutex_p);
+        static Mutex mutex_p;
+        ScopedMutexLock lock(mutex_p);
         if ( user_state ) delete user_state;
         user_state = init;
     }

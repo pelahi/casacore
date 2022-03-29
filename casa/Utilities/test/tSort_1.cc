@@ -32,7 +32,6 @@
 #include <casacore/casa/OS/Timer.h>
 #include <casacore/casa/sstream.h>
 #include <casacore/casa/stdlib.h>
-#include <casacore/casa/BasicMath/Math.h>
 
 #include <casacore/casa/namespace.h>
 //# Forward Declarations
@@ -331,8 +330,8 @@ Bool sort2 (uInt nr)
     bl += vec2;
     cout << "  fill    ";
     timer.show();
-    Vector<uInt64> inx;
-    GenSortIndirect<Int,uInt64>::sort (inx, bl);
+    Vector<uInt> inx;
+    GenSortIndirect<Int>::sort (inx, bl);
     cout << "indsort   ";
     timer.show();
   }

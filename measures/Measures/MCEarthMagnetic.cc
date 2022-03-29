@@ -85,12 +85,12 @@ uInt MCEarthMagnetic::ToRef_p[N_Routes][3] = {
   {MEarthMagnetic::J2000,		MEarthMagnetic::ICRS,		0} };
 uInt MCEarthMagnetic::
 FromTo_p[MEarthMagnetic::N_Types][MEarthMagnetic::N_Types];
-std::once_flag MCEarthMagnetic::theirInitOnceFlag;
+CallOnce0 MCEarthMagnetic::theirInitOnce;
 
 //# Constructors
 MCEarthMagnetic::MCEarthMagnetic() :
   MVPOS1(0), EFIELD(0), measMath() {
-    std::call_once(theirInitOnceFlag, doFillState);
+    theirInitOnce(doFillState);
 }
 
 //# Destructor
@@ -489,7 +489,7 @@ void MCEarthMagnetic::doConvert(MVEarthMagnetic &in,
 }
 
 String MCEarthMagnetic::showState() {
-  std::call_once(theirInitOnceFlag, doFillState);
+  theirInitOnce(doFillState);
   return MCBase::showState(MCEarthMagnetic::FromTo_p[0],
 			   MEarthMagnetic::N_Types, MCEarthMagnetic::N_Routes,
 			   MCEarthMagnetic::ToRef_p);

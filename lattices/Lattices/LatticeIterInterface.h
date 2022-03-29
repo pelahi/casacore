@@ -38,6 +38,9 @@
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 //# Forward Declarations
+template <class T> class Vector;
+template <class T> class Matrix;
+template <class T> class Cube;
 template <class T> class Lattice;
 template <class T> class LatticeIterator;
 template <class T> class RO_LatticeIterator;

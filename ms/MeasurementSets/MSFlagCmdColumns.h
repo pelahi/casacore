@@ -112,7 +112,7 @@ public:
   // </group>
 
   // Convenience function that returns the number of rows in any of the columns
-  rownr_t nrow() const {return applied_p.nrow();}
+  uInt nrow() const {return applied_p.nrow();}
 
   // set the epoch type for the FLAG_CMD column.
   // <note role=tip>

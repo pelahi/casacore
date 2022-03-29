@@ -25,42 +25,46 @@
 //#
 //# $Id$
 
-#ifndef CASA_ARRAYITER_2_TCC
-#define CASA_ARRAYITER_2_TCC
+#ifndef CASA_ARRAYITER_TCC
+#define CASA_ARRAYITER_TCC
 
-#include "ArrayIter.h"
-#include "ArrayError.h"
+#include <casacore/casa/Arrays/ArrayIter.h>
+#include <casacore/casa/Arrays/ArrayError.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
-template<typename T, typename Alloc> ArrayIterator<T, Alloc>::ArrayIterator(const Array<T, Alloc> &a, size_t byDim)
+template<class T> ArrayIterator<T>::ArrayIterator(const Array<T> &a, uInt byDim)
 : ArrayPositionIterator(a.shape(), byDim),
-  ap_p(),
-  pOriginalArray_p(a.allocator())
+  ap_p(0)
 {
     init(a);
 }
 
-template<typename T, typename Alloc> ArrayIterator<T, Alloc>::ArrayIterator(const Array<T, Alloc> &a,
+template<class T> ArrayIterator<T>::ArrayIterator(const Array<T> &a,
 						  const IPosition &axes,
-						  bool axesAreCursor)
+						  Bool axesAreCursor)
 : ArrayPositionIterator(a.shape(), axes, axesAreCursor),
-  ap_p(),
-  pOriginalArray_p(a.allocator())
+  ap_p(0)
 {
     init(a);
 }
+
+template<class T> ArrayIterator<T>::~ArrayIterator()
+{
+    delete ap_p;
+}
+
 
 // <thrown>
 //     <item> ArrayIteratorError
 // </thrown>
-template<typename T, typename Alloc> void ArrayIterator<T, Alloc>::init(const Array<T, Alloc> &a)
+template<class T> void ArrayIterator<T>::init(const Array<T> &a)
 {
     pOriginalArray_p.reference (a);
     dataPtr_p = pOriginalArray_p.begin_p;
 
     if (dimIter() < 1)
-	throw(ArrayIteratorError("ArrayIterator<T, Alloc>::ArrayIterator<T, Alloc> - "
+	throw(ArrayIteratorError("ArrayIterator<T>::ArrayIterator<T> - "
 				 " at the moment cannot iterate by scalars"));
     IPosition blc(pOriginalArray_p.ndim(), 0);
     IPosition trc(pOriginalArray_p.endPosition());
@@ -75,9 +79,9 @@ template<typename T, typename Alloc> void ArrayIterator<T, Alloc>::init(const Ar
     const IPosition& shape = pOriginalArray_p.shape();
     offset_p.resize (a.ndim());
     offset_p = 0;
-    int lastoff = 0;
-    for (size_t i=0; i<iAxes.nelements(); i++) {
-        size_t axis = iAxes(i);
+    Int lastoff = 0;
+    for (uInt i=0; i<iAxes.nelements(); i++) {
+        uInt axis = iAxes(i);
 	if (trc(axis) > 0) trc(axis) = 0;
 	offset_p(axis) = steps(axis) - lastoff;
 	lastoff += (shape(axis)-1)*steps(axis);
@@ -86,20 +90,20 @@ template<typename T, typename Alloc> void ArrayIterator<T, Alloc>::init(const Ar
     // correct shape. We only want to remove the iteration axes, not the
     // possible degenerate axes in the cursor).
     if (dimIter() < pOriginalArray_p.ndim()) {
-        ap_p.reset( new Array<T, Alloc>(pOriginalArray_p(blc,trc).nonDegenerate(cursorAxes())) );
+        ap_p = new Array<T>(pOriginalArray_p(blc,trc).nonDegenerate(cursorAxes()));
     } else {
         // Same dimensionality, so no degenerate axes
-        ap_p.reset( new Array<T, Alloc>(pOriginalArray_p) );
+        ap_p = new Array<T>(pOriginalArray_p);
     }
 }
 
 // <thrown>
 //     <item> ArrayIteratorError
 // </thrown>
-template<typename T, typename Alloc> void ArrayIterator<T, Alloc>::apSetPointer(int stepDim)
+template<class T> void ArrayIterator<T>::apSetPointer(Int stepDim)
 {
     if (ap_p == 0)
-	throw(ArrayIteratorError("ArrayIterator<T, Alloc>::apSetPointer()"
+	throw(ArrayIteratorError("ArrayIterator<T>::apSetPointer()"
 				 " - no iteration array!"));
     if (pastEnd()) {
 	ap_p->begin_p = 0;  // Mark it "invalid"
@@ -114,24 +118,24 @@ template<typename T, typename Alloc> void ArrayIterator<T, Alloc>::apSetPointer(
     }
 }
 
-template<typename T, typename Alloc> void ArrayIterator<T, Alloc>::reset()
+template<class T> void ArrayIterator<T>::reset()
 {
     ArrayPositionIterator::reset();
     apSetPointer(-1);
 }
 
-template<typename T, typename Alloc> void ArrayIterator<T, Alloc>::next()
+template<class T> void ArrayIterator<T>::next()
 {
-    int stepDim = ArrayPositionIterator::nextStep();
+    Int stepDim = ArrayPositionIterator::nextStep();
     apSetPointer(stepDim);
 }
 
   
-template<typename T, typename Alloc> void ArrayIterator<T, Alloc>::set (const IPosition& cursorPos)
+template<class T> void ArrayIterator<T>::set (const IPosition& cursorPos)
 {
     ArrayPositionIterator::set (cursorPos);
-    if (ap_p == nullptr)
-	throw(ArrayIteratorError("ArrayIterator<T, Alloc>::apSetPointer()"
+    if (ap_p == 0)
+	throw(ArrayIteratorError("ArrayIterator<T>::apSetPointer()"
 				 " - no iteration array!"));
     if (pastEnd()) {
 	ap_p->begin_p = 0;  // Mark it "invalid"
@@ -142,7 +146,7 @@ template<typename T, typename Alloc> void ArrayIterator<T, Alloc>::set (const IP
     }  
 }
 
-template<typename T, typename Alloc> ArrayBase& ArrayIterator<T, Alloc>::getArray()
+template<class T> ArrayBase& ArrayIterator<T>::getArray()
 {
     return array();
 }

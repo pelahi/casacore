@@ -30,6 +30,7 @@
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/BasicMath/Math.h>
 #include <casacore/casa/BasicSL/Constants.h>
+#include <casacore/casa/Utilities/Register.h>
 #include <casacore/casa/Quanta/RotMatrix.h>
 #include <casacore/casa/Quanta/Euler.h>
 #include <casacore/casa/Quanta/UnitVal.h>
@@ -39,7 +40,7 @@
 #include <casacore/casa/Quanta/MVBaseline.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -48,6 +49,13 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 //# Constructors
 MVuvw::MVuvw() :
   MVPosition() {}
+
+MVuvw &MVuvw::operator=(const MVuvw &other) {
+  if (this != &other) {
+    xyz = other.xyz;
+  }
+  return *this;
+}
 
 MVuvw::MVuvw(Double in) :
   MVPosition(in) {}
@@ -95,6 +103,9 @@ MVuvw::MVuvw(const MVBaseline &pos, const MVDirection &dr, Bool ew) :
 
 MVuvw::MVuvw(const MVPosition &other) :
   MVPosition(other) {}
+
+//# Destructor
+MVuvw::~MVuvw() {}
 
 //# Operators
 Bool MVuvw::
@@ -161,8 +172,12 @@ MVuvw MVuvw::operator-(const MVuvw &right) const{
 
 //# Member functions
 
+uInt MVuvw::type() const {
+  return Register(static_cast<MVuvw *>(0));
+}
+
 void MVuvw::assure(const MeasValue &in) {
-  if (!dynamic_cast<const MVuvw*>(&in)) {
+  if (in.type() != Register(static_cast<MVuvw *>(0))) {
     throw(AipsError("Illegal MeasValue type argument: MVuvw"));
   }
 }

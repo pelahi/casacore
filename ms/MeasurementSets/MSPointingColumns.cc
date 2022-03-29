@@ -113,7 +113,7 @@ void MSPointingColumns::attachOptionalCols(const MSPointing& msPointing)
   if (cds.isDefined(overTheTop)) overTheTop_p.attach(msPointing, overTheTop);
 }
 
-MDirection MSPointingColumns::directionMeas(rownr_t row, 
+MDirection MSPointingColumns::directionMeas(Int row, 
 						 Double interTime) const
 {
   return MSFieldColumns::interpolateDirMeas(directionMeasCol()(row),
@@ -121,14 +121,14 @@ MDirection MSPointingColumns::directionMeas(rownr_t row,
 					       interTime, time()(row)); 
 }
 
-MDirection MSPointingColumns::targetMeas(rownr_t row, Double interTime) const
+MDirection MSPointingColumns::targetMeas(Int row, Double interTime) const
 {
   return MSFieldColumns::interpolateDirMeas(targetMeasCol()(row),
 					       numPoly()(row),
 					       interTime, time()(row)); 
 }
 
-MDirection MSPointingColumns::pointingOffsetMeas(rownr_t row, 
+MDirection MSPointingColumns::pointingOffsetMeas(Int row, 
 						      Double interTime) const
 {
   if (pointingOffsetMeasCol().isNull()) return MDirection();
@@ -137,7 +137,7 @@ MDirection MSPointingColumns::pointingOffsetMeas(rownr_t row,
 					       interTime, time()(row)); 
 }
 
-MDirection MSPointingColumns::sourceOffsetMeas(rownr_t row,
+MDirection MSPointingColumns::sourceOffsetMeas(Int row,
 						    Double interTime) const
 {
   if (sourceOffsetMeasCol().isNull()) return MDirection();
@@ -147,30 +147,30 @@ MDirection MSPointingColumns::sourceOffsetMeas(rownr_t row,
 }
 
 
-Int64 MSPointingColumns::pointingIndex(Int antenna, Double ptime, Int64 guessRow) const
+Int MSPointingColumns::pointingIndex(Int antenna, Double ptime, Int guessRow) const
 {
   if((this->nrow()) < 1)
     return -1;
   // return the first row matching the requirements
-  const Int64 nrow = antennaId().nrow();
+  const Int nrow = antennaId().nrow();
   //take up from where we left last time
   //hopefully time is monotonic
   //otherwise it will go through the table each time
   if(guessRow <0)
     guessRow=0;
   for (Int k=0; k< 2; ++k){
-    Int64 start=guessRow;
-    Int64 end=nrow;
+    Int start=guessRow;
+    Int end=nrow;
     if(k==1){
       start=0;
       end=guessRow;
     }
-    for (Int64 i=start; i<end; i++) {
+    for (Int i=start; i<end; i++) {
       if (antennaId()(i)==antenna) {
 	Double halfInt=0.0;  
 	if(interval()(i)==0.0){
-	  Int64 counter=0;
-	  Int64 adder=1;
+	  Int counter=0;
+	  Int adder=1;
 	  
 	  while(!( (time()(i+counter)!=time()(i))&& (antennaId()(i+counter) == antenna))){
 	    counter=counter+adder;

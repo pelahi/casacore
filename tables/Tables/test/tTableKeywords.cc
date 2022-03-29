@@ -105,7 +105,7 @@ void renameTables (const String& newName, const String& oldName)
     Bool excp = False;
     try {
 	Table tab1(oldName);
-    } catch (std::exception& x) {
+    } catch (AipsError& x) {
 	excp = True;
     } 
     AlwaysAssertExit (excp);
@@ -140,6 +140,11 @@ void readFromOtherDir()
     Table subtab4 = subtab3.keywordSet().asTable ("SubTab4");
     AlwaysAssertExit (subtab4.nrow() == 4);
   }
+  {
+    // Open the table using the :: syntax.
+    Table subtab3 (Table::openTable("main3data::SubTab2"));
+    AlwaysAssertExit (subtab3.nrow() == 3);
+  }
 }    
 
 
@@ -164,8 +169,8 @@ int main()
 	readTables ("main3data", True);
 	readTables ("main4data", False);
 	readFromOtherDir();
-    } catch (std::exception& x) {
-        cout << "Caught an exception : " << x.what() << endl;
+    } catch (AipsError& x) {
+        cout << "Caught an exception : " << x.getMesg() << endl;
 	return 1;
     } 
     cout << "OK" << endl;

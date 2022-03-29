@@ -25,11 +25,13 @@
 //#
 //# $Id$
 
-#ifndef CASA_VECTORITER_2_H
-#define CASA_VECTORITER_2_H
+#ifndef CASA_VECTORITER_H
+#define CASA_VECTORITER_H
 
-#include "ArrayIter.h"
-#include "Vector.h"
+
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/ArrayIter.h>
+#include <casacore/casa/Arrays/Vector.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -56,35 +58,34 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 // have the "sum" function in ArrayMath.h that we should use instead.
 //
 // <srcblock>
-// Array<float> af;
+// Array<Float> af;
 // // set af
 // VectorIterator vi(af);
-// float sum = 0.0;
-// size_t n = vi.vector().nelements();
+// Float sum = 0.0;
+// uInt n = vi.vector().nelements();
 // while (! vi.pastEnd()) {
-//     for (int i=0; i < n; i++) {   // N.B.; cursor always 0 based.
+//     for (Int i=0; i < n; i++) {   // N.B.; cursor always 0 based.
 //         sum += vi.vector()(i);
 //     }
 //     vi.next();
 // }
 // </srcblock>
 
-template<typename T, typename Alloc=std::allocator<T>>
-class VectorIterator : public ArrayIterator<T, Alloc>
+template<class T> class VectorIterator : public ArrayIterator<T>
 {
 public:
     // Iterate by vector cursors through array "a".
     // The vector cursor is taken for the given axis.
-    explicit VectorIterator(Array<T, Alloc> &a, size_t axis=0);
+    explicit VectorIterator(Array<T> &a, uInt axis=0);
 
     // Return a Vector at the current position.
-    Vector<T, Alloc> &vector() {return *(Vector<T, Alloc> *)this->ap_p.get();}
+    Vector<T> &vector() {return *(Vector<T> *)this->ap_p;}
 
 private:
     // Not implemented.
-    VectorIterator(const VectorIterator<T, Alloc> &) = delete;
+    VectorIterator(const VectorIterator<T> &);
     // Not implemented.
-    VectorIterator<T, Alloc> &operator=(const VectorIterator<T, Alloc> &) = delete;
+    VectorIterator<T> &operator=(const VectorIterator<T> &);
 };
 
 // 
@@ -99,38 +100,39 @@ private:
 //        ArrayIterator.
 // </note>
 
-template<typename T, typename Alloc=std::allocator<T>> class ReadOnlyVectorIterator 
+template<class T> class ReadOnlyVectorIterator 
 {
 public:
     // <group>
-    explicit ReadOnlyVectorIterator(const Array<T, Alloc> &a, size_t axis=0)
+    explicit ReadOnlyVectorIterator(const Array<T> &a, uInt axis=0)
       : vi(const_cast<Array<T>&>(a), axis) {}
 
     void next()   {vi.next();}
     void reset() {vi.origin();}
     void origin() {vi.origin();}
     
-    const Array<T, Alloc> &array() {return vi.array();}
-    const Vector<T, Alloc> &vector() {return vi.vector();}
+    const Array<T> &array() {return vi.array();}
+    const Vector<T> &vector() {return vi.vector();}
 
-    bool atStart() const {return vi.atStart();}
-    bool pastEnd() const {return vi.pastEnd();}
+    Bool atStart() const {return vi.atStart();}
+    Bool pastEnd() const {return vi.pastEnd();}
     const IPosition &pos() const {return vi.pos();}
     IPosition endPos() const {return vi.endPos();}
-    size_t ndim() const {return vi.ndim();}
+    uInt ndim() const {return vi.ndim();}
     // </group>
 private:
     // Not implemented.
-    ReadOnlyVectorIterator(const ReadOnlyVectorIterator<T, Alloc> &) = delete;
+    ReadOnlyVectorIterator(const ReadOnlyVectorIterator<T> &);
     // Not implemented.
-    ReadOnlyVectorIterator<T, Alloc> &operator=(const ReadOnlyVectorIterator<T, Alloc> &) = delete;
+    ReadOnlyVectorIterator<T> &operator=(const ReadOnlyVectorIterator<T> &);
 
-    VectorIterator<T, Alloc> vi;
+    VectorIterator<T> vi;
 };
 
 
 } //# NAMESPACE CASACORE - END
 
-#include "VectorIter.tcc"
-
+#ifndef CASACORE_NO_AUTO_TEMPLATES
+#include <casacore/casa/Arrays/VectorIter.tcc>
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

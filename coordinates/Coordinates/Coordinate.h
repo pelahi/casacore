@@ -31,7 +31,6 @@
 #define COORDINATES_COORDINATE_H
 
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/casa/BasicSL/String.h>
 #include <casacore/casa/Arrays/Vector.h>
 #include <wcslib/wcs.h>
@@ -40,6 +39,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 
 template<class T> class Quantum;
+template<class T> class Matrix;
 class IPosition;
 class RecordInterface;
 class Projection;

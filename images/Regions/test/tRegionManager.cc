@@ -725,8 +725,8 @@ int main() {
 			  compVecs(gottrc, exptrc);
 		  }
 	  }
-	  catch (std::exception x) {
-		  cerr << "Unexpected exception: " << x.what() << endl;
+	  catch (AipsError x) {
+		  cerr << "Unexpected exception: " << x.getMesg() << endl;
 		  return 1;
 	  }
 	  cout << "ok" << endl;

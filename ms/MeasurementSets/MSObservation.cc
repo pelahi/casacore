@@ -62,14 +62,14 @@ MSObservation::MSObservation(const String& tableName, const String &tableDescNam
 			 "table is not a valid MSObservation"));
 }
 
-MSObservation::MSObservation(SetupNewTable &newTab, rownr_t nrrow,
+MSObservation::MSObservation(SetupNewTable &newTab, uInt nrrow,
 			       Bool initialize)
     : MSTable<MSObservationEnums>(newTab, nrrow, initialize), 
       hasBeenDestroyed_p(False)
 {
     // verify that the now opened table is valid
     if (! validate(this->tableDesc()))
-	throw (AipsError("MSObservation(SetupNewTable &, rownr_t, Bool) - "
+	throw (AipsError("MSObservation(SetupNewTable &, uInt, Bool) - "
 			 "table is not a valid MSObservation"));
 }
 

@@ -35,7 +35,7 @@ Adios2StManColumn::Adios2StManColumn(
         int aDataType,
         String aColName,
         std::shared_ptr<adios2::IO> aAdiosIO)
-    :StManColumnBase(aDataType),
+    :StManColumn(aDataType),
     itsStManPtr(aParent),
     itsColumnName(aColName),
     itsAdiosIO(aAdiosIO)
@@ -62,7 +62,7 @@ void Adios2StManColumn::setShapeColumn(const IPosition &aShape)
     }
 }
 
-IPosition Adios2StManColumn::shape(rownr_t aRowNr)
+IPosition Adios2StManColumn::shape(uInt aRowNr)
 {
     if(isShapeFixed)
     {
@@ -77,6 +77,11 @@ IPosition Adios2StManColumn::shape(rownr_t aRowNr)
         }
         else
         {
+            /*
+            throw(std::runtime_error("Shape not defined for Column "
+                        + static_cast<std::string>(itsColumnName)
+                        + " Row " + std::to_string(aRowNr)));
+                        */
             return IPosition();
         }
     }
@@ -87,63 +92,21 @@ Bool Adios2StManColumn::canChangeShape() const
     return !isShapeFixed;
 }
 
-void Adios2StManColumn::setShape (rownr_t aRowNr, const IPosition& aShape)
+void Adios2StManColumn::setShape (uInt aRowNr, const IPosition& aShape)
 {
     itsCasaShapes[aRowNr] = aShape;
 }
 
-void Adios2StManColumn::scalarToSelection(rownr_t rownr)
+void Adios2StManColumn::scalarVToSelection(uInt rownr)
 {
     itsAdiosStart[0] = rownr;
     itsAdiosCount[0] = 1;
 }
 
-void Adios2StManColumn::scalarColumnVToSelection()
+void Adios2StManColumn::arrayVToSelection(uInt rownr)
 {
-    itsAdiosStart[0] = 0;
-    itsAdiosCount[0] = itsStManPtr->getNrRows();
-}
-
-void Adios2StManColumn::arrayVToSelection(rownr_t rownr)
-{
-    if(isShapeFixed)
-    {
-        itsAdiosStart[0] = rownr;
-        itsAdiosCount[0] = 1;
-        for (size_t i = 1; i < itsAdiosShape.size(); ++i)
-        {
-            itsAdiosStart[i] = 0;
-            itsAdiosCount[i] = itsAdiosShape[i];
-        }
-    }
-    else
-    {
-        auto casaShape = itsCasaShapes.find(rownr);
-        if(casaShape != itsCasaShapes.end())
-        {
-            itsAdiosShape.resize(casaShape->second.size() + 1);
-            itsAdiosStart.resize(casaShape->second.size() + 1);
-            itsAdiosCount.resize(casaShape->second.size() + 1);
-            itsAdiosStart[0] = rownr;
-            itsAdiosCount[0] = 1;
-            for (size_t i = 0; i < casaShape->second.size(); ++i)
-            {
-                itsAdiosShape[i + 1] = casaShape->second[casaShape->second.size() - i - 1];
-                itsAdiosCount[i + 1] = casaShape->second[casaShape->second.size() - i - 1];
-                itsAdiosStart[i + 1] = 0;
-            }
-        }
-        else
-        {
-            cerr << "Shape of Row " << rownr << " has not been set" << endl;
-        }
-    }
-}
-
-void Adios2StManColumn::arrayColumnVToSelection()
-{
-    itsAdiosStart[0] = 0;
-    itsAdiosCount[0] = itsStManPtr->getNrRows();
+    itsAdiosStart[0] = rownr;
+    itsAdiosCount[0] = 1;
     for (size_t i = 1; i < itsAdiosShape.size(); ++i)
     {
         itsAdiosStart[i] = 0;
@@ -169,7 +132,7 @@ void Adios2StManColumn::scalarColumnCellsVToSelection(const RefRows &rows)
     }
 }
 
-void Adios2StManColumn::sliceVToSelection(rownr_t rownr, const Slicer &ns)
+void Adios2StManColumn::sliceVToSelection(uInt rownr, const Slicer &ns)
 {
     columnSliceCellsVToSelection(rownr, 1, ns);
 }
@@ -191,7 +154,7 @@ void Adios2StManColumn::columnSliceCellsVToSelection(const RefRows &rows, const 
     columnSliceCellsVToSelection(row_start, row_end - row_start + 1, ns);
 }
 
-void Adios2StManColumn::columnSliceCellsVToSelection(rownr_t row_start, rownr_t row_count, const Slicer &ns)
+void Adios2StManColumn::columnSliceCellsVToSelection(uInt row_start, uInt row_count, const Slicer &ns)
 {
     itsAdiosStart[0] = row_start;
     itsAdiosCount[0] = row_count;
@@ -202,160 +165,43 @@ void Adios2StManColumn::columnSliceCellsVToSelection(rownr_t row_start, rownr_t 
     }
 }
 
-void Adios2StManColumn::putArrayV(rownr_t rownr, const ArrayBase& data)
-{
-    arrayVToSelection(rownr);
-    toAdios(&data);
-}
-
-void Adios2StManColumn::getArrayV(rownr_t rownr, ArrayBase& data)
-{
-    arrayVToSelection(rownr);
-    fromAdios(&data);
-}
-
-void Adios2StManColumn::putScalar(rownr_t rownr, const void *dataPtr)
-{
-    scalarToSelection(rownr);
-    toAdios(dataPtr);
-}
-
-void Adios2StManColumn::getScalar(rownr_t rownr, void *data)
-{
-    scalarToSelection(rownr);
-    fromAdios(data);
-}
-
-void Adios2StManColumn::putScalarColumnV(const ArrayBase &data)
-{
-    scalarColumnVToSelection();
-    toAdios(&data);
-}
-
-void Adios2StManColumn::getScalarColumnV(ArrayBase &data)
-{
-    scalarColumnVToSelection();
-    fromAdios(&data);
-}
-
-void Adios2StManColumn::getScalarColumnCellsV(const RefRows &rownrs, ArrayBase& data)
-{
-    scalarColumnCellsVToSelection(rownrs);
-    fromAdios(&data);
-}
-
-void Adios2StManColumn::putScalarColumnCellsV(const RefRows &rownrs, const ArrayBase& data)
-{
-    scalarColumnCellsVToSelection(rownrs);
-    toAdios(&data);
-}
-
-void Adios2StManColumn::putArrayColumnCellsV (const RefRows& rownrs, const ArrayBase& data)
-{
-    if(rownrs.isSliced())
-    {
-        rownrs.convert();
-    }
-    Bool deleteIt;
-    const void *dataPtr = data.getVStorage(deleteIt);
-    itsAdiosCount[0] = 1;
-    for (size_t i = 1; i < itsAdiosShape.size(); ++i)
-    {
-        itsAdiosStart[i] = 0;
-        itsAdiosCount[i] = itsAdiosShape[i];
-    }
-    for(uInt i = 0; i < rownrs.rowVector().size(); ++i)
-    {
-        itsAdiosStart[0] = rownrs.rowVector()[i];
-        toAdios(dataPtr, i * itsCasaShape.nelements());
-    }
-    data.freeVStorage(dataPtr, deleteIt);
-}
-
-void Adios2StManColumn::getArrayColumnCellsV (const RefRows& rownrs, ArrayBase &data)
-{
-    if(rownrs.isSliced())
-    {
-        rownrs.convert();
-    }
-    Bool deleteIt;
-    void *dataPtr = data.getVStorage(deleteIt);
-    itsAdiosCount[0] = 1;
-    for (size_t i = 1; i < itsAdiosShape.size(); ++i)
-    {
-        itsAdiosStart[i] = 0;
-        itsAdiosCount[i] = itsAdiosShape[i];
-    }
-    for(uInt i = 0; i < rownrs.rowVector().size(); ++i)
-    {
-        itsAdiosStart[0] = rownrs.rowVector()[i];
-        fromAdios(dataPtr, i * itsCasaShape.nelements());
-    }
-    data.putVStorage(dataPtr, deleteIt);
-}
-
-void Adios2StManColumn::getSliceV(rownr_t aRowNr, const Slicer &ns, ArrayBase& data)
-{
-    sliceVToSelection(aRowNr, ns);
-    fromAdios(&data);
-}
-
-void Adios2StManColumn::putSliceV(rownr_t aRowNr, const Slicer &ns, const ArrayBase& data)
-{
-    sliceVToSelection(aRowNr, ns);
-    toAdios(&data);
-}
-
-void Adios2StManColumn::getArrayColumnV(ArrayBase& data)
-{
-    arrayColumnVToSelection();
-    fromAdios(&data);
-}
-
-void Adios2StManColumn::putArrayColumnV(const ArrayBase& data)
-{
-	arrayColumnVToSelection();
-    toAdios(&data);
-}
-
-void Adios2StManColumn::putColumnSliceV(const Slicer &ns, const ArrayBase& data)
-{
-    columnSliceVToSelection(ns);
-    toAdios(&data);
-}
-
-void Adios2StManColumn::getColumnSliceV(const Slicer &ns, ArrayBase& data)
-{
-    columnSliceVToSelection(ns);
-    fromAdios(&data);
-}
-
-void Adios2StManColumn::getColumnSliceCellsV(const RefRows& rownrs,
-                                  const Slicer& slicer, ArrayBase& data)
-{
-    columnSliceCellsVToSelection(rownrs, slicer);
-    fromAdios(&data);
-}
-
-void Adios2StManColumn::putColumnSliceCellsV(const RefRows& rownrs,
-                                   const Slicer& slicer, const ArrayBase& data)
-{
-    columnSliceCellsVToSelection(rownrs, slicer);
-    toAdios(&data);
-}
-
-
-#define DEFINE_GETPUT(T) \
-void Adios2StManColumn::put ## T(rownr_t rownr, const T *dataPtr) \
+#define DEFINE_GETPUT_TYPE_V(T) \
+void Adios2StManColumn::put ## T ## V(uInt rownr, const T *dataPtr) \
 { \
-    putScalar(rownr, dataPtr); \
+    putScalarV(rownr, dataPtr); \
 } \
 \
-void Adios2StManColumn::get ## T(rownr_t rownr, T *dataPtr) \
+void Adios2StManColumn::get ## T ## V(uInt rownr, T *dataPtr) \
 { \
-    getScalar(rownr, dataPtr); \
+    getScalarV(rownr, dataPtr); \
 }
 
+#define DEFINE_GETPUT_SCALAR_COLUMN_CELLS_V(T) \
+void Adios2StManColumn::getScalarColumnCells ## T ## V(const RefRows& rownrs, Vector<T>* dataPtr) \
+{ \
+    getScalarColumnCellsV(rownrs, dataPtr); \
+} \
+\
+void Adios2StManColumn::putScalarColumnCells ## T ## V(const RefRows& rownrs, const Vector<T>* dataPtr) \
+{ \
+    putScalarColumnCellsV(rownrs, dataPtr); \
+}
+
+#define DEFINE_GETPUT_SLICE_TYPE_V(T) \
+void Adios2StManColumn::putSlice ## T ## V(uInt rownr, const Slicer& ns, const Array<T>* dataPtr) \
+{ \
+    putSliceV(rownr, ns, dataPtr); \
+}\
+\
+void Adios2StManColumn::getSlice ## T ## V(uInt rownr, const Slicer& ns, Array<T>* dataPtr) \
+{ \
+    getSliceV(rownr, ns, dataPtr); \
+}
+
+#define DEFINE_GETPUT(T) \
+DEFINE_GETPUT_TYPE_V(T) \
+DEFINE_GETPUT_SCALAR_COLUMN_CELLS_V(T) \
+DEFINE_GETPUT_SLICE_TYPE_V(T)
 
 DEFINE_GETPUT(Bool)
 DEFINE_GETPUT(uChar)
@@ -367,8 +213,13 @@ DEFINE_GETPUT(float)
 DEFINE_GETPUT(double)
 DEFINE_GETPUT(Complex)
 DEFINE_GETPUT(DComplex)
-DEFINE_GETPUT(Int64)
+DEFINE_GETPUT_TYPE_V(Int64)
+DEFINE_GETPUT_SLICE_TYPE_V(String)
+DEFINE_GETPUT_SCALAR_COLUMN_CELLS_V(Int64)
 #undef DEFINE_GETPUT
+#undef DEFINE_GETPUT_TYPE_V
+#undef DEFINE_GETPUT_SCALAR_COLUMN_CELLS_V
+#undef DEFINE_GETPUT_SLICE_TYPE_V
 
 
 // string
@@ -379,7 +230,7 @@ void Adios2StManColumnT<std::string>::create(std::shared_ptr<adios2::Engine> aAd
     itsAdiosEngine = aAdiosEngine;
 }
 
-void Adios2StManColumn::putString(rownr_t rownr, const String *dataPtr)
+void Adios2StManColumn::putStringV(uInt rownr, const String *dataPtr)
 {
     std::string variableName = static_cast<std::string>(itsColumnName) + std::to_string(rownr);
     adios2::Variable<std::string> v = itsAdiosIO->InquireVariable<std::string>(variableName);
@@ -390,7 +241,7 @@ void Adios2StManColumn::putString(rownr_t rownr, const String *dataPtr)
     itsAdiosEngine->Put(v, reinterpret_cast<const std::string *>(dataPtr), adios2::Mode::Sync);
 }
 
-void Adios2StManColumn::getString(rownr_t rownr, String *dataPtr)
+void Adios2StManColumn::getStringV(uInt rownr, String *dataPtr)
 {
     std::string variableName = static_cast<std::string>(itsColumnName) + std::to_string(rownr);
     adios2::Variable<std::string> v = itsAdiosIO->InquireVariable<std::string>(variableName);
@@ -400,29 +251,29 @@ void Adios2StManColumn::getString(rownr_t rownr, String *dataPtr)
     }
 }
 
-void Adios2StManColumnString::putArrayV(rownr_t rownr, const ArrayBase& data)
+template<>
+void Adios2StManColumnT<std::string>::putArrayV(uInt rownr, const void *dataPtr)
 {
     String combined;
     Bool deleteIt;
-    auto *arrayPtr = reinterpret_cast<const Array<String> *>(&data);
-    const String *dataPtr = arrayPtr->getStorage(deleteIt);
-    for(auto &i : *arrayPtr)
+    const String *data = (reinterpret_cast<const Array<String> *>(dataPtr))->getStorage(deleteIt);
+    for(auto &i : *(reinterpret_cast<const Array<String> *>(dataPtr)))
     {
         combined = combined + i + itsStringArrayBarrier;
     }
-    arrayPtr->freeStorage(dataPtr, deleteIt);
-    putString(rownr, &combined);
+    (reinterpret_cast<const Array<String> *>(dataPtr))->freeStorage(reinterpret_cast<const String *&>(data), deleteIt);
+    putStringV(rownr, &combined);
 }
 
-void Adios2StManColumnString::getArrayV(rownr_t rownr, ArrayBase& data)
+template<>
+void Adios2StManColumnT<std::string>::getArrayV(uInt rownr, void *dataPtr)
 {
     String combined;
-    getString(rownr, &combined);
+    getStringV(rownr, &combined);
     Bool deleteIt;
-    auto *arrayPtr = reinterpret_cast<Array<String> *>(&data);
-    String *dataPtr = arrayPtr->getStorage(deleteIt);
+    String *data = (reinterpret_cast<Array<String>*>(dataPtr))->getStorage(deleteIt);
     size_t pos = 0;
-    for(auto &i : *arrayPtr)
+    for(auto &i : *(reinterpret_cast<Array<String> *>(dataPtr)))
     {
         size_t found = combined.find(itsStringArrayBarrier, pos);
         if(found != std::string::npos)
@@ -431,35 +282,41 @@ void Adios2StManColumnString::getArrayV(rownr_t rownr, ArrayBase& data)
             pos = found + itsStringArrayBarrier.length();
         }
     }
-    arrayPtr->putStorage(dataPtr, deleteIt);
+    reinterpret_cast<Array<String>*>(dataPtr)->putStorage(reinterpret_cast<String *&>(data), deleteIt);
 }
 
-void Adios2StManColumnString::getSliceV(rownr_t /*aRowNr*/, const Slicer &/*ns*/, ArrayBase &/*data*/)
+template<>
+void Adios2StManColumnT<std::string>::getSliceV(uInt /*aRowNr*/, const Slicer &/*ns*/, void */*dataPtr*/)
 {
     throw std::runtime_error("Not implemented yet");
 }
 
-void Adios2StManColumnString::putSliceV(rownr_t /*aRowNr*/, const Slicer &/*ns*/, const ArrayBase &/*data*/)
+template<>
+void Adios2StManColumnT<std::string>::putSliceV(uInt /*aRowNr*/, const Slicer &/*ns*/, const void */*dataPtr*/)
 {
     throw std::runtime_error("Not implemented yet");
 }
 
-void Adios2StManColumnString::getColumnSliceV(const Slicer &/*ns*/, ArrayBase &/*data*/)
+template<>
+void Adios2StManColumnT<std::string>::getColumnSliceV(const Slicer &/*ns*/, void */*dataPtr*/)
 {
     throw std::runtime_error("Not implemented yet");
 }
 
-void Adios2StManColumnString::putColumnSliceV(const Slicer &/*ns*/, const ArrayBase &/*data*/)
+template<>
+void Adios2StManColumnT<std::string>::putColumnSliceV(const Slicer &/*ns*/, const void */*dataPtr*/)
 {
     throw std::runtime_error("Not implemented yet");
 }
 
-void Adios2StManColumnString::getColumnSliceCellsV(const RefRows& /*rownrs*/, const Slicer& /*slicer*/, ArrayBase& /*data*/)
+template<>
+void Adios2StManColumnT<std::string>::getColumnSliceCellsV(const RefRows& /*rownrs*/, const Slicer& /*slicer*/, void* /*dataPtr*/)
 {
     throw std::runtime_error("Not implemented yet");
 }
 
-void Adios2StManColumnString::putColumnSliceCellsV(const RefRows& /*rownrs*/, const Slicer& /*slicer*/, const ArrayBase& /*data*/)
+template<>
+void Adios2StManColumnT<std::string>::putColumnSliceCellsV(const RefRows& /*rownrs*/, const Slicer& /*slicer*/, const void* /*dataPtr*/)
 {
     throw std::runtime_error("Not implemented yet");
 }

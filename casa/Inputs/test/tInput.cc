@@ -119,9 +119,9 @@ int main(int argc, const char* argv[])
     // Announce program and version.
     prgInput.announce();
     
-  } catch(std::exception& x) {
+  } catch(AipsError& x) {
     cout << "Caught exception" << endl;
-    cout << "Message is: " << x.what() << endl;
+    cout << "Message is: " << x.getMesg() << endl;
   } 
 }
 

@@ -107,14 +107,14 @@ void a (uInt nrrow)
 						     IPosition(1,nrrow-1)));
 	timer.show("range ISM");
 	for (i=0; i<nrrow-1; i++) {
-	    AlwaysAssertExit (abv1(i) == i);
-	    AlwaysAssertExit (adv1(i) == Int(i/10));
+	    if (abv1(i) != i  ||  adv1(i) != Int(i/10)) {
+		cout << i << ',';
+	    }
 	}
+	cout << endl;
     }
     {
-        Vector<rownr_t> abvcp(abv.size());
-        convertArray (abvcp, abv);
-	Table rtab (tab(abvcp));
+	Table rtab (tab(abv));
 	ScalarColumn<uInt> ab1(rtab,"ab");
 	ScalarColumn<Int> ad(rtab,"ad");
 	Timer timer;
@@ -137,9 +137,11 @@ void a (uInt nrrow)
 	    }	
 	    timer.show("b");
 	    for (i=0; i<nrrow; i++) {
-                AlwaysAssertExit (abv(i) == i);
-                AlwaysAssertExit (adv(i) == Int(i/10));
+		if (abv(i) != i  ||  adv(i) != Int(i/10)) {
+		    cout << i << ',';
+		}
 	    }
+	    cout << endl;
 	}
 	{
 	    // Get entire column (minus last cell) to test range performance.
@@ -152,9 +154,11 @@ void a (uInt nrrow)
 							 IPosition(1,nrrow-1)));
 	    timer.show("cells/range ISM");
 	    for (i=0; i<nrrow-1; i++) {
-                AlwaysAssertExit (abv1(i) == i);
-                AlwaysAssertExit (adv1(i) == Int(i/10));
+		if (abv1(i) != i  ||  adv1(i) != Int(i/10)) {
+		    cout << i << ',';
+		}
 	    }
+	    cout << endl;
 	}
     }
 }
@@ -168,8 +172,8 @@ int main (int argc, const char* argv[])
 	}
 	cout << nrrow << " rows" << endl;
 	a (nrrow);
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     return 0;                           // exit with success status

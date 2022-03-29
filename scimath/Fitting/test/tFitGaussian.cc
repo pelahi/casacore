@@ -30,9 +30,13 @@
 #include <casacore/scimath/Functionals/Gaussian2D.h>
 #include <casacore/scimath/Functionals/Gaussian3D.h>
 #include <casacore/casa/iostream.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 
 #include <casacore/casa/namespace.h>
+
+namespace casacore {
+   template <class T> class Matrix;
+   template <class T> class Vector;
+}
 
 void printfparameters(Function<Double> &f);
 void printparameters(Matrix<Double> &m);
@@ -74,8 +78,8 @@ int main()
 
   try {
     solution = fitgauss.fit(pos, f);
-  } catch (std::exception& err) {
-    cout << "ERROR: " << err.what() << endl;
+  } catch (AipsError& err) {
+    cout << "ERROR: " << err.getMesg() << endl;
     fail = 1;
   }
 
@@ -114,8 +118,8 @@ int main()
   errors.resize();
   try {
     solution = fitgauss.fit(pos, f);
-  } catch (std::exception& err) {
-    cout << "ERROR: " << err.what() << endl;
+  } catch (AipsError& err) {
+    cout << "ERROR: " << err.getMesg() << endl;
     fail = 1;
   }
 
@@ -166,8 +170,8 @@ int main()
   errors.resize();
   try {
     solution = fitgauss.fit(pos, f);
-  } catch (std::exception& err) {
-    cout << "ERROR: " << err.what() << endl;
+  } catch (AipsError& err) {
+    cout << "ERROR: " << err.getMesg() << endl;
     fail = 1;
   }
 
@@ -208,8 +212,8 @@ int main()
   errors.resize();
   try {
     solution = fitgauss.fit(pos, f, 0.001);
-  } catch (std::exception& err) {
-    cout << "ERROR: " << err.what() << endl;
+  } catch (AipsError& err) {
+    cout << "ERROR: " << err.getMesg() << endl;
     fail = 1;
   }
 
@@ -266,8 +270,8 @@ int main()
 
   try {
     solution = fitgauss.fit(pos, f, 0.01, 256);
-  } catch (std::exception& err) {
-    cout << "ERROR: " << err.what() << endl;
+  } catch (AipsError& err) {
+    cout << "ERROR: " << err.getMesg() << endl;
     fail = 1;
   }
 

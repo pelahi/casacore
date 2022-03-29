@@ -34,7 +34,6 @@
 #include <casacore/casa/aips.h>
 #include <casacore/casa/Containers/ValueHolderRep.h>
 #include <casacore/casa/Arrays/Array.h>
-#include <casacore/casa/Utilities/CountedPtr.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 

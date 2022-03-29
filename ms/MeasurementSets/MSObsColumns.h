@@ -125,7 +125,7 @@ public:
   // </group>
 
   // Convenience function that returns the number of rows in any of the columns
-  rownr_t nrow() const {return flagRow_p.nrow();}
+  uInt nrow() const {return flagRow_p.nrow();}
 
   // set the epoch type for the TIME_RANGE & RELEASE_DATE columns.
   // <note role=tip>

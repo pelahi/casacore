@@ -65,18 +65,18 @@ void testVectorROIter (const Lattice<Int>& lattice, Bool useRef)
         Matrix<Int> temp(iter.matrixCursor());
         throw(AipsError("tHDF5Iterator - "
                         "matrixCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("two non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("two non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Cube<Int> temp(iter.cubeCursor());
         throw(AipsError("tHDF5Iterator - "
                         "cubeCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("three non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("three non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     AlwaysAssert(latticeShape == iter.latticeShape(), AipsError);
@@ -129,18 +129,18 @@ void testMatrixROIter (const Lattice<Int>& lattice, Bool useRef)
         Vector<Int> temp(iter.vectorCursor());
         throw(AipsError("tHDF5Iterator - "
                         "vectorCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("one non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("one non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Cube<Int> temp(iter.cubeCursor());
         throw(AipsError("tHDF5Iterator - "
                         "cubeCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("three non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("three non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     Timer clock;
@@ -194,18 +194,18 @@ void testCubeROIter (const Lattice<Int>& lattice, Bool useRef)
         Vector<Int> temp(iter.vectorCursor());
         throw(AipsError("tHDF5Iterator - "
                         "vectorCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("one non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("one non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Matrix<Int> temp(iter.matrixCursor());
         throw(AipsError("tHDF5Iterator - "
                         "matrixCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("two non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("two non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     Timer clock;
@@ -253,27 +253,27 @@ void testArrayROIter (const Lattice<Int>& lattice, Bool useRef)
         Vector<Int> temp(iter.vectorCursor());
         throw(AipsError("tHDF5Iterator - "
                         "vectorCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("one non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("one non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Matrix<Int> temp(iter.matrixCursor());
         throw(AipsError("tHDF5Iterator - "
                         "matrixCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("two non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("two non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Cube<Int> temp(iter.cubeCursor());
         throw(AipsError("tHDF5Iterator - "
                         "cubeCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("three non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("three non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     Timer clock;
@@ -321,18 +321,18 @@ void test8ElemROIter (const Lattice<Int>& lattice, Bool useRef)
         Matrix<Int> temp(iter.matrixCursor());
         throw(AipsError("tHDF5Iterator - "
                         "matrixCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("two non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("two non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Cube<Int> temp(iter.cubeCursor());
         throw(AipsError("tHDF5Iterator - "
                         "cubeCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("three non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("three non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     Timer clock;
@@ -625,18 +625,18 @@ void testVectorRWIter (Lattice<Int>& lattice, Bool useRef)
         Matrix<Int> temp(iter.matrixCursor());
         throw(AipsError("tHDF5Iterator - "
                         "matrixCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("two non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("two non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Cube<Int> temp(iter.cubeCursor());
         throw(AipsError("tHDF5Iterator - "
                         "cubeCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("three non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("three non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     
@@ -693,18 +693,18 @@ void testMatrixRWIter (Lattice<Int>& lattice, Bool useRef)
         Vector<Int> temp(iter.vectorCursor());
         throw(AipsError("tHDF5Iterator - "
                         "vectorCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("one non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("one non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Cube<Int> temp(iter.cubeCursor());
         throw(AipsError("tHDF5Iterator - "
                         "cubeCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("three non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("three non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     Timer clock;
@@ -758,18 +758,18 @@ void testCubeRWIter (Lattice<Int>& lattice, Bool useRef)
         Vector<Int> temp(iter.vectorCursor());
         throw(AipsError("tHDF5Iterator - "
                         "vectorCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("one non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("one non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Matrix<Int> temp(iter.matrixCursor());
         throw(AipsError("tHDF5Iterator - "
                         "matrixCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("two non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("two non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     Timer clock;
@@ -817,27 +817,27 @@ void testArrayRWIter (Lattice<Int>& lattice, Bool useRef)
         Vector<Int> temp(iter.vectorCursor());
         throw(AipsError("tHDF5Iterator - "
                         "vectorCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("one non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("one non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Matrix<Int> temp(iter.matrixCursor());
         throw(AipsError("tHDF5Iterator - "
                         "matrixCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("two non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("two non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     try {
         Cube<Int> temp(iter.cubeCursor());
         throw(AipsError("tHDF5Iterator - "
                         "cubeCursor worked where it should not have"));
-    } catch (std::exception& x) {
-        if (!String(x.what()).contains("three non-degenerate")) {
-	    throw (AipsError (x.what()));
+    } catch (AipsError& x) {
+        if (!x.getMesg().contains("three non-degenerate")) {
+	    throw (AipsError (x.getMesg()));
         }
     } 
     Timer clock;
@@ -1276,8 +1276,8 @@ int main (int argc, const char *argv[])
       pagedArr.put (savarr);
       testNonCongruentRWIter (pagedArr, True);
     }
-  } catch (std::exception& x) {
-    cerr << "Caught exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cerr << "Caught exception: " << x.getMesg() << endl;
     cout << "FAIL" << endl;
     return 1;
   } 
@@ -1446,8 +1446,8 @@ int main (int argc, const char *argv[])
       testAdd (latArr1, pagedArr2, True);
       AlwaysAssert (allEQ(latArr1.get(), 13*arr), AipsError);
     }      
-  } catch (std::exception& x) {
-    cerr << "Caught exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cerr << "Caught exception: " << x.getMesg() << endl;
     cout << "FAIL" << endl;
     return 1;
   } 

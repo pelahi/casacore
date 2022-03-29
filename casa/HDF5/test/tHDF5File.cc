@@ -86,7 +86,7 @@ int main()
       Bool succ = True;
       try {
 	HDF5File file("tHDF5File_tmpx", ByteIO::Old);
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	succ = False;
 	cout << x.what() << endl;
       }
@@ -110,7 +110,7 @@ int main()
       Bool succ = True;
       try {
       HDF5File file("tHDF5File_tmp", ByteIO::NewNoReplace);
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	succ = False;
 	cout << x.what() << endl;
       }
@@ -118,7 +118,7 @@ int main()
       cout << "<<<" << endl;
     }
 
-  } catch (std::exception& x) {
+  } catch (AipsError& x) {
     cout << "Unexpected exception: " << x.what() << endl;
     return 1;
   }

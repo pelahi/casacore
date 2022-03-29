@@ -61,7 +61,7 @@ Bool Aipsrc::matchKeyword(uInt &where,  const String &keyword,
 Bool Aipsrc::find(String &value,	
 		  const String &keyword,
 		  uInt start) {
-  std::call_once(theirCallOnceFlag, parse);
+  theirCallOnce(parse);
   return findNoParse(value, keyword, start);
 }
 
@@ -195,12 +195,12 @@ Double Aipsrc::lastRead() {
 }
 
 const Block<String> &Aipsrc::values() {
-  std::call_once(theirCallOnceFlag, parse);
+  theirCallOnce(parse);
   return keywordValue;
 }
 
 const Block<String> &Aipsrc::patterns() {
-  std::call_once(theirCallOnceFlag, parse);
+  theirCallOnce(parse);
   return keywordPattern;
 }
 
@@ -246,27 +246,27 @@ void Aipsrc::setAipsPath(const String &path) {
 }
 
 const String &Aipsrc::aipsRoot() {
-  std::call_once(theirCallOnceFlag, parse);
+  theirCallOnce(parse);
   return root;
 }
 
 const String &Aipsrc::aipsArch() {
-  std::call_once(theirCallOnceFlag, parse);
+  theirCallOnce(parse);
   return arch;
 }
 
 const String &Aipsrc::aipsSite() {
-  std::call_once(theirCallOnceFlag, parse);
+  theirCallOnce(parse);
   return site;
 }
 
 const String &Aipsrc::aipsHost() {
-  std::call_once(theirCallOnceFlag, parse);
+  theirCallOnce(parse);
   return host;
 }
 
 const String &Aipsrc::aipsHome() {
-  std::call_once(theirCallOnceFlag, parse);
+  theirCallOnce(parse);
   return home;
 }
 
@@ -355,7 +355,7 @@ void Aipsrc::save(uInt keyword, const Vector<String> &tname) {
 void Aipsrc::save(const String keyword, const String val) {
   static uInt nv_r = Aipsrc::registerRC("user.aipsrc.edit.keep", "5");
   static String editTxt = "# Edited at ";
-  std::call_once(theirCallOnceFlag, parse);
+  theirCallOnce(parse);
   String filn(uhome + "/.aipsrc");
   String filno(filn + ".old");
   RegularFile fil(filn);
@@ -526,7 +526,7 @@ void Aipsrc::show() {
 }
 
 void Aipsrc::show(ostream &oStream) {
-  std::call_once(theirCallOnceFlag, parse);
+  theirCallOnce(parse);
   String nam;
   const String gs00(".*");
   const String gs01("*");
@@ -563,8 +563,8 @@ uInt Aipsrc::genRestore(Vector<String> &namlst, Vector<String> &vallst,
       vla[n-1] = vl[i];
     }
   }
-  namlst = Vector<String>(nla.begin(), nla.end());
-  vallst = Vector<String>(vla.begin(), vla.end());
+  namlst = Vector<String>(nla);
+  vallst = Vector<String>(vla);
   return namlst.nelements();
 }
 
@@ -589,13 +589,14 @@ void Aipsrc::genSave(Vector<String> &namlst, Vector<String> &vallst,
 
 void Aipsrc::genSet(Vector<String> &namlst, Vector<String> &vallst,
 		    const String &nam, const String &val) {
-  Block<String> nl = makeBlock(namlst);
+  Block<String> nl;
+  namlst.toBlock(nl);
   uInt n = Aipsrc::registerRC(nam, nl);
   if (n > vallst.nelements()) vallst.resize(n, True);
   vallst(n-1) = val;
 //   if (n > namlst.nelements()) namlst.resize(n, True);
   namlst.resize(0);
-  namlst = Vector<String>(nl.begin(), nl.end());
+  namlst = Vector<String>(nl);
 }
 
 Bool Aipsrc::genUnSet(Vector<String> &namlst, Vector<String> &vallst,
@@ -630,7 +631,7 @@ Bool Aipsrc::genGet(String &val, Vector<String> &namlst, Vector<String> &vallst,
 
   // Static Initializations -- Only really want to read the files once
 
-  std::once_flag Aipsrc::theirCallOnceFlag;
+  CallOnce0 Aipsrc::theirCallOnce;
   Double Aipsrc::lastParse = 0;
   Block<String> Aipsrc::keywordPattern(0);
   Block<String> Aipsrc::keywordValue(0);

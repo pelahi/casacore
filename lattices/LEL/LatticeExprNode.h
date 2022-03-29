@@ -36,7 +36,6 @@
 #include <casacore/lattices/LEL/LELBinaryEnums.h>
 #include <casacore/lattices/LEL/LELUnaryEnums.h>
 #include <casacore/lattices/LEL/LELFunctionEnums.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/Utilities/CountedPtr.h>
 #include <casacore/casa/Utilities/DataType.h>
@@ -47,6 +46,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 template <class T> class LatticeExpr;
 template <class T> class Lattice;
 template <class T> class MaskedLattice;
+template <class T> class Array;
 template <class T> class Block;
 class LCRegion;
 class Slicer;

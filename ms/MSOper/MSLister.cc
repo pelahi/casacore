@@ -289,10 +289,6 @@ void MSLister::listHeader()
     // logStream_p << "dataColSel = " << dataColSel << LogIO::POST;
     // cout << "dataColSel = " << dataColSel << endl;
 
-    // Fill unused variables to avoid compiler warnings.
-    nchan = 0;
-    start = 0;
-    step  = 0;
     selectvis(timerange, newSpw, scan, field, antenna, uvrange, chanmode,
               nchan, start, step, mStart,  mStep, correlation,
               // IGNORE PARAMETERS THAT ARE NOT YET IMPLEMENTED
@@ -302,9 +298,9 @@ void MSLister::listHeader()
     // List the data
     listData(pagerows, listfile);
   }
-  catch (const std::exception& x) {
+  catch (AipsError& x) {
     logStream_p << LogOrigin("MSLister","list",WHERE)
-            << LogIO::SEVERE << "Caught exception: " << x.what()
+            << LogIO::SEVERE << "Caught exception: " << x.getMesg()
             << LogIO::POST;
     throw(AipsError("Error in MSLister::list"));
   }
@@ -524,15 +520,15 @@ void MSLister::selectvis(const String& timerange,
   catch (MSSelectionError& x) {
     // Re-initialize with the existing MS
     logStream_p << LogOrigin("MSLister","selectvis",WHERE)
-            << LogIO::SEVERE << "Caught exception: " << x.what()
+            << LogIO::SEVERE << "Caught exception: " << x.getMesg()
             << LogIO::POST;
     //initialize(*pMS_p,False);
     throw(AipsError("Error in data selection specification."));
   }
-  catch (std::exception& x) {
+  catch (AipsError& x) {
     // Re-initialize with the existing MS
     logStream_p << LogOrigin("MSLister","selectvis",WHERE)
-            << LogIO::SEVERE << "Caught exception: " << x.what()
+            << LogIO::SEVERE << "Caught exception: " << x.getMesg()
             << LogIO::POST;
     // initialize(*pMS_p,False);
     throw(AipsError("Error in MSLister::selectvis()"));
@@ -1142,8 +1138,8 @@ void MSLister::listData(const int pageRows,
     logStream_p << LogIO::DEBUG1 << "End: MSLister::listData"
                 << LogIO::POST;
   } // end try
-  catch(std::exception& x){
-    logStream_p << LogIO::SEVERE << "Caught exception: " << x.what()
+  catch(AipsError& x){
+    logStream_p << LogIO::SEVERE << "Caught exception: " << x.getMesg()
                 << LogIO::POST;
     throw(AipsError("Error in MSLister::listData"));
   }
@@ -1326,8 +1322,8 @@ void MSLister::polarizationParse(String correlation) {
 	} // end try
 
 	// Catch an exception if a selected correlation does not exist.
-	catch(std::exception& x){
-		logStream_p << LogIO::SEVERE << "Caught exception: " << x.what()
+	catch(AipsError& x){
+		logStream_p << LogIO::SEVERE << "Caught exception: " << x.getMesg()
                 		<< LogIO::POST;
 		throw(AipsError("Error in MSLister::polarizationParse"));
 	}

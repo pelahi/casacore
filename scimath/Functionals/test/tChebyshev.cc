@@ -204,8 +204,8 @@ int main() {
 			 tmp(0) == -15.0 && tmp(1) == 15.0 &&
 			 def == 70.0);
     }
-    catch (std::exception& ex) {
-	cerr << "Exception: " << ex.what() << endl;
+    catch (AipsError& ex) {
+	cerr << "Exception: " << ex.getMesg() << endl;
 	exit(1);
     }
 

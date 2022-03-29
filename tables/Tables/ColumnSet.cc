@@ -68,10 +68,11 @@ ColumnSet::ColumnSet (TableDesc* tdesc, const StorageOption& opt)
 
 ColumnSet::~ColumnSet()
 {
+    uInt i;
     for (auto& x : colMap_p) {
         delete COLMAPCAST(x.second);
     }
-    for (uInt i=0; i<blockDataMan_p.nelements(); i++) {
+    for (i=0; i<blockDataMan_p.nelements(); i++) {
 	delete BLOCKDATAMANVAL(i);
     }
     delete multiFile_p;
@@ -107,20 +108,21 @@ void ColumnSet::removeLastDataManager()
     seqCount_p--;
 }
 
-void ColumnSet::initDataManagers (rownr_t nrrow, Bool bigEndian,
+void ColumnSet::initDataManagers (uInt nrrow, Bool bigEndian,
                                   const TSMOption& tsmOption,
                                   Table& tab)
 {
-    for (uInt i=0; i<blockDataMan_p.nelements(); i++) {
+    uInt i;
+    for (i=0; i<blockDataMan_p.nelements(); i++) {
 	BLOCKDATAMANVAL(i)->setEndian (bigEndian);
 	BLOCKDATAMANVAL(i)->setTsmOption (tsmOption);
     }
-    for (uInt i=0; i<colMap_p.size(); ++i) {
+    for (i=0; i<colMap_p.size(); ++i) {
         getColumn(i)->createDataManagerColumn();
     }
     //# Delete data managers without columns.
     uInt nr = 0;
-    for (uInt i=0; i<blockDataMan_p.nelements(); i++) {
+    for (i=0; i<blockDataMan_p.nelements(); i++) {
  	if (BLOCKDATAMANVAL(i)->ncolumn() > 0) {
 	    blockDataMan_p[nr++] = blockDataMan_p[i];
 	}else{
@@ -138,29 +140,31 @@ void ColumnSet::initDataManagers (rownr_t nrrow, Bool bigEndian,
 void ColumnSet::initSomeDataManagers (uInt from, Table& tab)
 {
     openMultiFile (from, tab, ByteIO::New);
+    uInt i;
     //# Link the data managers to the table.
-    for (uInt i=from; i<blockDataMan_p.nelements(); i++) {
+    for (i=from; i<blockDataMan_p.nelements(); i++) {
 	BLOCKDATAMANVAL(i)->linkToTable (tab);
     }
     //# Now give the data managers the opportunity to create files as needed.
     //# Thereafter to prepare things.
-    for (uInt i=from; i<blockDataMan_p.nelements(); i++) {
-	BLOCKDATAMANVAL(i)->create64 (nrrow_p);
+    for (i=from; i<blockDataMan_p.nelements(); i++) {
+	BLOCKDATAMANVAL(i)->create (nrrow_p);
     }
     prepareSomeDataManagers (from);
 }
 
 void ColumnSet::prepareSomeDataManagers (uInt from)
 {
-    for (uInt i=from; i<blockDataMan_p.nelements(); i++) {
+    uInt i, j;
+    for (i=from; i<blockDataMan_p.nelements(); i++) {
 	if (BLOCKDATAMANVAL(i)->canReallocateColumns()) {
-	    for (uInt j=0; j<colMap_p.size(); j++) {
+	    for (j=0; j<colMap_p.size(); j++) {
 		DataManagerColumn*& column = getColumn(j)->dataManagerColumn();
 		column = BLOCKDATAMANVAL(i)->reallocateColumn (column);
 	    }
 	}
     }
-    for (uInt i=from; i<blockDataMan_p.nelements(); i++) {
+    for (i=from; i<blockDataMan_p.nelements(); i++) {
 	BLOCKDATAMANVAL(i)->prepare();
     }
 }
@@ -198,7 +202,7 @@ void ColumnSet::openMultiFile (uInt from, const Table& tab,
   }
 }
 
-rownr_t ColumnSet::resync (rownr_t nrrow, Bool forceSync)
+uInt ColumnSet::resync (uInt nrrow, Bool forceSync)
 {
     //# There may be no sync data (when new table locked for first time).
     if (dataManChanged_p.nelements() > 0) {
@@ -206,7 +210,7 @@ rownr_t ColumnSet::resync (rownr_t nrrow, Bool forceSync)
 		                   blockDataMan_p.nelements(), AipsError);
 	for (uInt i=0; i<blockDataMan_p.nelements(); i++) {
 	    if (dataManChanged_p[i]  ||  nrrow != nrrow_p  ||  forceSync) {
-                rownr_t nrr = BLOCKDATAMANVAL(i)->resync64 (nrrow);
+                uInt nrr = BLOCKDATAMANVAL(i)->resync1 (nrrow);
                 if (nrr > nrrow) {
                     nrrow = nrr;
                 }
@@ -270,23 +274,23 @@ Bool ColumnSet::canRenameColumn (const String& columnName) const
 
 
 //# Add rows to all data managers.
-void ColumnSet::addRow (rownr_t nrrow)
+void ColumnSet::addRow (uInt nrrow)
 {
     // First add row to storage managers, thereafter to virtual engines.
     for (uInt i=0; i<blockDataMan_p.nelements(); i++) {
         if (BLOCKDATAMANVAL(i)->isStorageManager()) {
-	    BLOCKDATAMANVAL(i)->addRow64 (nrrow);
+	    BLOCKDATAMANVAL(i)->addRow (nrrow);
 	}
     }
     for (uInt i=0; i<blockDataMan_p.nelements(); i++) {
         if (! BLOCKDATAMANVAL(i)->isStorageManager()) {
-	    BLOCKDATAMANVAL(i)->addRow64 (nrrow);
+	    BLOCKDATAMANVAL(i)->addRow (nrrow);
 	}
     }
     nrrow_p += nrrow;
 }
 //# Remove a row from all data managers.
-void ColumnSet::removeRow (rownr_t rownr)
+void ColumnSet::removeRow (uInt rownr)
 {
     if (!canRemoveRow()) {
 	throw (TableInvOper ("Rows cannot be removed from table " +
@@ -299,7 +303,7 @@ void ColumnSet::removeRow (rownr_t rownr)
 			     " (#rows=" + String::toString(nrrow_p) + ")"));
     }
     for (uInt i=0; i<blockDataMan_p.nelements(); i++) {
-	BLOCKDATAMANVAL(i)->removeRow64 (rownr);
+	BLOCKDATAMANVAL(i)->removeRow (rownr);
     }
     nrrow_p--;
 }
@@ -399,9 +403,9 @@ void ColumnSet::doAddColumn (const ColumnDesc& columnDesc,
 	col->createDataManagerColumn();
 	dmcol = col->dataManagerColumn();
 	dataManPtr->addColumn (dmcol);
-    } catch (const std::exception& x) {
+    } catch (const AipsError& x) {
 	error = True;
-	msg = x.what();
+	msg = x.getMesg();
 	//# Get the column pointer (it may not have been filled yet).
 	//# When #columns has grown, the column has been already added.
 	//# In that case remove it, which will also delete the column.
@@ -468,9 +472,9 @@ void ColumnSet::addColumn (const TableDesc& tableDesc,
 	}
 	// Let the new data manager create space, etc. for its columns.
 	initSomeDataManagers (blockDataMan_p.nelements() - 1, tab);
-    } catch (const std::exception& x) {
+    } catch (const AipsError& x) {
 	error = True;
-	msg = x.what();
+	msg = x.getMesg();
 	for (uInt i=0; i<tableDesc.ncolumn(); i++) {
 	    const String& name = tableDesc[i].name();
 	    if (colMap_p.find(name) != colMap_p.end()) {
@@ -716,7 +720,7 @@ Record ColumnSet::dataManagerInfo (Bool virtualOnly) const
 
 
 //# Initialize rows.
-void ColumnSet::initialize (rownr_t startRow, rownr_t endRow)
+void ColumnSet::initialize (uInt startRow, uInt endRow)
 {
     for (uInt i=0; i<colMap_p.size(); i++) {
         getColumn(i)->initialize (startRow, endRow);
@@ -764,16 +768,17 @@ Bool ColumnSet::putFile (Bool writeTable, AipsIO& ios,
     //# Only write the table data when the flag is set.
     uInt nrold = dataManChanged_p.nelements();
     dataManChanged_p.resize (blockDataMan_p.nelements(), True);
-    for (uInt i=nrold; i<dataManChanged_p.nelements(); i++) {
+    uInt i;
+    for (i=nrold; i<dataManChanged_p.nelements(); i++) {
         dataManChanged_p[i] = False;
     }
     if (writeTable) {
 	//# The first version of ColumnSet did not put a version.
 	//# Therefore a negative number is put as the version
 	//# (because nrrow_p is always positive).
-        // Still use version 2 if MultiFile is not used and #rows fit in an Int.
+        // Still use version 2 if MultiFile is not used and #rows fit in a uInt.
         if (storageOpt_p.option() != StorageOption::SepFile  ||
-            nrrow_p > rownr_t(std::numeric_limits<Int>::max())) {
+            nrrow_p > Int64(std::numeric_limits<uInt>::max())) {
           ios << Int(-3);          // version (must be negative !!!)
           ios << nrrow_p;
           ios << Int(storageOpt_p.option()) << storageOpt_p.blockSize();
@@ -785,20 +790,20 @@ Bool ColumnSet::putFile (Bool writeTable, AipsIO& ios,
 	//# Start with writing the data manager types.
 	//# Only write with columns in them (thus count first).
 	uInt nr=0;
-	for (uInt i=0; i<blockDataMan_p.nelements(); i++) {
+	for (i=0; i<blockDataMan_p.nelements(); i++) {
 	    if (BLOCKDATAMANVAL(i)->ncolumn() > 0) {
 		nr++;
 	    }
 	}
 	ios << nr;
-	for (uInt i=0; i<blockDataMan_p.nelements(); i++) {
+	for (i=0; i<blockDataMan_p.nelements(); i++) {
 	    if (BLOCKDATAMANVAL(i)->ncolumn() > 0) {
 		ios << BLOCKDATAMANVAL(i)->dataManagerType();
 		ios << BLOCKDATAMANVAL(i)->sequenceNr();
 	    }
 	}
 	//# Now write all columns.
-	for (uInt i=0; i<colMap_p.size(); i++) {
+	for (i=0; i<colMap_p.size(); i++) {
 	    getColumn(i)->putFile (ios, attr);
 	}
     }
@@ -806,7 +811,7 @@ Bool ColumnSet::putFile (Bool writeTable, AipsIO& ios,
     //# Keep track if a data manager indeed wrote something.
     MemoryIO memio;
     AipsIO aio(&memio);
-    for (uInt i=0; i<blockDataMan_p.nelements(); i++) {
+    for (i=0; i<blockDataMan_p.nelements(); i++) {
         if (BLOCKDATAMANVAL(i)->flush (aio, fsync)) {
 	    dataManChanged_p[i] = True;
 	    written = True;
@@ -823,7 +828,7 @@ Bool ColumnSet::putFile (Bool writeTable, AipsIO& ios,
 }
 
 
-rownr_t ColumnSet::getFile (AipsIO& ios, Table& tab, rownr_t nrrow, Bool bigEndian,
+uInt ColumnSet::getFile (AipsIO& ios, Table& tab, uInt nrrow, Bool bigEndian,
                          const TSMOption& tsmOption)
 {
     //# If the first value is negative, it is the version.
@@ -899,7 +904,7 @@ rownr_t ColumnSet::getFile (AipsIO& ios, Table& tab, rownr_t nrrow, Bool bigEndi
 	ios.getnew (leng, data);
 	MemoryIO memio (data, leng);
 	AipsIO aio(&memio);
-	rownr_t nrrow = BLOCKDATAMANVAL(i)->open64 (nrrow_p, aio);
+	uInt nrrow = BLOCKDATAMANVAL(i)->open1 (nrrow_p, aio);
         if (nrrow > nrrow_p) {
           nrrow_p = nrrow;
         }

@@ -262,7 +262,7 @@ int main(int argc, char **argv)
       }
     catch (MSSelectionError& x)
       {
-    	cout << "###MSSelectionError: " << x.what() << endl;
+    	cout << "###MSSelectionError: " << x.getMesg() << endl;
 	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
       }
     //
@@ -274,11 +274,7 @@ int main(int argc, char **argv)
     //
     catch (AipsError& x)
       {
-    	cout << "###AipsError: " << x.what() << endl;
-      }
-    catch (std::exception& x)
-      {
-    	cout << "###std::exception: " << x.what() << endl;
+    	cout << "###AipsError: " << x.getMesg() << endl;
       }
   }
   //

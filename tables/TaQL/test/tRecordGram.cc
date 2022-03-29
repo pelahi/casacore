@@ -186,8 +186,8 @@ void doIt()
     Bool err = False;
     try {
       TableExprNode expr8 (RecordGram::parse (rec, "rownumber() > 3"));
-    } catch (std::exception& x) {
-      cout << "Expected exception:\n" << x.what() << endl;
+    } catch (AipsError& x) {
+      cout << "Expected exception:\n" << x.getMesg() << endl;
       err = True;
     }
     AlwaysAssertExit (err);
@@ -266,8 +266,8 @@ int main()
   try {
     doIt();
     testExpr2();
-  } catch (std::exception& x) {
-    cout << "Unexpected exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << "Unexpected exception: " << x.getMesg() << endl;
     return 1;
   } catch (...) {
     cout << "Unexpected unknown exception" << endl;

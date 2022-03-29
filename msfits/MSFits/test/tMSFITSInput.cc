@@ -60,13 +60,13 @@ int main() {
         try {
             msfitsin.readFitsFile();
         }
-        catch (const std::exception& x) {
+        catch (const AipsError& x) {
             thrown = True;
         }
         AlwaysAssert(thrown, AipsError);
     }
-    catch (const std::exception& x) {
-        cerr << x.what() << endl;
+    catch (const AipsError& x) {
+        cerr << x.getMesg() << endl;
         cout << "FAIL" << endl;
         return 1;
     }

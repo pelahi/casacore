@@ -122,7 +122,7 @@ public:
 
   // Tests if a row contains a Measure (i.e., if the row has a defined
   // value).
-  Bool isDefined (rownr_t rownr) const;
+  Bool isDefined (uInt rownr) const;
 
   // Get access to the TableMeasDescBase describing the column.
   // <group>

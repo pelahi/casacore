@@ -30,11 +30,10 @@
 
 #include <casacore/casa/aips.h>
 #include <casacore/casa/BasicMath/Math.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
-
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 class String;
+template<class T> class Vector;
 
 // <summary>Base class for random number generators</summary>
 //

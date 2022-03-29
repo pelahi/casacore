@@ -230,8 +230,8 @@ int main()
 
     cout << "OK" << endl;
 
-  } catch (std::exception& x) {
-    cerr << x.what() << endl;
+  } catch (AipsError& x) {
+    cerr << x.getMesg () << endl;
   } 
   
   return 0;

@@ -59,7 +59,7 @@
 #include <casacore/casa/Arrays/Array.h>
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Utilities/DataType.h>
 #include <casacore/casa/Utilities/ValType.h>
 #include <casacore/casa/Utilities/Assert.h>
@@ -346,52 +346,52 @@ void testMain (Bool doExcep)
       try {
 	// test TMRefDesc no such column
 	TableMeasRefDesc tCol(td, "SillyColumnName");
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following should report no such column ";
 	cout << " for TableMeasRefDesc.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
       try {
 	// test TMRefDesc - column exist but is of the wrong type
 	TableMeasRefDesc tCol(td, "Time4ScaOffset");
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following should report that the column's ";
 	cout << "type is no good.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
       try {
 	// test TableMeasValueDesc - column doesn't exist exception
 	TableMeasValueDesc tCol(td, "SillyColumnName");
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following should report no such column ";
 	cout << "for TableMeasValueDesc.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
       try {
 	// test TableMeasValueDesc - column exists but not array
 	TableMeasValueDesc tCol(td, "Time4StrRef");
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following should report that the column ";
 	cout << "is not array for TabelMeasValueDesc.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
       try {
 	// test TableMeasValueDesc - column exists but is double
 	TableMeasValueDesc tCol(td, "Time2ArrRef");
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following should report that the column's ";
 	cout << "type should be double for the TableMeasValueDesc.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
       try {
 	// test TableMeasValueDesc - too many units
 	Vector<Unit> u(2);
 	TableMeasValueDesc tCol(td, "Time2Arr");
 	TableMeasDesc<MEpoch> tmp(tCol, u);
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following should report that the column's ";
 	cout << "unit vector is too long.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
       try {
 	// test TableMeasValueDesc - invalid unit
@@ -399,10 +399,10 @@ void testMain (Bool doExcep)
 	u(0) = "m";
 	TableMeasValueDesc tCol(td, "Time2Arr");
 	TableMeasDesc<MEpoch> tmp(tCol, u);
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following should report that the column ";
 	cout << "has an invalid unit.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
     }
 
@@ -420,10 +420,10 @@ void testMain (Bool doExcep)
       try {
 	// get getOffset on a variable offset column
 	tmOsDesc.getOffset();
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "Attempt to reference undefined Measure offset ";
 	cout << " exception on the TableMeasOffsetDesc object.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
     }
   }
@@ -578,10 +578,10 @@ void testMain (Bool doExcep)
       if (doExcep) {
 	try {
 	  arrayCol.setDescUnits (u);
-	} catch (std::exception& x) {
+	} catch (AipsError& x) {
 	  cout << "The following line should report an error ";
 	  cout << "in ScalarMeasColumn::setDescUnits - invalid unit.\n";
-	  cout << x.what() << endl;
+	  cout << x.getMesg() << endl;
 	} 
       }
       cout << "Units of Time1Arr: "
@@ -648,28 +648,28 @@ void testMain (Bool doExcep)
       try {
 	// try constructing with a non MeasureColumn
 	MEpoch::ScalarColumn tScaCol(tab, "TimeRef");
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following line should report an error ";
 	cout << "in reconstruct - invalid column exception.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
       try {
 	// test throw if null exception
 	MEpoch::ScalarColumn nullCol;
 	nullCol.throwIfNull();
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following line should be a ";
 	cout << "null column exception.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
       try {
 	// try constructing a ScalarMeasColumn with an Array Offset
 	// column
 	MEpoch::ScalarColumn(tab, "SpareCol1");
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following line should be an illegal ";
 	cout << "offset column type exception.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
     }
   }
@@ -840,11 +840,11 @@ void testMain (Bool doExcep)
 	MeasFrame frame(epoch_frame);
 	me.getRefPtr()->set(frame);
 	meCol.put(0, me);
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following line should report an error ";
 	cout << "in ScalarMeasColumn::put - not allowed to put a ";
 	cout << "measure with a frame in variable column.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
     }
   }
@@ -943,11 +943,11 @@ void testMain (Bool doExcep)
       try {
 	Vector<Unit> u(1);
 	arrayCol.setDescUnits (u);
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following line should report an error ";
 	cout << "in ScalarMeasColumn::setDescUnits - not allowed to put ";
 	cout << "when the table is not empty.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
     }
   }
@@ -1036,10 +1036,10 @@ void testMain (Bool doExcep)
 	// test throw if null exception
 	MEpoch::ArrayColumn nullCol;
 	nullCol.throwIfNull();
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following line should be a ";
 	cout << "null column exception.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
     }
 
@@ -1105,14 +1105,14 @@ void testMain (Bool doExcep)
       Bool excp = False;
       try {
 	arrayCol.setDescRefCode (MEpoch::TAI);
-      } catch (std::exception&) {
+      } catch (AipsError&) {
 	excp = True;
       }
       AlwaysAssertExit (excp);
       excp = False;
       try {
 	arrayCol.setDescOffset (obsTime);
-      } catch (std::exception&) {
+      } catch (AipsError&) {
 	excp = True;
       }
       AlwaysAssertExit (excp);
@@ -1122,10 +1122,10 @@ void testMain (Bool doExcep)
       try {
 	Array<MEpoch> badShapeArr(IPosition(2,2));
 	scaStrRefCol.get(0, badShapeArr, False);
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	cout << "The following line should be a ";
 	cout << "Table array conformance error exception.\n";
-	cout << x.what() << endl;
+	cout << x.getMesg() << endl;
       } 
     }
   }
@@ -1437,10 +1437,10 @@ int main(int argc, const char*[])
     // Do tests where a refcode changes.
     testRefCodeChg();
     cout << "Test completed normally...bye.\n";
-  } catch (std::exception& x) {
+  } catch (AipsError& x) {
     cout << "An error occurred.  The test ended early with the following";
     cout << " message:\n";
-    cout << x.what() << endl;
+    cout << x.getMesg() << endl;
     return 1;
   }
   return 0;

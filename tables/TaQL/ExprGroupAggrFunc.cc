@@ -33,7 +33,6 @@
 #include <casacore/tables/Tables/TableColumn.h>
 #include <casacore/tables/Tables/TableError.h>
 #include <casacore/casa/Utilities/Sort.h>
-#include <casacore/casa/Utilities/GenSort.h>
 #include <limits>
 
 
@@ -318,13 +317,13 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
   {
     vector<Double> values;
     values.reserve (ids.size());
-    for (size_t i=0; i<ids.size(); ++i) {
+    for (uInt i=0; i<ids.size(); ++i) {
       values.push_back (itsOperand->getDouble (ids[i]));
     }
     if (! values.empty()) {
       return GenSort<Double>::kthLargest
         (&(values[0]), values.size(),
-         static_cast<Int>((values.size() - 1.)*itsFrac + 0.001));
+         static_cast<Int>((values.size() - 1)*itsFrac + 0.001));
     }
     return 0;
   }

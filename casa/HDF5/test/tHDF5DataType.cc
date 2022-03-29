@@ -95,7 +95,7 @@ int main()
     testDT<Complex> (TpComplex, TpArrayComplex, 8, True);
     testDT<DComplex> (TpDComplex, TpArrayDComplex, 16, True);
     testCompound();
-  } catch (std::exception& x) {
+  } catch (AipsError& x) {
     cout << "Unexpected exception: " << x.what() << endl;
     return 1;
   }

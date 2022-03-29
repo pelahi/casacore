@@ -202,9 +202,9 @@ Bool RegionHandlerHDF5::removeRegion (const String& name,
       Bool error = False;
       try {
 	lcPtr->handleDelete();
-      } catch (std::exception& x) {
+      } catch (AipsError& x) {
 	error = True;
-	msg = x.what();
+	msg = x.getMesg();
       }
       delete lcPtr;
       if (error) {

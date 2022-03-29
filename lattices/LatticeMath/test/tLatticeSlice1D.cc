@@ -83,8 +83,8 @@ try {
    doit3();
 
 
-} catch (std::exception& x) {
-     cerr << "aipserror: error " << x.what() << endl;
+} catch (AipsError& x) {
+     cerr << "aipserror: error " << x.getMesg() << endl;
      return 1;
 } 
 
@@ -175,8 +175,8 @@ void doit1 ()
       trc = shape - 1;
       try {
         slicer.getSlice (data, mask, blc, trc, nPts);
-      } catch (std::exception& x) {
-        cerr << "Caught expected exception " << x.what() << endl;
+      } catch (AipsError& x) {
+        cerr << "Caught expected exception " << x.getMesg() << endl;
       }
    }
 }
@@ -248,8 +248,8 @@ void doit2 ()
       LatticeSlice1D<Float> slicer2;
       try {
         slicer2.getSlice (data, mask, blc, trc, nPts);
-      } catch (std::exception& x) {
-        cerr << "Caught expected exception " << x.what() << endl;
+      } catch (AipsError& x) {
+        cerr << "Caught expected exception " << x.getMesg() << endl;
       }
 //
       LatticeSlice1D<Float> slicer3(inML, LatticeSlice1D<Float>::CUBIC);

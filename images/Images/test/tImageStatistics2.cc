@@ -399,9 +399,9 @@ int main() {
         */
 
     }
-    catch (const std::exception& x) {
+    catch (const AipsError& x) {
 
-        cerr << "Exception caught: " << x.what() << endl;
+        cerr << "Exception caught: " << x.getMesg() << endl;
         return 1;
     } 
     return 0;

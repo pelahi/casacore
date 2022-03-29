@@ -28,12 +28,13 @@
 //# Includes
 #include <casacore/casa/Quanta/MVRadialVelocity.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/BasicMath/Math.h>
 #include <casacore/casa/Quanta/MVFrequency.h>
 #include <casacore/casa/Quanta/Quantum.h>
 #include <casacore/casa/Utilities/Assert.h>
+#include <casacore/casa/Utilities/Register.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -128,8 +129,12 @@ Bool MVRadialVelocity::nearAbs(const MVRadialVelocity &other, Double tol) const 
 
 // Member functions
 
+uInt MVRadialVelocity::type() const {
+  return Register(static_cast<MVRadialVelocity *>(0));
+}
+
 void MVRadialVelocity::assure(const MeasValue &in) {
-  if (!dynamic_cast<const MVRadialVelocity*>(&in)) {
+  if (in.type() != Register(static_cast<MVRadialVelocity *>(0))) {
     throw(AipsError("Illegal MeasValue type argument: MVRadialVelocity"));
   }
 }

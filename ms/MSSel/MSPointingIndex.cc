@@ -29,7 +29,6 @@
 
 #include <casacore/casa/Arrays/ArrayUtil.h>
 #include <casacore/ms/MeasurementSets/MSPointing.h>
-#include <casacore/casa/IO/ArrayIO.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 

@@ -27,7 +27,7 @@
 //# $Id$
 
 #include <casacore/tables/LogTables/LoggerHolder.h>
-#include <casacore/tables/Tables/TableUtil.h>
+#include <casacore/tables/Tables/Table.h>
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/iostream.h>
@@ -45,7 +45,7 @@ void doIt (Bool tempClose)
 
   // Make sure we have a new table.
   if (Table::isReadable ("tLoggerHolder_tmp.log")) {
-    TableUtil::deleteTable ("tLoggerHolder_tmp.log");
+    Table::deleteTable ("tLoggerHolder_tmp.log");
   }
   // Create with a TableLogSink.
   // Test copy ctor and assignment.
@@ -103,8 +103,8 @@ int main()
   try {
     doIt (False);
     doIt (True);
-  } catch (std::exception& x) {
-    cout << "Unexpected exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << "Unexpected exception: " << x.getMesg() << endl;
     return 1;
   } catch (...) {
     cout << "Unexpected unknown exception" << endl;

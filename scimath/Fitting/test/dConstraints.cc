@@ -26,7 +26,7 @@
 //# $Id$
 
 #include <casacore/scimath/Fitting/NonLinearFitLM.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/Matrix.h>
@@ -132,17 +132,14 @@ int main (int argc, const char* argv[])
       constrArg = 0.0;
       constrArg[2] = 1.0;
       fitter.addConstraint(constrArg, v[2]);
-      CASACORE_FALLTHROUGH;
     case '2':					// W1==W2
       constrArg = 0.0;
       constrArg[2] = 1.0; constrArg[5] = -1.0;
       fitter.addConstraint(constrArg);
-      CASACORE_FALLTHROUGH;
     case '1':					// A1/A2=2
       constrArg = 0.0;
       constrArg[0] = 1.0; constrArg[3] = -2.0;
       fitter.addConstraint(constrArg);
-      CASACORE_FALLTHROUGH;
     default:
       break;
     }
@@ -176,8 +173,8 @@ int main (int argc, const char* argv[])
     delete gauss;
 
     cout << "---------------------------------------------------" << endl;
-  } catch (std::exception& x) {
-    cout << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << x.getMesg() << endl;
   }
   
   return 0;

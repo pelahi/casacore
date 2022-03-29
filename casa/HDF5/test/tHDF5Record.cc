@@ -34,7 +34,6 @@
 #include <casacore/casa/Arrays/ArrayLogical.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/Exceptions/Error.h>
-#include <casacore/casa/vector.h>
 
 using namespace casacore;
 
@@ -292,7 +291,7 @@ int main()
     HDF5Record::writeRecord (file, "test", rec3);
     check (file);
 
-  } catch (std::exception& x) {
+  } catch (AipsError& x) {
     cout << "Unexpected exception: " << x.what() << endl;
     return 1;
   }

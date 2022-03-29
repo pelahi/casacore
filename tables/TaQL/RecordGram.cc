@@ -82,7 +82,7 @@ const RecordInterface* RecordGram::theirRecPtr = 0;
 TableExprNode* RecordGram::theirNodePtr = 0;
 const Table* RecordGram::theirTabPtr = 0;
 TaQLStyle RecordGram::theirTaQLStyle;
-std::mutex RecordGram::theirMutex;
+Mutex RecordGram::theirMutex;
 
 //# The list of nodes to delete (usually in case of exception).
 std::map<void*, RecordGram::Token> RecordGram::theirTokens;
@@ -331,7 +331,7 @@ Array<MVTime> RecordGram::expr2ArrayDate (const String& expr,
 TableExprNode RecordGram::parse (const RecordInterface& record,
                                  const String& expression)
 {
-    std::lock_guard<std::mutex> lock(theirMutex);
+    ScopedMutexLock lock(theirMutex);
     theirRecPtr = &record;
     theirTabPtr = 0;
     return doParse (expression);
@@ -340,7 +340,7 @@ TableExprNode RecordGram::parse (const RecordInterface& record,
 TableExprNode RecordGram::parse (const Table& table,
                                  const String& expression)
 {
-    std::lock_guard<std::mutex> lock(theirMutex);
+    ScopedMutexLock lock(theirMutex);
     theirRecPtr = 0;
     theirTabPtr = &table;
     return doParse (expression);
@@ -361,8 +361,8 @@ TableExprNode RecordGram::doParse (const String& expression)
         // Make this copy before deleteTokenStorage is done,
         // otherwise it will be deleted.
         result = *theirNodePtr;
-    } catch (const std::exception& x) {
-        message = x.what();
+    } catch (const AipsError& x) {
+        message = x.getMesg();
         error = True;
     }
     // Delete possibly non-deleted tokens (usually in case of exception).
@@ -482,7 +482,7 @@ TableExprNode RecordGram::handleRegex (const TableExprNode& left,
   if (caseInsensitive) {
     str = Regex::makeCaseInsensitive (str);
   }
-  TableExprNode rnode((Regex(str, True)));
+  TableExprNode rnode((Regex(str)));
   if (negate) {
     lnode = (lnode != rnode);
   } else {

@@ -96,7 +96,8 @@ void MUString::skipBlank() {
 }
 
 Bool MUString::testBlank() const {
-  return (ptr >= len || str[ptr] == ' ' || str[ptr] == '\t');
+  static Regex ex("[ \t]");
+  return (ptr >= len || testChar(ex));
 }
 
 Bool MUString::tSkipBlank() {
@@ -104,7 +105,8 @@ Bool MUString::tSkipBlank() {
 }
 
 Bool MUString::testSign() const {
-  return (ptr < len && (str[ptr] == '-' || str[ptr] == '+'));
+  static Regex ex("[-+]");
+  return testChar(ex);
 }
 
 void MUString::skipSign() {
@@ -465,27 +467,30 @@ void MUString::setLast(Int st) {
 
 uInt MUString::minimaxNC(const String &in, Int N_name, 
 			const String tname[]) {
+    String a;
+    String b;
     Int i;
-    String a = upcase(in);
+    a = upcase(in);
 // Exact fit?
     for (i=0; i<N_name; i++) {
 	if (a == upcase(tname[i])) break;
     }
 // Now look for partial
     if (i >= N_name) {
-	size_t ia = a.length();
+	Int ia, ib;
+	ia = a.length();
 	for (i=0; i<N_name; i++) {
-	    String b = upcase(tname[i]);
-	    size_t ib = b.length();
+	    ib = tname[i].length();
 	    ib = ia < ib ? ia : ib;
+	    b = upcase(tname[i]);
 	    if (a.at(0,ib) == b.at(0,ib)) {
 		Int j;
 // Look for more partials
 		for (j=i+1; j<N_name; j++) {
-		    b = upcase(tname[j]);
-		    ib = b.length();
+		    ib = tname[j].length();
 		    ib = ia < ib ? ia : ib;
-		    if (a(0,ib) == b.at(0,ib)) break;
+		    b = upcase(tname[j]);
+		    if (a.at(0,ib) == b.at(0,ib)) break;
 		}
 // Found duplicate
 		if (j<N_name) i=N_name;

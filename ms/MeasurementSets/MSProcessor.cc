@@ -62,14 +62,14 @@ MSProcessor::MSProcessor(const String& tableName, const String &tableDescName,
 			 "table is not a valid MSProcessor"));
 }
 
-MSProcessor::MSProcessor(SetupNewTable &newTab, rownr_t nrrow,
+MSProcessor::MSProcessor(SetupNewTable &newTab, uInt nrrow,
 			       Bool initialize)
     : MSTable<MSProcessorEnums>(newTab, nrrow, initialize), 
       hasBeenDestroyed_p(False)
 {
     // verify that the now opened table is valid
     if (! validate(this->tableDesc()))
-	throw (AipsError("MSProcessor(SetupNewTable &, rownr_t, Bool) - "
+	throw (AipsError("MSProcessor(SetupNewTable &, uInt, Bool) - "
 			 "table is not a valid MSProcessor"));
 }
 

@@ -26,19 +26,14 @@
 //# $Id$
 
 //# Includes
-#include "../Array.h"
-#include "../ArrayMath.h"
-#include "../ArrayLogical.h"
-
-#include <cstdlib>
-
-#include <boost/test/unit_test.hpp>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/ArrayLogical.h>
+#include <casacore/casa/iostream.h>
 
 using namespace casacore;
 
-BOOST_AUTO_TEST_SUITE(array_math_transform)
-
-BOOST_AUTO_TEST_CASE(test)
+void doIt()
 {
   IPosition shape(3,10,11,12);
   Array<int> arr1(shape);
@@ -49,7 +44,7 @@ BOOST_AUTO_TEST_CASE(test)
   Array<int> res(shape);
   indgen (arr1, -100);
   indgen (arr2);
-  for (size_t i=0; i<arr1.nelements(); ++i) {
+  for (uInt i=0; i<arr1.nelements(); ++i) {
     exp1.data()[i] = arr1.data()[i] + arr2.data()[i];
     exp2.data()[i] = arr1.data()[i] + 20;
     expa.data()[i] = std::abs(arr1.data()[i]);
@@ -57,41 +52,41 @@ BOOST_AUTO_TEST_CASE(test)
 
   // First test transform of contiguous arrays.
   arrayContTransform (arr1, arr2, res, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp1));
+  AlwaysAssertExit (allEQ (res, exp1));
   arrayContTransform (arr1, 20, res, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp2));
+  AlwaysAssertExit (allEQ (res, exp2));
   arrayContTransform (20, arr1, res, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp2));
-  arrayContTransform (arr1, res, [](int a){return std::abs(a);});
-  BOOST_CHECK (allEQ (res, expa));
+  AlwaysAssertExit (allEQ (res, exp2));
+  arrayContTransform (arr1, res, Abs<int>());
+  AlwaysAssertExit (allEQ (res, expa));
 
   arrayTransform (arr1, arr2, res, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp1));
+  AlwaysAssertExit (allEQ (res, exp1));
   arrayTransform (arr1, 20, res, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp2));
+  AlwaysAssertExit (allEQ (res, exp2));
   arrayTransform (20, arr1, res, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp2));
-  arrayTransform (arr1, res, [](int a){return std::abs(a);});
-  BOOST_CHECK (allEQ (res, expa));
+  AlwaysAssertExit (allEQ (res, exp2));
+  arrayTransform (arr1, res, Abs<int>());
+  AlwaysAssertExit (allEQ (res, expa));
 
-  BOOST_CHECK (allEQ (exp1, arrayTransformResult (arr1, arr2,
+  AlwaysAssertExit (allEQ (exp1, arrayTransformResult (arr1, arr2,
                                                        std::plus<int>())));
-  BOOST_CHECK (allEQ (exp2, arrayTransformResult (arr1, 20,
+  AlwaysAssertExit (allEQ (exp2, arrayTransformResult (arr1, 20,
                                                        std::plus<int>())));
-  BOOST_CHECK (allEQ (exp2, arrayTransformResult (20, arr1,
+  AlwaysAssertExit (allEQ (exp2, arrayTransformResult (20, arr1,
                                                        std::plus<int>())));
-  BOOST_CHECK (allEQ (expa, arrayTransformResult (arr1,
-    [](int a){return std::abs(a);})));
+  AlwaysAssertExit (allEQ (expa, arrayTransformResult (arr1,
+                                                       Abs<int>())));
 
-  res.assign_conforming(arr1);
+  res = arr1;
   arrayTransformInPlace (res, arr2, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp1));
-  res.assign_conforming(arr1);
+  AlwaysAssertExit (allEQ (res, exp1));
+  res = arr1;
   arrayTransformInPlace (res, 20, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp2));
-  res.assign_conforming(arr1);
-  arrayTransformInPlace (res, [](int a){return std::abs(a);});
-  BOOST_CHECK (allEQ (res, expa));
+  AlwaysAssertExit (allEQ (res, exp2));
+  res = arr1;
+  arrayTransformInPlace (res, Abs<int>());
+  AlwaysAssertExit (allEQ (res, expa));
 
   // Now test non-contiguous arrays.
   Slicer slicer(IPosition(3,1,2,3), IPosition(3,7,8,9), IPosition(3,2),
@@ -103,39 +98,49 @@ BOOST_AUTO_TEST_CASE(test)
   Array<int> exp2sl (exp2(slicer));
   Array<int> expasl (expa(slicer));
 
-  res.assign_conforming(exp1);
+  res = exp1;
   arrayTransform (arr1sl, arr2sl, ressl, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp1));
-  res.assign_conforming(exp2);
+  AlwaysAssertExit (allEQ (res, exp1));
+  res = exp2;
   arrayTransform (arr1sl, 20, ressl, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp2));
+  AlwaysAssertExit (allEQ (res, exp2));
   arrayTransform (20, arr1sl, ressl, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp2));
-  res.assign_conforming(expa);
-  arrayTransform (arr1sl, ressl, [](int a){return std::abs(a);});
-  BOOST_CHECK (allEQ (res, expa));
+  AlwaysAssertExit (allEQ (res, exp2));
+  res = expa;
+  arrayTransform (arr1sl, ressl, Abs<int>());
+  AlwaysAssertExit (allEQ (res, expa));
 
-  BOOST_CHECK (allEQ (exp1sl, arrayTransformResult (arr1sl, arr2sl,
+  AlwaysAssertExit (allEQ (exp1sl, arrayTransformResult (arr1sl, arr2sl,
                                                          std::plus<int>())));
-  BOOST_CHECK (allEQ (exp2sl, arrayTransformResult (arr1sl, 20,
+  AlwaysAssertExit (allEQ (exp2sl, arrayTransformResult (arr1sl, 20,
                                                          std::plus<int>())));
-  BOOST_CHECK (allEQ (exp2sl, arrayTransformResult (20, arr1sl,
+  AlwaysAssertExit (allEQ (exp2sl, arrayTransformResult (20, arr1sl,
                                                          std::plus<int>())));
-  BOOST_CHECK (allEQ (expasl, arrayTransformResult (arr1sl,
-    [](int a){return std::abs(a);})));
+  AlwaysAssertExit (allEQ (expasl, arrayTransformResult (arr1sl,
+                                                         Abs<int>())));
 
-  res.assign_conforming(exp1);
-  ressl.assign_conforming(arr1sl);
+  res   = exp1;
+  ressl = arr1sl;
   arrayTransformInPlace (ressl, arr2sl, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp1));
-  res.assign_conforming(exp2);
-  ressl.assign_conforming(arr1sl);
+  AlwaysAssertExit (allEQ (res, exp1));
+  res   = exp2;
+  ressl = arr1sl;
   arrayTransformInPlace (ressl, 20, std::plus<int>());
-  BOOST_CHECK (allEQ (res, exp2));
-  res.assign_conforming(expa);
-  ressl.assign_conforming(arr1sl);
-  arrayTransformInPlace (res, [](int a){return std::abs(a);});
-  BOOST_CHECK (allEQ (res, expa));
+  AlwaysAssertExit (allEQ (res, exp2));
+  res   = expa;
+  ressl = arr1sl;
+  arrayTransformInPlace (res, Abs<int>());
+  AlwaysAssertExit (allEQ (res, expa));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+int main()
+{
+  try {
+    doIt();
+  } catch (AipsError& x) {
+    cout << "Unexpected exception: " << x.getMesg() << endl;
+    return 1;
+  }
+  cout << "OK" << endl;
+  return 0;
+}

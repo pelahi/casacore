@@ -31,7 +31,6 @@
 
 //# Includes
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <casacore/casa/BasicSL/String.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
@@ -39,6 +38,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 //# Forward Declarations
 class LELImageCoord;
 class IPosition;
+template<class T> class Vector;
+
 
 // <summary>
 // The base letter class for lattice coordinates in LEL.

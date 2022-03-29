@@ -59,15 +59,15 @@ int main ()
           AlwaysAssert(z && i <=lastGood && j <= lastGood, AipsError);
           delete z;
         }
-        catch (std::exception& x) {
+        catch (AipsError& x) {
           AlwaysAssert(i > lastGood || j > lastGood, AipsError);
         }
       }
     }
     cout << "OK" << endl;
   }
-  catch (const std::exception& x) {
-    cerr << "Caught exception: " << x.what() << endl;
+  catch (const AipsError& x) {
+    cerr << "Caught exception: " << x.getMesg() << endl;
     cout << "FAIL" << endl;
     ret = 1;
   }

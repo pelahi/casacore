@@ -26,7 +26,6 @@
 //# $Id$
 //   
 
-#include <casacore/casa/Exceptions/Error.h>
 #include <casacore/scimath/Mathematics/Combinatorics.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
@@ -34,14 +33,14 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     // Initialize factorial with first 2 values (0! and 1! are both 1).
     Vector<uInt> Combinatorics::_factorialCache(2,1);
     volatile uInt Combinatorics::_factorialCacheSize = 2;
-    std::mutex Combinatorics::theirMutex;
+    Mutex Combinatorics::theirMutex;
 
     void Combinatorics::fillCache(const uInt n) {
         // Make updating the cache thread-safe.
         // After acquiring a lock, test again if an update needs to be done
         // because another thread might have done it in the mean time.
         // Need C++11 or later to implement double checked locking correctly.
-        std::lock_guard<std::mutex> lock(theirMutex);
+        ScopedMutexLock lock(theirMutex);
         if (n >= _factorialCacheSize) {
           // Create a new cache vector.
           // Note: do not resize the existing one, because that makes

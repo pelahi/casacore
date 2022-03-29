@@ -39,14 +39,14 @@ int main() {
 		try {
 			MFrequency::typeFromString("J2000");
 		}
-		catch (const std::exception& x) {
+		catch (const AipsError& x) {
 			except = True;
 		}
 		AlwaysAssert(except, AipsError);
 		cout << "ok" << endl;
 	}
-	catch (const std::exception& x) {
-		cout << "tMFrequency failed: " << x.what() << endl;
+	catch (const AipsError& x) {
+		cout << "tMFrequency failed: " << x.getMesg() << endl;
 		return 1;
 	}
 	return 0;

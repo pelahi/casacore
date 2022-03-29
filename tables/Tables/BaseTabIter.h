@@ -87,20 +87,11 @@ public:
     // Create the table iterator to iterate through the given
     // columns in the given order. The given compare objects
     // will be used for the sort and to compare if values are equal.
-    // If a compare object in cmpObjs is null, the default ObjCompare<T> 
-    // will be used.
-    // If cacheIterationBoundaries is set to true then the iteration
-    // boundaries computed at construction time while sorting the table
-    // are used when advancing with next(). Otherwise, for each next()
-    // call the comparison functions are reevaluated again to get the
-    // iteration boundary. This improves performance in general but will
-    // break existing applications that change the comparison objects
-    // (cmpObjs) between iterations.
+    // If a compare object is null, the default ObjCompare<T> will be used.
     BaseTableIterator (BaseTable*, const Block<String>& columnNames,
-                       const Block<CountedPtr<BaseCompare> >& cmpObjs,
+                       const Block<CountedPtr<BaseCompare> >&,
                        const Block<Int>& orders,
-                       int option,
-                       bool cacheIterationBoundaries = false);
+                       int option);
 
     // Clone this iterator.
     BaseTableIterator* clone() const;
@@ -123,7 +114,7 @@ public:
 
 protected:
     BaseTable*             sortTab_p;     //# Table sorted in iteration order
-    rownr_t                lastRow_p;     //# last row used from reftab
+    uInt                   lastRow_p;     //# last row used from reftab
     uInt                   nrkeys_p;      //# nr of columns in group
     String                 keyChangeAtLastNext_p;  //# name of column that terminated most recent next()
     PtrBlock<BaseColumn*>  colPtr_p;      //# pointer to column objects
@@ -131,8 +122,6 @@ protected:
 
     // Copy constructor (to be used by clone)
     BaseTableIterator (const BaseTableIterator&);
-
-    BaseTable* noCachedIterBoundariesNext();
 
 private:
     // Assignment is not needed, because the assignment operator in
@@ -142,12 +131,6 @@ private:
 
     Block<void*>           lastVal_p;     //# last value per column
     Block<void*>           curVal_p;      //# current value per column
-
-    std::shared_ptr<Vector<rownr_t>> sortIterBoundaries_p;
-    std::shared_ptr<Vector<size_t>> sortIterKeyIdxChange_p;
-    Vector<rownr_t>::iterator sortIterBoundariesIt_p;
-    Vector<size_t>::iterator  sortIterKeyIdxChangeIt_p;
-    RefTable* aRefTable_p;
 };
 
 

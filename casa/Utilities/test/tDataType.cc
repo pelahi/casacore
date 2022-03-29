@@ -317,7 +317,7 @@ void excpAsScalar(DataType type)
     Bool hadExcp = False;
     try {
 	asScalar(type);
-    } catch (std::exception& x) {
+    } catch (AipsError& x) {
 	hadExcp = True;
     } 
     AlwaysAssert(hadExcp, AipsError);
@@ -328,7 +328,7 @@ void excpAsArray(DataType type)
     Bool hadExcp = False;
     try {
 	asArray(type);
-    } catch (std::exception& x) {
+    } catch (AipsError& x) {
 	hadExcp = True;
     } 
     AlwaysAssert(hadExcp, AipsError);
@@ -349,8 +349,8 @@ int main()
     try {
 	simpleTests();
 	excpTests();
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
 

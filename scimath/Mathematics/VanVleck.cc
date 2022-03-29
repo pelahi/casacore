@@ -56,7 +56,7 @@ Double VanVleck::itsXlev = 0.0;
 Double VanVleck::itsYlev = 0.0;
 Double VanVleck::itsXmean = 0.0;
 Double VanVleck::itsYmean = 0.0;
-std::mutex VanVleck::theirMutex;
+Mutex VanVleck::theirMutex;
 
 #define NEED_UNDERSCORES
 #if defined(NEED_UNDERSCORES)
@@ -112,7 +112,7 @@ extern "C" {
 
 void VanVleck::size(uInt npts)
 {
-    std::lock_guard<std::mutex> lock(theirMutex);
+    ScopedMutexLock lock(theirMutex);
     if (itsSize != npts) {
 	itsSize = npts;
 	initInterpolator();
@@ -127,7 +127,7 @@ uInt VanVleck::getsize()
 void VanVleck::setQuantization(const Matrix<Double> &qx, 
 			       const Matrix<Double> &qy)
 {
-    std::lock_guard<std::mutex> lock(theirMutex);
+    ScopedMutexLock lock(theirMutex);
     // should double check that first dimension is 2
 
     uInt nx = qx.ncolumn();
@@ -175,7 +175,7 @@ Bool VanVleck::setEquiSpaced(Double xlev, Double ylev,
 {
     Bool result = n==3 || n==9;
     if (result) {
-        std::lock_guard<std::mutex> lock(theirMutex);
+        ScopedMutexLock lock(theirMutex);
 	itsNx = itsNy = n;
 	itsXlev = xlev;
 	itsYlev = ylev;
@@ -326,7 +326,7 @@ void VanVleck::initInterpolator()
 void VanVleck::getTable(Vector<Double> &rs,
 			Vector<Double> &rhos)
 {
-  std::lock_guard<std::mutex> lock(theirMutex);
+  ScopedMutexLock lock(theirMutex);
   rs.resize(itsInterp->getX().nelements());
   rs = itsInterp->getX();
   rhos.resize(itsInterp->getY().nelements());
@@ -335,7 +335,7 @@ void VanVleck::getTable(Vector<Double> &rs,
 
 Double VanVleck::r(const Double rho)
 {
-  std::lock_guard<std::mutex> lock(theirMutex);
+  ScopedMutexLock lock(theirMutex);
   return (*itsInterp)(rho);
 }
 

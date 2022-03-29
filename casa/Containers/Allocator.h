@@ -32,7 +32,6 @@
 #include <casacore/casa/config.h>
 #include <casacore/casa/aips.h>
 #include <casacore/casa/Utilities/DataType.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 
 #include <cstdlib>
 #include <memory>
@@ -207,11 +206,13 @@ inline bool operator!=(const new_del_allocator<T>&,
   return false;
 }
 
+template<typename T> class Array;
 template<typename T> class Block;
 
 class Allocator_private {
   template<typename T> friend class AbstractAllocator;
   template<typename T, typename Sub> friend class BaseAllocator;
+  template<typename T> friend class Array;
   template<typename T> friend class Block;
 
   template<typename T2>

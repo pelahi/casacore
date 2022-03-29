@@ -39,7 +39,7 @@
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
 #include <casacore/casa/Arrays/ArrayUtil.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/iostream.h>
 
@@ -337,7 +337,7 @@ void writeFixVar(const TSMOption& tsmOpt)
     SetupNewTable newtab("tTiledShapeStMan_tmp.data", td, Table::New);
     // Create a storage manager for it.
     // Let the tile shape match the cube shape.
-    TiledShapeStMan sm1 ("TSMExample", IPosition(2,16,25));
+    TiledShapeStMan sm1 ("TSMExample", IPosition(2,16,25,1));
     newtab.bindAll (sm1);
     Table table(newtab, 0, False, Table::LocalEndian, tsmOpt);
 
@@ -617,8 +617,8 @@ int main () {
 
         writeFlags();
 
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     return 0;                           // exit with success status

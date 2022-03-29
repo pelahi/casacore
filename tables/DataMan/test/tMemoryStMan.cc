@@ -35,11 +35,11 @@
 #include <casacore/tables/DataMan/MemoryStMan.h>
 #include <casacore/casa/BasicSL/Complex.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Arrays/Cube.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Containers/Record.h>
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/Exceptions/Error.h>
@@ -70,10 +70,10 @@ void init (uInt aMode);
 void deleteRow(const uInt aRow);
 
 // reopen table, and throw away a few rows
-void deleteRows(const Vector<rownr_t>& aNrRows);
+void deleteRows(const Vector<uInt>& aNrRows);
 
 // delete a Column
-void deleteColumn(const String& aColumn);
+void deleteColumn(const String aColumn);
 
 // delete a column && put it back again
 void deleteAndRestore();
@@ -125,7 +125,7 @@ int main ()
 	addDirectArrays ();
 	addIndStringArray();
 	addIndArray     ();
-        Vector<rownr_t> aNrRows(3);
+        Vector<uInt> aNrRows(3);
 	for (uInt i=0; i< 3; i++) {
 	  aNrRows(i) = i+3;
 	}
@@ -133,15 +133,15 @@ int main ()
 	deleteColumn    ("Col-7");
        	addColumn(TpString);
 	// remove all remaining rows to check freebucket performance
-        Vector<rownr_t> aNewNrRows(15);
+        Vector<uInt> aNewNrRows(15);
 	for (uInt i=0; i< 15; i++) {
 	  aNewNrRows(i) = i;
 	}
 	deleteRows      (aNewNrRows);
 
 
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     return 0;                           // exit with success status
@@ -429,7 +429,7 @@ void deleteRow(const uInt aRow)
   saveData(aTable);
 }
 
-void deleteRows(const Vector<rownr_t>& aNrRows)
+void deleteRows(const Vector<uInt>& aNrRows)
 {
   Table aTable = Table("tMemoryStMan_tmp.data", Table::Update);
   restoreData(aTable);
@@ -448,7 +448,7 @@ void deleteRows(const Vector<rownr_t>& aNrRows)
   saveData(aTable);
 }
 
-void deleteColumn(const String& aColumn)
+void deleteColumn(const String aColumn)
 {
   Table aTable = Table("tMemoryStMan_tmp.data", Table::Update);
   restoreData(aTable);

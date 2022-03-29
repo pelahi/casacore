@@ -26,14 +26,16 @@
 //#
 //# $Id$
 
-#ifndef CASA_AXESMAPPING_2_H
-#define CASA_AXESMAPPING_2_H
+#ifndef CASA_AXESMAPPING_H
+#define CASA_AXESMAPPING_H
+
 
 //# Includes
-#include "IPosition.h"
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/IPosition.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
- 
+
 //# Forward Declarations
 class Slicer;
 
@@ -75,7 +77,8 @@ class Slicer;
 
 // <motivation>
 // The class encapsulates the mapping functionality.
-// It is meant as a helper class for casacore's SubLattice.
+// It is meant as a helper class for
+// <linkto class=SubLattice>SubLattice</linkto>.
 // </motivation>
 
 //# <todo asof="yyyy/mm/dd">
@@ -93,12 +96,21 @@ public:
   // <br>It determines if axes are removed and/or reordered.
   explicit AxesMapping (const IPosition& oldToNew);
 
+  // Copy constructor (copy semantics).
+  AxesMapping(const AxesMapping& other);
+  
+  ~AxesMapping();
+
+  // Assignment (copy semantics).
+  // This and that do not have to have the same length.
+  AxesMapping& operator= (const AxesMapping& other);
+
   // Are axes removed?
-  bool isRemoved() const
+  Bool isRemoved() const
     { return itsRemoved; }
 
   // Is the axes order reordered?
-  bool isReordered() const
+  Bool isReordered() const
     { return itsReordered; }
 
   // Get the mapping of old->new.
@@ -142,8 +154,8 @@ public:
 private:
   IPosition itsToNew;
   IPosition itsToOld;
-  bool      itsRemoved;
-  bool      itsReordered;
+  Bool      itsRemoved;
+  Bool      itsReordered;
 };
 
 

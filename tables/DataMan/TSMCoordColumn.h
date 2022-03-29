@@ -104,49 +104,67 @@ public:
     virtual ~TSMCoordColumn();
 
     // Set the shape of the coordinate vector in the given row.
-    virtual void setShape (rownr_t rownr, const IPosition& shape);
+    void setShape (uInt rownr, const IPosition& shape);
 
     // Is the value shape defined in the given row?
-    virtual Bool isShapeDefined (rownr_t rownr);
+    Bool isShapeDefined (uInt rownr);
 
     // Get the shape of the item in the given row.
-    virtual IPosition shape (rownr_t rownr);
+    IPosition shape (uInt rownr);
 
     // Get a scalar value in the given row.
     // The buffer pointed to by dataPtr has to have the correct length
     // (which is guaranteed by the Scalar/ArrayColumn get function).
     // <group>
-    virtual void getInt      (rownr_t rownr, Int* dataPtr);
-    virtual void getuInt     (rownr_t rownr, uInt* dataPtr);
-    virtual void getInt64    (rownr_t rownr, Int64* dataPtr);
-    virtual void getfloat    (rownr_t rownr, float* dataPtr);
-    virtual void getdouble   (rownr_t rownr, double* dataPtr);
-    virtual void getComplex  (rownr_t rownr, Complex* dataPtr);
-    virtual void getDComplex (rownr_t rownr, DComplex* dataPtr);
+    void getIntV      (uInt rownr, Int* dataPtr);
+    void getuIntV     (uInt rownr, uInt* dataPtr);
+    void getInt64V    (uInt rownr, Int64* dataPtr);
+    void getfloatV    (uInt rownr, float* dataPtr);
+    void getdoubleV   (uInt rownr, double* dataPtr);
+    void getComplexV  (uInt rownr, Complex* dataPtr);
+    void getDComplexV (uInt rownr, DComplex* dataPtr);
     // </group>
 
     // Put a scalar value into the given row.
     // The buffer pointed to by dataPtr has to have the correct length
     // (which is guaranteed by the Scalar/ArrayColumn put function).
     // <group>
-    virtual void putInt      (rownr_t rownr, const Int* dataPtr);
-    virtual void putuInt     (rownr_t rownr, const uInt* dataPtr);
-    virtual void putInt64    (rownr_t rownr, const Int64* dataPtr);
-    virtual void putfloat    (rownr_t rownr, const float* dataPtr);
-    virtual void putdouble   (rownr_t rownr, const double* dataPtr);
-    virtual void putComplex  (rownr_t rownr, const Complex* dataPtr);
-    virtual void putDComplex (rownr_t rownr, const DComplex* dataPtr);
+    void putIntV      (uInt rownr, const Int* dataPtr);
+    void putuIntV     (uInt rownr, const uInt* dataPtr);
+    void putInt64V    (uInt rownr, const Int64* dataPtr);
+    void putfloatV    (uInt rownr, const float* dataPtr);
+    void putdoubleV   (uInt rownr, const double* dataPtr);
+    void putComplexV  (uInt rownr, const Complex* dataPtr);
+    void putDComplexV (uInt rownr, const DComplex* dataPtr);
     // </group>
 
     // Get the array value in the given row.
     // The array pointed to by dataPtr has to have the correct length
     // (which is guaranteed by the ArrayColumn get function).
-    virtual void getArrayV (rownr_t rownr, ArrayBase& dataPtr);
+    // The default implementation thrown an "invalid operation exception".
+    // <group>
+    void getArrayIntV      (uInt rownr, Array<Int>* dataPtr);
+    void getArrayuIntV     (uInt rownr, Array<uInt>* dataPtr);
+    void getArrayInt64V    (uInt rownr, Array<Int64>* dataPtr);
+    void getArrayfloatV    (uInt rownr, Array<float>* dataPtr);
+    void getArraydoubleV   (uInt rownr, Array<double>* dataPtr);
+    void getArrayComplexV  (uInt rownr, Array<Complex>* dataPtr);
+    void getArrayDComplexV (uInt rownr, Array<DComplex>* dataPtr);
+    // </group>
 
     // Put the array value into the given row.
     // The buffer pointed to by dataPtr has to have the correct length
     // (which is guaranteed by the ArrayColumn put function).
-    virtual void putArrayV (rownr_t rownr, const ArrayBase& dataPtr);
+    // The default implementation thrown an "invalid operation exception".
+    // <group>
+    void putArrayIntV      (uInt rownr, const Array<Int>* dataPtr);
+    void putArrayuIntV     (uInt rownr, const Array<uInt>* dataPtr);
+    void putArrayInt64V    (uInt rownr, const Array<Int64>* dataPtr);
+    void putArrayfloatV    (uInt rownr, const Array<float>* dataPtr);
+    void putArraydoubleV   (uInt rownr, const Array<double>* dataPtr);
+    void putArrayComplexV  (uInt rownr, const Array<Complex>* dataPtr);
+    void putArrayDComplexV (uInt rownr, const Array<DComplex>* dataPtr);
+    // </group>
 
 private:
     // The axis number of the coordinate.

@@ -38,7 +38,7 @@
 #include <casacore/tables/Tables/ScalarColumn.h>
 #include <casacore/tables/Tables/ArrayColumn.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/OS/Timer.h>
 #include <iostream>
 
@@ -201,9 +201,9 @@ int main(int argc, char* argv[])
     mdv.setObservatoryPosition (arrayPos);
     // Now loop through quite some rows and compare result of DerivedMSCal
     // with MSDerivedValues.
-    rownr_t nr = std::max(tab.nrow(), rownr_t(1000));
+    uInt nr = std::max(tab.nrow(), 1000u);
     Int lastFldId = -1;
-    for (rownr_t i=0; i<nr; ++i) {
+    for (uInt i=0; i<nr; ++i) {
       Int fldId = fld(i);
       if (fldId != lastFldId) {
         mdv.setFieldCenter (fldId);

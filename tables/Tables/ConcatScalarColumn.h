@@ -83,40 +83,41 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     // Construct the ConcatColumn. It will point to the given column
     // description, ConcatTable and referenced column.
     // The ConcatTable will be used to convert the rownr to the rownr
-    // in the apprpriate table.
+    // in the referenced column.
     ConcatScalarColumn (const BaseColumnDesc*, ConcatTable*);
 
     ~ConcatScalarColumn();
 
     // Get the vector of all scalar values in a column.
-    virtual void getScalarColumn (ArrayBase& dataPtr) const;
+    virtual void getScalarColumn (void* dataPtr) const;
 
     // Get the vector of some scalar values in a column.
     virtual void getScalarColumnCells (const RefRows& rownrs,
-				       ArrayBase& dataPtr) const;
+				       void* dataPtr) const;
 
     // Put the vector of all scalar values in the column.
-    virtual void putScalarColumn (const ArrayBase& dataPtr);
+    virtual void putScalarColumn (const void* dataPtr);
 
     // Get the vector of some scalar values in a column.
     virtual void putScalarColumnCells (const RefRows& rownrs,
-				       const ArrayBase& dataPtr);
+				       const void* dataPtr);
 
     // Handle the creation and deletion of sort keys.
     // <group>
     virtual void makeSortKey (Sort& sortobj,
                               CountedPtr<BaseCompare>& cmpObj,
 			      Int order,
-			      CountedPtr<ArrayBase>& dataSave);
+			      const void*& dataSave);
     virtual void makeRefSortKey (Sort& sortobj,
                                  CountedPtr<BaseCompare>& cmpObj,
 				 Int order,
-				 const Vector<rownr_t>& rownrs,
-				 CountedPtr<ArrayBase>& dataSave);
+				 const Vector<uInt>& rownrs,
+				 const void*& dataSave);
     virtual void fillSortKey (const Vector<T>* vecPtr,
 			      Sort& sortobj,
                               CountedPtr<BaseCompare>& cmpObj,
 			      Int order);
+    virtual void freeSortKey (const void*& dataSave);
     // </group>
 
   };

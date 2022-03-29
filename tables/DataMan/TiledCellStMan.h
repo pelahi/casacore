@@ -138,7 +138,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 //  Cube<float> imageValues(IPosition(3,512,512,64));
 //  indgen (imageValues);
 //  // Write some data into the data columns.
-//  for (uInt i=0; i<4; i++) {
+//  uInt i;
+//  for (i=0; i<4; i++) {
 //      table.addRow();
 //	image.put (i, imageValues);
 //      ra.put (i, raValues);
@@ -174,7 +175,7 @@ public:
     // <group>
     TiledCellStMan (const String& hypercolumnName,
 		    const IPosition& defaultTileShape,
-		    uInt64 maximumCacheSize = 0);
+		    uInt maximumCacheSize = 0);
     TiledCellStMan (const String& hypercolumnName,
 		    const Record& spec);
     // </group>
@@ -192,7 +193,7 @@ public:
     Bool canChangeShape() const;
 
     // Set the shape and tile shape of the hypercube.
-    virtual void setShape (rownr_t rownr, TSMCube* hypercube,
+    virtual void setShape (uInt rownr, TSMCube* hypercube,
 			   const IPosition& shape,
 			   const IPosition& tileShape);
 
@@ -217,14 +218,14 @@ private:
     virtual IPosition defaultTileShape() const;
 
     // Add rows to the storage manager.
-    void addRow64 (rownr_t nrrow);
+    void addRow (uInt nrrow);
 
     // Get the hypercube in which the given row is stored.
-    virtual TSMCube* getHypercube (rownr_t rownr);
+    virtual TSMCube* getHypercube (uInt rownr);
 
     // Get the hypercube in which the given row is stored.
     // It also returns the position of the row in that hypercube.
-    virtual TSMCube* getHypercube (rownr_t rownr, IPosition& position);
+    virtual TSMCube* getHypercube (uInt rownr, IPosition& position);
 
     // Check if the hypercolumn definition fits this storage manager.
     virtual void setupCheck (const TableDesc& tableDesc,
@@ -236,10 +237,10 @@ private:
 
     // Let the storage manager create files as needed for a new table.
     // This allows a column with an indirect array to create its file.
-    virtual void create64 (rownr_t nrrow);
+    virtual void create (uInt nrrow);
 
     // Read the header info.
-    virtual void readHeader (rownr_t nrrow, Bool firstTime);
+    virtual void readHeader (uInt nrrow, Bool firstTime);
 
 
     //# Declare the data members.

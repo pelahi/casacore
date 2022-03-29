@@ -110,7 +110,7 @@ public:
   ~MSSummary();
 
 // Retrieve number of rows
-   Int64 nrow() const;
+   Int nrow() const;
  
 // Retrieve image name
    String name() const;

@@ -25,32 +25,42 @@
 //#
 //# $Id$
 
-#ifndef CASA_VECTOR2_2_TCC
-#define CASA_VECTOR2_2_TCC
+#ifndef CASA_VECTOR2_TCC
+#define CASA_VECTOR2_TCC
 
-#include "Vector.h"
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/stdvector.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
-template<class T, typename Alloc>
+template<class T>
 template <class U, class V>
-Vector<T, Alloc>::Vector(const std::vector<U, V> &other)
+Vector<T>::Vector(const vector<U, V> &other)
   : Array<T>(IPosition(1, other.size()))
 {
   size_t i=0;
-  for (typename std::vector<U, V>::const_iterator pos=other.begin();
+  for (typename vector<U, V>::const_iterator pos=other.begin();
        pos != other.end(); ++pos) {
     (*this)[i++] = (T)*pos;
   }
 }
-template<class T, typename Alloc>
+template<class T>
 template<class Iterator>
-Vector<T, Alloc>::Vector(Iterator first, size_t size, int)
-  : Array<T, Alloc>(IPosition(1, size)) {
+Vector<T>::Vector(Iterator first, size_t size, int)
+  : Array<T>(IPosition(1, size)) {
   for (size_t i=0; i<size; ++i, ++first) {
     (*this)[i] = *first;
   }
 }
+
+template<class T>
+template<class U>
+void Array<T>::tovector(vector<T, U> &out) const {
+  Bool deleteIt;
+  const T *stor = this->getStorage(deleteIt);
+  out.assign(stor, stor+nelements());
+  this->freeStorage(stor, deleteIt);
+}  
 
 } //# NAMESPACE CASACORE - END
 

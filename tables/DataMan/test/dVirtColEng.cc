@@ -89,13 +89,12 @@ Bool DummyVirtualEngine::flush (AipsIO& ios, Bool)
     data2_p.flush (ios);
     return True;
 }
-void DummyVirtualEngine::create64 (rownr_t)
+void DummyVirtualEngine::create (uInt)
 {}
-rownr_t DummyVirtualEngine::open64 (rownr_t nrrow, AipsIO& ios)
+void DummyVirtualEngine::open (uInt, AipsIO& ios)
 {
     data1_p.open (ios);
     data2_p.open (ios);
-    return nrrow;
 }
 void DummyVirtualEngine::prepare ()
 {
@@ -187,20 +186,20 @@ Bool DummyVirtualScalar::isWritable() const
     return (writable_p > 0  ?  True : False);
 }
 
-void DummyVirtualScalar::get (rownr_t rownr, double& data)
+void DummyVirtualScalar::get (uInt rownr, double& data)
 {
     data = scale_p * (*column_p)(rownr);
 }
-void DummyVirtualScalar::getdoubleV (rownr_t rownr, double* dataPtr)
+void DummyVirtualScalar::getdoubleV (uInt rownr, double* dataPtr)
 {
     *dataPtr = scale_p * (*column_p)(rownr);
 }    
 
-void DummyVirtualScalar::put (rownr_t rownr, const double& data)
+void DummyVirtualScalar::put (uInt rownr, const double& data)
 {
     column_p->put (rownr, Int(data / scale_p));
 }
-void DummyVirtualScalar::putdoubleV (rownr_t rownr, const double* dataPtr)
+void DummyVirtualScalar::putdoubleV (uInt rownr, const double* dataPtr)
 {
     column_p->put (rownr, Int(*dataPtr / scale_p));
 }
@@ -262,24 +261,24 @@ Bool DummyVirtualArray::isWritable() const
     return (writable_p > 0  ?  True : False);
 }
 
-void DummyVirtualArray::setShape (rownr_t rownr, const IPosition& shape)
+void DummyVirtualArray::setShape (uInt rownr, const IPosition& shape)
 {
     column_p->setShape (rownr, shape);
 }
-Bool DummyVirtualArray::isShapeDefined (rownr_t rownr)
+Bool DummyVirtualArray::isShapeDefined (uInt rownr)
 {
     return column_p->isDefined (rownr);
 }
-uInt DummyVirtualArray::ndim (rownr_t rownr)
+uInt DummyVirtualArray::ndim (uInt rownr)
 {
     return column_p->ndim (rownr);
 }
-IPosition DummyVirtualArray::shape (rownr_t rownr)
+IPosition DummyVirtualArray::shape (uInt rownr)
 {
     return column_p->shape (rownr);
 }
 
-void DummyVirtualArray::getArray (rownr_t rownr, Array<double>& array)
+void DummyVirtualArray::getArray (uInt rownr, Array<double>& array)
 {
     Array<Int> intern(array.shape());
     column_p->get (rownr, intern);
@@ -295,7 +294,7 @@ void DummyVirtualArray::getArray (rownr_t rownr, Array<double>& array)
     intern.freeStorage (in, deleteIn);
     array.putStorage (out, deleteOut);
 }
-void DummyVirtualArray::putArray (rownr_t rownr, const Array<double>& array)
+void DummyVirtualArray::putArray (uInt rownr, const Array<double>& array)
 {
     Array<Int> intern(array.shape());
     Bool deleteIn, deleteOut;

@@ -346,7 +346,6 @@ void TableExprFuncNodeArray::tryToConst()
         break;
     case TableExprFuncNode::arrfractilesFUNC:
         axarg = 2;
-        CASACORE_FALLTHROUGH;
     case TableExprFuncNode::arrsumsFUNC:
     case TableExprFuncNode::arrproductsFUNC:
     case TableExprFuncNode::arrsumsqrsFUNC:
@@ -1236,7 +1235,7 @@ MArray<Int64> TableExprFuncNodeArray::getArrayInt (const TableExprId& id)
     case TableExprFuncNode::arrntruesFUNC:
       {
         MArray<Bool> arr (operands()[0]->getArrayBool(id));
-        MArray<size_t> res(partialNTrue (arr, getAxes(id, arr.ndim())));
+        MArray<uInt> res(partialNTrue (arr, getAxes(id, arr.ndim())));
         Array<Int64> resd(res.shape());
         convertArray (resd, res.array());
         return MArray<Int64> (resd, res);
@@ -1260,7 +1259,7 @@ MArray<Int64> TableExprFuncNodeArray::getArrayInt (const TableExprId& id)
     case TableExprFuncNode::arrnfalsesFUNC:
       {
         MArray<Bool> arr (operands()[0]->getArrayBool(id));
-        MArray<size_t> res(partialNFalse (arr, getAxes(id, arr.ndim())));
+        MArray<uInt> res(partialNFalse (arr, getAxes(id, arr.ndim())));
         Array<Int64> resd(res.shape());
         convertArray (resd, res.array());
         return MArray<Int64> (resd, res);
@@ -2217,39 +2216,40 @@ MArray<String> TableExprFuncNodeArray::getArrayString (const TableExprId& id)
         Bool deleteStr;
         String* str = strings.getStorage (deleteStr);
         size_t n = strings.size();
+        size_t i;
         switch (funcType()) {
         case TableExprFuncNode::upcaseFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i].upcase();
             }
             break;
         case TableExprFuncNode::downcaseFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i].downcase();
             }
             break;
         case TableExprFuncNode::capitalizeFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i].capitalize();
             }
             break;
         case TableExprFuncNode::sreverseFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i].reverse();
             }
             break;
         case TableExprFuncNode::trimFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i].trim();
             }
             break;
         case TableExprFuncNode::ltrimFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i].gsub (leadingWS, String());
             }
             break;
         case TableExprFuncNode::rtrimFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i].gsub (trailingWS, String());
             }
             break;
@@ -2260,7 +2260,7 @@ MArray<String> TableExprFuncNodeArray::getArrayString (const TableExprId& id)
               if (operands().size() > 2) {
                 sz = std::max (Int64(0), operands()[2]->getInt (id));
               }
-              for (size_t i=0; i<n; i++) {
+              for (i=0; i<n; i++) {
                 Int64 st = stv;
                 if (st < 0) st += str[i].size();
                 if (st < 0) st = 0;
@@ -2276,12 +2276,12 @@ MArray<String> TableExprFuncNodeArray::getArrayString (const TableExprId& id)
               }
               if (operands()[1]->dataType() == TableExprNodeRep::NTString) {
                 String patt = operands()[1]->getString(id);
-                for (size_t i=0; i<n; i++) {
+                for (i=0; i<n; i++) {
                   str[i].gsub (patt, repl);
                 }
               } else {
                 Regex patt = operands()[1]->getRegex(id).regex();
-                for (size_t i=0; i<n; i++) {
+                for (i=0; i<n; i++) {
                   str[i].gsub (patt, repl);
                 }
               }
@@ -2308,29 +2308,30 @@ MArray<String> TableExprFuncNodeArray::getArrayString (const TableExprId& id)
         const MVTime* val = values.array().getStorage (deleteVal);
         String* str = strings.getStorage (deleteStr);
         size_t n = values.size();
+        size_t i;
         switch (funcType()) {
         case TableExprFuncNode::cmonthFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i] = val[i].monthName();
             }
             break;
         case TableExprFuncNode::cdowFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i] = val[i].dayName();
             }
             break;
         case TableExprFuncNode::ctodFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i] = TableExprFuncNode::stringDateTime (val[i], 9);
             }
             break;
         case TableExprFuncNode::cdateFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i] = TableExprFuncNode::stringDate (val[i]);
             }
             break;
         case TableExprFuncNode::ctimeFUNC:
-            for (size_t i=0; i<n; i++) {
+            for (i=0; i<n; i++) {
                 str[i] = TableExprFuncNode::stringTime (val[i], 9);
             }
             break;

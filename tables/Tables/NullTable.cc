@@ -157,7 +157,7 @@ Bool NullTable::canAddRow() const
   throw makeError ("canAddRow");
 }
 
-void NullTable::addRow (rownr_t, Bool)
+void NullTable::addRow (uInt, Bool)
 {
   throw makeError ("addRow");
 }
@@ -167,7 +167,7 @@ Bool NullTable::canRemoveRow() const
   throw makeError ("canRemoveRow");
 }
 
-void NullTable::removeRow (rownr_t)
+void NullTable::removeRow (uInt)
 {
   throw makeError ("removeRow");
 }
@@ -225,7 +225,7 @@ void NullTable::renameHypercolumn (const String&, const String&)
   throw makeError ("renameHypercolumn");
 }
 
-Vector<rownr_t> NullTable::rowNumbers() const
+Vector<uInt> NullTable::rowNumbers() const
 {
   throw makeError ("rowNumbers");
 }
@@ -237,26 +237,24 @@ BaseTable* NullTable::root()
 
 Bool NullTable::rowOrder() const
 {
-  throw makeError ("rowOrder");
+  throw makeError ("rowOrde");
 }
 
-Vector<rownr_t>* NullTable::rowStorage()
+Vector<uInt>* NullTable::rowStorage()
 {
   throw makeError ("rowStorage");
 }
 
-Bool NullTable::adjustRownrs (rownr_t, Vector<rownr_t>&,
+Bool NullTable::adjustRownrs (uInt, Vector<uInt>&,
 			      Bool) const
 {
   throw makeError ("adjustRownrs");
 }
 
 BaseTable* NullTable::doSort (PtrBlock<BaseColumn*>&,
-                             const Block<CountedPtr<BaseCompare> >&,
-                             const Block<Int>&,
-                             int,
-                             std::shared_ptr<Vector<rownr_t>>,
-                             std::shared_ptr<Vector<size_t>>)
+			      const Block<CountedPtr<BaseCompare> >&,
+			      const Block<Int>&,
+			      int)
 {
   throw makeError ("doSort");
 }

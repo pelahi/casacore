@@ -53,8 +53,6 @@
 #include <casacore/casa/System/AipsrcValue.h>
 #include <casacore/casa/Utilities/Assert.h>
 
-#include <atomic>
-
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 #ifndef CASADATA
@@ -75,25 +73,25 @@ MeasTableMulPosSunXY   MeasTable::theirMulPosSunXY;
 MeasTableMulPosSunZ    MeasTable::theirMulPosSunZ;
 MeasTableMulPosEarthXY MeasTable::theirMulPosEarthXY;
 MeasTableMulPosEarthZ  MeasTable::theirMulPosEarthZ;
-std::once_flag MeasTable::theirPlanetaryInitOnceFlag;
-std::once_flag MeasTable::theirPlanetaryConstantsInitOnceFlag;
-std::once_flag MeasTable::theirObsInitOnceFlag;
+CallOnce MeasTable::theirPlanetaryInitOnce;
+CallOnce MeasTable::theirPlanetaryConstantsInitOnce;
+CallOnce0 MeasTable::theirObsInitOnce;
 Vector<String> MeasTable::obsNams;
 Vector<MPosition> MeasTable::obsPos;
 Vector<String> MeasTable::antResponsesPath;
-std::once_flag MeasTable::theirLinesInitOnceFlag;
+CallOnce0 MeasTable::theirLinesInitOnce;
 Vector<String> MeasTable::lineNams;
 Vector<MFrequency> MeasTable::linePos;
-std::once_flag MeasTable::theirSrcInitOnceFlag;
+CallOnce0 MeasTable::theirSrcInitOnce;
 Vector<String> MeasTable::srcNams;
 Vector<MDirection> MeasTable::srcPos;
-std::once_flag MeasTable::theirIGRFInitOnceFlag;
+CallOnce0 MeasTable::theirIGRFInitOnce;
 Double MeasTable::dtimeIGRF = 0;
 Double MeasTable::firstIGRF = 0;
 std::vector<Vector<Double> > MeasTable::coefIGRF;
 std::vector<Vector<Double> > MeasTable::dIGRF;
   ///#if !defined(USE_THREADS) || defined(__APPLE__)
-  ///std::mutex MeasTable::theirdUT1Mutex;
+  ///Mutex MeasTable::theirdUT1Mutex;
   ///#endif
 
 //# Member functions
@@ -2803,7 +2801,7 @@ Double MeasTable::dPsiEps(uInt which, Double T) {
 // Planetary data
 Vector<Double> MeasTable::Planetary(MeasTable::Types which, Double T) {
   static MeasJPL::Files fil(MeasJPL::DE200);
-  std::call_once(theirPlanetaryInitOnceFlag, calcPlanetary, &fil);
+  theirPlanetaryInitOnce(calcPlanetary, &fil);
 
   Vector<Double> res(6);
   if (!MeasJPL::get(res, fil, (MeasJPL::Types)which, MVEpoch(T))) {
@@ -2828,7 +2826,7 @@ void MeasTable::calcPlanetary(MeasJPL::Files *fil) {
 // Planetary constants
 Double MeasTable::Planetary(MeasTable::JPLconst what) {
   static Double cn[MeasTable::N_JPLconst];
-  std::call_once(theirPlanetaryConstantsInitOnceFlag, calcPlanetaryConstants, cn);
+  theirPlanetaryConstantsInitOnce(calcPlanetaryConstants, cn);
   return cn[what];
 }
 
@@ -2850,7 +2848,7 @@ void MeasTable::calcPlanetaryConstants(Double cn[MeasTable::N_JPLconst]) {
 
 // Observatory data
 void MeasTable::initObservatories() {
-  std::call_once(theirObsInitOnceFlag, doInitObservatories);
+  theirObsInitOnce(doInitObservatories);
 }
 
 void MeasTable::doInitObservatories()
@@ -2899,12 +2897,12 @@ void MeasTable::doInitObservatories()
 }
 
 const Vector<String> &MeasTable::Observatories() {
-  std::call_once(theirObsInitOnceFlag, doInitObservatories);
+  theirObsInitOnce(doInitObservatories);
   return MeasTable::obsNams;
 }
 
 Bool MeasTable::Observatory(MPosition &obs, const String &nam) {
-  std::call_once(theirObsInitOnceFlag, doInitObservatories);
+  theirObsInitOnce(doInitObservatories);
   uInt i=MUString::minimaxNC(nam, MeasTable::obsNams);
   if (i < MeasTable::obsNams.nelements()) {
     obs = MeasTable::obsPos[i];
@@ -2914,7 +2912,7 @@ Bool MeasTable::Observatory(MPosition &obs, const String &nam) {
 }
 
 Bool MeasTable::AntennaResponsesPath(String &antRespPath, const String &nam) {
-  std::call_once(theirObsInitOnceFlag, doInitObservatories);
+  theirObsInitOnce(doInitObservatories);
   uInt i=MUString::minimaxNC(nam, MeasTable::obsNams);
   if (i < MeasTable::obsNams.nelements()) {
     antRespPath = MeasTable::antResponsesPath(i);
@@ -2959,7 +2957,7 @@ Bool MeasTable::AntennaResponsesPath(String &antRespPath, const String &nam) {
 
 // Line data
 void MeasTable::initLines() {
-  std::call_once(theirLinesInitOnceFlag, doInitLines);
+  theirLinesInitOnce(doInitLines);
 }
 
 void MeasTable::doInitLines()
@@ -2994,12 +2992,12 @@ void MeasTable::doInitLines()
 }
 
 const Vector<String> &MeasTable::Lines() {
-  std::call_once(theirLinesInitOnceFlag, doInitLines);
+  theirLinesInitOnce(doInitLines);
   return MeasTable::lineNams;
 }
 
 Bool MeasTable::Line(MFrequency &obs, const String &nam) {
-  std::call_once(theirLinesInitOnceFlag, doInitLines);
+  theirLinesInitOnce(doInitLines);
   uInt i=MUString::minimaxNC(nam, MeasTable::lineNams);
   if (i < MeasTable::lineNams.nelements()) {
     obs = MeasTable::linePos(i);
@@ -3010,7 +3008,7 @@ Bool MeasTable::Line(MFrequency &obs, const String &nam) {
 
 // Source data
 void MeasTable::initSources() {
-  std::call_once(theirSrcInitOnceFlag, doInitSources);
+  theirSrcInitOnce(doInitSources);
 }
 
 void MeasTable::doInitSources()
@@ -3049,12 +3047,12 @@ void MeasTable::doInitSources()
 }
 
 const Vector<String> &MeasTable::Sources() {
-  std::call_once(theirSrcInitOnceFlag, doInitSources);
+  theirSrcInitOnce(doInitSources);
   return MeasTable::srcNams;
 }
 
 Bool MeasTable::Source(MDirection &obs, const String &nam) {
-  std::call_once(theirSrcInitOnceFlag, doInitSources);
+  theirSrcInitOnce(doInitSources);
   uInt i=MUString::minimaxNC(nam, MeasTable::srcNams);
   if (i < MeasTable::srcNams.nelements()) {
     obs = MeasTable::srcPos(i);
@@ -3065,7 +3063,7 @@ Bool MeasTable::Source(MDirection &obs, const String &nam) {
 
 // Magnetic field (IGRF) function
 Vector<Double> MeasTable::IGRF(Double tm) {
-  std::call_once(theirIGRFInitOnceFlag, doInitIGRF);
+  theirIGRFInitOnce(doInitIGRF);
   // Look up closest MJD interval. Note that each interval has same width.
   Int indx = Int((tm-firstIGRF) / dtimeIGRF) - 1;
   if (indx >= Int(coefIGRF.size())) {
@@ -3080,7 +3078,7 @@ Vector<Double> MeasTable::IGRF(Double tm) {
 }
 
 void MeasTable::initIGRF() {
-  std::call_once(theirIGRFInitOnceFlag, doInitIGRF);
+  theirIGRFInitOnce(doInitIGRF);
 }
 
 void MeasTable::doInitIGRF()
@@ -4409,7 +4407,7 @@ Double MeasTable::dUT1(Double utc) {
   static thread_local Double res = 0.0;
   static thread_local Double checkT = -1e6;
   ///#else // !USE_THREADS (empty Mutex impl) or __APPLE__
-  ///  std::lock_guard<std::mutex> lock(theirdUT1Mutex); // Pity. Try to narrow blunt __APPLE__ cond.
+  ///  ScopedMutexLock lock(theirdUT1Mutex); // Pity. Try to narrow blunt __APPLE__ cond.
   ///  static Double res = 0.0;
   ///  static Double checkT = -1e6;
   ///#endif

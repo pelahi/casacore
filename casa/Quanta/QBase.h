@@ -84,6 +84,8 @@ public:
   //# Constructors
   // Default constructor, generates ""
   QBase();
+  // Copy constructor
+  QBase(const QBase &other);
   // Construct dimensioned QBase (e.g. 'km/Mpc')
   // <thrown>
   //   <li> AipsError if non-matching unit dimensions
@@ -94,6 +96,10 @@ public:
   
   // Destructor
   virtual ~QBase();
+  
+  //# Operators
+  // Assignment (copy)
+  QBase &operator=(const QBase &other);
   
   //# Member functions
   // Get units of QBase

@@ -30,7 +30,6 @@
 #include <casacore/ms/MSOper/MSMetaData.h>
 
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/BasicMath/StdLogical.h>
 #include <casacore/casa/Containers/Record.h>
 #include <casacore/casa/OS/Directory.h>
@@ -2182,7 +2181,7 @@ void testIt(MSMetaData& md) {
             try {
                 md.getSubScanProperties(sskey);
             }
-            catch (const std::exception& x) {
+            catch (const AipsError& x) {
                 thrown = True;
             }
             AlwaysAssert(thrown, AipsError);
@@ -2426,11 +2425,11 @@ void testIt(MSMetaData& md) {
             key.obsID = 0;
             key.scan = 1;
             key.fieldID = 0;
-            std::shared_ptr<const std::map<SubScanKey, rownr_t> > both = md.getNRowMap(MSMetaData::BOTH);
+            std::shared_ptr<const std::map<SubScanKey, uInt> > both = md.getNRowMap(MSMetaData::BOTH);
             AlwaysAssert(both->find(key)->second == 367, AipsError);
-            std::shared_ptr<const std::map<SubScanKey, rownr_t> > ac = md.getNRowMap(MSMetaData::AUTO);
+            std::shared_ptr<const std::map<SubScanKey, uInt> > ac = md.getNRowMap(MSMetaData::AUTO);
             AlwaysAssert(ac->find(key)->second == 51, AipsError);
-            std::shared_ptr<const std::map<SubScanKey, rownr_t> > xc = md.getNRowMap(MSMetaData::CROSS);
+            std::shared_ptr<const std::map<SubScanKey, uInt> > xc = md.getNRowMap(MSMetaData::CROSS);
             AlwaysAssert(xc->find(key)->second == 316, AipsError);
         }
         {
@@ -2592,8 +2591,8 @@ int main() {
         AlwaysAssert(md2.getCache() == 0, AipsError);
         cout << "OK" << endl;
     } 
-    catch (const std::exception& x) {
-        cerr << "Exception : " << x.what() << endl;
+    catch (const AipsError& x) {
+        cerr << "Exception : " << x.getMesg() << endl;
         return 1;
     }
     return 0;

@@ -43,8 +43,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
   void TableCopy::cloneColumnTyped (const Table& fromTable,
                                     const String& fromColumn,
                                     Table& toTable, const String& newColumn,
-                                    const String& dataManagerName,
-                                    const Record& newdmInfo)
+                                    const String& dataManagerName)
   {
     // Get existing column description.
     ColumnDesc cd(fromTable.tableDesc()[fromColumn]);
@@ -58,7 +57,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
                              cd.shape(), cd.options(), cd.ndim());
       cd = ColumnDesc(acd);
     }
-    doCloneColumn (fromTable, fromColumn, toTable, cd, dataManagerName, newdmInfo);
+    doCloneColumn (fromTable, fromColumn, toTable, cd, dataManagerName);
   }
 
   template<typename T>
@@ -94,7 +93,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
     AlwaysAssert (fromCol.columnDesc().isArray(), AipsError);
     Array<T> arr;
     ArrayColumn<T> toCol(table, column);
-    for (rownr_t i=0; i<table.nrow(); ++i) {
+    for (uInt i=0; i<table.nrow(); ++i) {
       // Only write if the source cell contains an array.
       if (fromCol.isDefined(i)) {
         IPosition shp(fromCol.shape(i));

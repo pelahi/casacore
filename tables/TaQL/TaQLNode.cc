@@ -40,7 +40,7 @@ TaQLNode TaQLNode::theirNode;
 std::vector<TaQLNode*> TaQLNode::theirNodesCreated;
 // Initialize the TaQL style.
 TaQLStyle TaQLNode::theirStyle;
-std::mutex TaQLNode::theirMutex;
+Mutex TaQLNode::theirMutex;
 
 
 TaQLNode TaQLNode::parse (const String& command)
@@ -50,7 +50,7 @@ TaQLNode TaQLNode::parse (const String& command)
   if (str.length() == 0  ||  str[str.length()-1] != '\n') {
     str += '\n';
   }
-  std::lock_guard<std::mutex> lock(theirMutex);
+  ScopedMutexLock lock(theirMutex);
   // Reset to default TaQL style and no timings.
   theirStyle.reset();
   try {
@@ -182,10 +182,6 @@ TaQLNode TaQLNode::restoreNode (AipsIO& aio)
     return TaQLConcTabNodeRep::restore (aio);
   case TaQLNode_Show:
     return TaQLShowNodeRep::restore (aio);
-  case TaQLNode_CopyCol:
-    return TaQLCopyColNodeRep::restore (aio);
-  case TaQLNode_DropTab:
-    return TaQLDropTabNodeRep::restore (aio);
   default:
     throw AipsError ("TaQLNode::restoreNode - unknown node type");
   }

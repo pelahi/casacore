@@ -120,7 +120,7 @@ public:
     inline uInt ndim() const;
 
     // Get nr of elements (ie. vector length).
-    inline rownr_t nelements() const;
+    inline uInt nelements() const;
 
     // Test if vector shape conforms another table vector.
     inline Bool conform(const TabVecRep<T>&) const;
@@ -141,13 +141,13 @@ public:
     inline TabVecTag getTag() const;
 
     // Get a value.
-    virtual T value (rownr_t index) const = 0;
+    virtual T value (uInt index) const = 0;
 
     // Get a value.
-    virtual void getVal (rownr_t index, T&) const = 0;
+    virtual void getVal (uInt index, T&) const = 0;
 
     // Put a value.
-    virtual void putVal (rownr_t index, const T&) = 0;
+    virtual void putVal (uInt index, const T&) = 0;
 
     // Set entire vector to a value.
     virtual void set (const T&) = 0;
@@ -158,14 +158,14 @@ public:
 protected:
     uInt      count_p;               //# reference count
     TabVecTag tag_p;
-    Int64     nrel_p;                //# #elements (<0 = ask derived class)
+    Int       nrel_p;                //# #elements (<0 = ask derived class)
 
     // Get nr of elements.
-    virtual rownr_t nelem() const;
+    virtual uInt nelem() const;
 
 public:
     // Check if vectors are comformant.
-    void validateConformance (rownr_t) const;
+    void validateConformance (uInt) const;
 
     // Create a new temporary vector (for result of math operations).
     // TabVecTemp<T>& cannot be used, because the template instantiation
@@ -181,7 +181,7 @@ inline uInt TabVecRep<T>::ndim() const
     { return 1; }
 
 template<class T>
-inline rownr_t TabVecRep<T>::nelements() const
+inline uInt TabVecRep<T>::nelements() const
     { return (nrel_p<0  ?  nelem() : nrel_p); }
 
 //# Check if 2 table vectors are conformant.

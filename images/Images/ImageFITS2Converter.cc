@@ -250,7 +250,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
           success = False;
         }
       }
-      catch(const std::exception& x){
+      catch(const AipsError& x){
         if(whichHDU>=0){
           throw(x);
         }
@@ -758,8 +758,8 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
           } else {
             msg = "Cannot remove file - unknown file type";
           }
-        } catch (std::exception& x) {
-          msg = x.what();
+        } catch (AipsError& x) {
+          msg = x.getMesg();
         }
         //
         if (outFile.exists()) {
@@ -1493,7 +1493,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
       //
       if (pMeter) delete pMeter;
     }
-    catch (const std::exception& x) {
+    catch (const AipsError& x) {
       error = "Unknown error copying image to FITS file";
       if (outfile) {
         delete outfile;

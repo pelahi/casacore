@@ -25,30 +25,32 @@
 //#
 //# $Id$
 
-#ifndef CASA_MATRIXMATH_2_TCC
-#define CASA_MATRIXMATH_2_TCC
+#ifndef CASA_MATRIXMATH_TCC
+#define CASA_MATRIXMATH_TCC
 
-#include "MatrixMath.h"
-#include "Vector.h"
-#include "Matrix.h"
-#include "ArrayError.h"
+#include <casacore/casa/Arrays/MatrixMath.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/ArrayError.h>
+#include <casacore/casa/iostream.h>
+#include <casacore/casa/math.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
-  
+
                                       // the vector dot/scalar/inner product
 template<class T> T innerProduct (const Vector<T> &A, const Vector<T> &B) {
                                    // check for correct dimensions
-  if (A.conform(B) == false){
+  if (A.conform(B) == False){
     throw(ArrayConformanceError("innerProduct - conform() error."));
   }
   T scalar = 0;   
-  for (size_t i=0; i < A.nelements(); i++)
+  for (uInt i=0; i < A.nelements(); i++)
     scalar += A(i)*B(i);
   return scalar;
 }
 
 // Uncomment this if we ever want a templated Rot3D again.
-// template <class T> Matrix<T> Rot3D(int axis, T angle) {
+// template <class T> Matrix<T> Rot3D(Int axis, T angle) {
 //     if (axis<0 || axis>2) 
 // 	throw (ArrayError("Rot3D(axis, angle): axis has to be 0 (x),"
 // 			  " 1 (y) or 2 (z)."));
@@ -102,9 +104,9 @@ Vector<T> product (const Matrix<T> &A, const Vector<T> &x) {
     throw (ArrayError("product - multiplication of" 
                                     " these matrices shapes is undefined"));
   Vector<T> result(A.nrow());
-  for (size_t i = 0; i < A.nrow(); i++) {
+  for (uInt i = 0; i < A.nrow(); i++) {
       result(i) = T(0);
-      for (size_t k = 0; k < A.ncolumn(); k++) result(i) += A(i,k) * x(k);
+      for (uInt k = 0; k < A.ncolumn(); k++) result(i) += A(i,k) * x(k);
   }
   return result;
 }
@@ -113,9 +115,9 @@ Vector<T> product (const Matrix<T> &A, const Vector<T> &x) {
 template <class T> 
 Vector<T> directProduct(const Vector<T>& x, const Vector<T>& y) 
 {
-  size_t nx=x.nelements(), ny=y.nelements();
+  uInt nx=x.nelements(), ny=y.nelements();
   Vector<T> res(nx*ny);
-  for (size_t i=0; i<nx*ny; i++) {
+  for (uInt i=0; i<nx*ny; i++) {
       res(i) = x(i/ny) * y(i%ny);
   }
   return res;
@@ -128,7 +130,7 @@ Matrix<T> product (const Vector<T> &x, const Matrix<T> &yT) {
     throw (ArrayError("product - multiplication of" 
                                     " these matrices shapes is undefined"));
   Matrix<T> A(x.nelements(),1u);
-  A.column(0).assign_conforming( x );
+  A.column(0) = x;
 
   return product(A,yT);
 }
@@ -140,27 +142,27 @@ Matrix<T> product (const Matrix<T> &A, const Matrix<T> &B) {
     throw (ArrayError("product - multiplication of" 
                                     " these matrices shapes is undefined"));
   Matrix<T> result(A.nrow(), B.ncolumn());
-  for (size_t i = 0; i < A.nrow(); i++) 
-      for (size_t j = 0; j < B.ncolumn(); j++) {
+  for (uInt i = 0; i < A.nrow(); i++) 
+      for (uInt j = 0; j < B.ncolumn(); j++) {
 	  result(i,j) = T(0);
-	  for (size_t k = 0; k < A.ncolumn(); k++) result(i,j) += A(i,k) * B(k,j);
+	  for (uInt k = 0; k < A.ncolumn(); k++) result(i,j) += A(i,k) * B(k,j);
       }
   return result;
 }
 
 template <class T> Matrix<T> transpose (const Matrix<T> &A) {
   Matrix<T> aT(A.ncolumn(), A.nrow());
-  for (size_t i=0; i<A.nrow(); i++)
-    for (size_t j=0; j<A.ncolumn(); j++) aT(j,i) = A(i,j);
+  for (uInt i=0; i<A.nrow(); i++)
+    for (uInt j=0; j<A.ncolumn(); j++) aT(j,i) = A(i,j);
   return aT;
 }
 
 template <class T> 
 Matrix<T> directProduct(const  Matrix<T> &A, const Matrix<T> &B) {
-    int ncB = B.ncolumn(), nrB = B.nrow();
+    Int ncB = B.ncolumn(), nrB = B.nrow();
     Matrix<T> dpAB(A.ncolumn()*B.ncolumn(),A.nrow()*B.nrow());
-    for (size_t i=0; i<dpAB.ncolumn(); i++) {
-	for (size_t j=0; j<dpAB.nrow(); j++) {
+    for (uInt i=0; i<dpAB.ncolumn(); i++) {
+	for (uInt j=0; j<dpAB.nrow(); j++) {
 	    dpAB(i,j) = A(i/ncB,j/nrB)*B(i%ncB,j%nrB);
 	}
     }

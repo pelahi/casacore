@@ -25,21 +25,14 @@
 //#
 //# $Id$
 
-#ifndef CASA_ARRAYLOGICAL_2_TCC
-#define CASA_ARRAYLOGICAL_2_TCC
+#ifndef CASA_ARRAYLOGICAL_TCC
+#define CASA_ARRAYLOGICAL_TCC
 
-#include "ArrayLogical.h"
-#include "ArrayMath.h"
-#include "ArrayUtil.h"
-#include "ArrayError.h"
-#include "ElementFunctions.h"
-
-#include <algorithm>
-#include <cmath>
-#include <complex>
-#include <limits>
-
-#include "ElementFunctions.h"
+#include <casacore/casa/Arrays/ArrayLogical.h>
+#include <casacore/casa/Arrays/ArrayUtil.h>
+#include <casacore/casa/Arrays/ArrayError.h>
+//# For scalar near() functions.
+#include <casacore/casa/BasicMath/Functors.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -49,9 +42,9 @@ bool arrayCompareAll (const Array<T>& left, const Array<T>& right,
 {
   if (! left.conform(right)) return false;
   if (left.contiguousStorage()  &&  right.contiguousStorage()) {
-    return arrays_internal::compareAll (left.cbegin(), left.cend(), right.cbegin(), op);
+    return compareAll (left.cbegin(), left.cend(), right.cbegin(), op);
   } else {
-    return arrays_internal::compareAll (left.begin(),  left.end(),  right.begin(),  op);
+    return compareAll (left.begin(),  left.end(),  right.begin(),  op);
   }
 }
 
@@ -60,9 +53,9 @@ bool arrayCompareAll (const Array<T>& left, T right,
                       CompareOperator op)
 {
   if (left.contiguousStorage()) {
-    return arrays_internal::compareAllRight (left.cbegin(), left.cend(), right, op);
+    return compareAllRight (left.cbegin(), left.cend(), right, op);
   } else {
-    return arrays_internal::compareAllRight (left.begin(), left.end(), right, op);
+    return compareAllRight (left.begin(), left.end(), right, op);
   }
 }
 
@@ -71,9 +64,9 @@ bool arrayCompareAll (T left, const Array<T>& right,
                       CompareOperator op)
 {
   if (right.contiguousStorage()) {
-    return arrays_internal::compareAllLeft (right.cbegin(), right.cend(), left, op);
+    return compareAllLeft (right.cbegin(), right.cend(), left, op);
   } else {
-    return arrays_internal::compareAllLeft (right.begin(), right.end(), left, op);
+    return compareAllLeft (right.begin(), right.end(), left, op);
   }
 }
 
@@ -83,9 +76,9 @@ bool arrayCompareAny (const Array<T>& left, const Array<T>& right,
 {
   if (! left.conform(right)) return false;
   if (left.contiguousStorage()  &&  right.contiguousStorage()) {
-    return arrays_internal::compareAny (left.cbegin(), left.cend(), right.cbegin(), op);
+    return compareAny (left.cbegin(), left.cend(), right.cbegin(), op);
   } else {
-    return arrays_internal::compareAny (left.begin(),  left.end(),  right.begin(),  op);
+    return compareAny (left.begin(),  left.end(),  right.begin(),  op);
   }
 }
 
@@ -94,9 +87,9 @@ bool arrayCompareAny (const Array<T>& left, T right,
                       CompareOperator op)
 {
   if (left.contiguousStorage()) {
-    return arrays_internal::compareAnyRight (left.cbegin(), left.cend(), right, op);
+    return compareAnyRight (left.cbegin(), left.cend(), right, op);
   } else {
-    return arrays_internal::compareAnyRight (left.begin(), left.end(), right, op);
+    return compareAnyRight (left.begin(), left.end(), right, op);
   }
 }
 
@@ -105,256 +98,256 @@ bool arrayCompareAny (T left, const Array<T>& right,
                       CompareOperator op)
 {
   if (right.contiguousStorage()) {
-    return arrays_internal::compareAnyLeft (right.cbegin(), right.cend(), left, op);
+    return compareAnyLeft (right.cbegin(), right.cend(), left, op);
   } else {
-    return arrays_internal::compareAnyLeft (right.begin(), right.end(), left, op);
+    return compareAnyLeft (right.begin(), right.end(), left, op);
   }
 }
 
 
 template<class T>
-bool allEQ (const Array<T> &l, const Array<T> &r)
+Bool allEQ (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::equal_to<T>());
 }
 template<class T>
-bool allNE (const Array<T> &l, const Array<T> &r)
+Bool allNE (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::not_equal_to<T>());
 }
 template<class T>
-bool allLT (const Array<T> &l, const Array<T> &r)
+Bool allLT (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::less<T>());
 }
 template<class T>
-bool allLE (const Array<T> &l, const Array<T> &r)
+Bool allLE (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::less_equal<T>());
 }
 template<class T>
-bool allGT (const Array<T> &l, const Array<T> &r)
+Bool allGT (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::greater<T>());
 }
 template<class T>
-bool allGE (const Array<T> &l, const Array<T> &r)
+Bool allGE (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::greater_equal<T>());
 }
 template<class T>
-bool allOR (const Array<T> &l, const Array<T> &r)
+Bool allOR (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::logical_or<T>());
 }
 template<class T>
-bool allAND (const Array<T> &l, const Array<T> &r)
+Bool allAND (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::logical_and<T>());
 }
 
 template<class T>
-bool allEQ (const Array<T> &l, const T &r)
+Bool allEQ (const Array<T> &l, const T &r)
 {
   return arrayCompareAll (l, r, std::equal_to<T>());
 }
 template<class T>
-bool allNE (const Array<T> &l, const T &r)
+Bool allNE (const Array<T> &l, const T &r)
 {
   return arrayCompareAll (l, r, std::not_equal_to<T>());
 }
 template<class T>
-bool allLT (const Array<T> &l, const T &r)
+Bool allLT (const Array<T> &l, const T &r)
 {
   return arrayCompareAll (l, r, std::less<T>());
 }
 template<class T>
-bool allLE (const Array<T> &l, const T &r)
+Bool allLE (const Array<T> &l, const T &r)
 {
   return arrayCompareAll (l, r, std::less_equal<T>());
 }
 template<class T>
-bool allGT (const Array<T> &l, const T &r)
+Bool allGT (const Array<T> &l, const T &r)
 {
   return arrayCompareAll (l, r, std::greater<T>());
 }
 template<class T>
-bool allGE (const Array<T> &l, const T &r)
+Bool allGE (const Array<T> &l, const T &r)
 {
   return arrayCompareAll (l, r, std::greater_equal<T>());
 }
 template<class T>
-bool allOR (const Array<T> &l, const T &r)
+Bool allOR (const Array<T> &l, const T &r)
 {
   return arrayCompareAll (l, r, std::logical_or<T>());
 }
 template<class T>
-bool allAND (const Array<T> &l, const T &r)
+Bool allAND (const Array<T> &l, const T &r)
 {
   return arrayCompareAll (l, r, std::logical_and<T>());
 }
 
 template<class T>
-bool allEQ (const T &l, const Array<T> &r)
+Bool allEQ (const T &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::equal_to<T>());
 }
 template<class T>
-bool allNE (const T &l, const Array<T> &r)
+Bool allNE (const T &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::not_equal_to<T>());
 }
 template<class T>
-bool allLT (const T &l, const Array<T> &r)
+Bool allLT (const T &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::less<T>());
 }
 template<class T>
-bool allLE (const T &l, const Array<T> &r)
+Bool allLE (const T &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::less_equal<T>());
 }
 template<class T>
-bool allGT (const T &l, const Array<T> &r)
+Bool allGT (const T &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::greater<T>());
 }
 template<class T>
-bool allGE (const T &l, const Array<T> &r)
+Bool allGE (const T &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::greater_equal<T>());
 }
 template<class T>
-bool allOR (const T &l, const Array<T> &r)
+Bool allOR (const T &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::logical_or<T>());
 }
 template<class T>
-bool allAND (const T &l, const Array<T> &r)
+Bool allAND (const T &l, const Array<T> &r)
 {
   return arrayCompareAll (l, r, std::logical_and<T>());
 }
 
 
 template<class T>
-bool anyEQ (const Array<T> &l, const Array<T> &r)
+Bool anyEQ (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::equal_to<T>());
 }
 template<class T>
-bool anyNE (const Array<T> &l, const Array<T> &r)
+Bool anyNE (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::not_equal_to<T>());
 }
 template<class T>
-bool anyLT (const Array<T> &l, const Array<T> &r)
+Bool anyLT (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::less<T>());
 }
 template<class T>
-bool anyLE (const Array<T> &l, const Array<T> &r)
+Bool anyLE (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::less_equal<T>());
 }
 template<class T>
-bool anyGT (const Array<T> &l, const Array<T> &r)
+Bool anyGT (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::greater<T>());
 }
 template<class T>
-bool anyGE (const Array<T> &l, const Array<T> &r)
+Bool anyGE (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::greater_equal<T>());
 }
 template<class T>
-bool anyOR (const Array<T> &l, const Array<T> &r)
+Bool anyOR (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::logical_or<T>());
 }
 template<class T>
-bool anyAND (const Array<T> &l, const Array<T> &r)
+Bool anyAND (const Array<T> &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::logical_and<T>());
 }
 
 template<class T>
-bool anyEQ (const Array<T> &l, const T &r)
+Bool anyEQ (const Array<T> &l, const T &r)
 {
   return arrayCompareAny (l, r, std::equal_to<T>());
 }
 template<class T>
-bool anyNE (const Array<T> &l, const T &r)
+Bool anyNE (const Array<T> &l, const T &r)
 {
   return arrayCompareAny (l, r, std::not_equal_to<T>());
 }
 template<class T>
-bool anyLT (const Array<T> &l, const T &r)
+Bool anyLT (const Array<T> &l, const T &r)
 {
   return arrayCompareAny (l, r, std::less<T>());
 }
 template<class T>
-bool anyLE (const Array<T> &l, const T &r)
+Bool anyLE (const Array<T> &l, const T &r)
 {
   return arrayCompareAny (l, r, std::less_equal<T>());
 }
 template<class T>
-bool anyGT (const Array<T> &l, const T &r)
+Bool anyGT (const Array<T> &l, const T &r)
 {
   return arrayCompareAny (l, r, std::greater<T>());
 }
 template<class T>
-bool anyGE (const Array<T> &l, const T &r)
+Bool anyGE (const Array<T> &l, const T &r)
 {
   return arrayCompareAny (l, r, std::greater_equal<T>());
 }
 template<class T>
-bool anyOR (const Array<T> &l, const T &r)
+Bool anyOR (const Array<T> &l, const T &r)
 {
   return arrayCompareAny (l, r, std::logical_or<T>());
 }
 template<class T>
-bool anyAND (const Array<T> &l, const T &r)
+Bool anyAND (const Array<T> &l, const T &r)
 {
   return arrayCompareAny (l, r, std::logical_and<T>());
 }
 
 template<class T>
-bool anyEQ (const T &l, const Array<T> &r)
+Bool anyEQ (const T &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::equal_to<T>());
 }
 template<class T>
-bool anyNE (const T &l, const Array<T> &r)
+Bool anyNE (const T &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::not_equal_to<T>());
 }
 template<class T>
-bool anyLT (const T &l, const Array<T> &r)
+Bool anyLT (const T &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::less<T>());
 }
 template<class T>
-bool anyLE (const T &l, const Array<T> &r)
+Bool anyLE (const T &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::less_equal<T>());
 }
 template<class T>
-bool anyGT (const T &l, const Array<T> &r)
+Bool anyGT (const T &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::greater<T>());
 }
 template<class T>
-bool anyGE (const T &l, const Array<T> &r)
+Bool anyGE (const T &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::greater_equal<T>());
 }
 template<class T>
-bool anyOR (const T &l, const Array<T> &r)
+Bool anyOR (const T &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::logical_or<T>());
 }
 template<class T>
-bool anyAND (const T &l, const Array<T> &r)
+Bool anyAND (const T &l, const Array<T> &r)
 {
   return arrayCompareAny (l, r, std::logical_and<T>());
 }
@@ -576,9 +569,7 @@ template<class T>
 LogicalArray isNaN (const Array<T> &array)
 {
   LogicalArray result(array.shape());
-  using std::isnan;
-  using arrays_internal::isnan;
-  arrayContTransform (array, result, [](T val){ return isnan(val);} );
+  arrayContTransform (array, result, casacore::IsNaN<T>());
   return result;
 }
 
@@ -586,9 +577,7 @@ template<class T>
 LogicalArray isInf (const Array<T> &array)
 {
   LogicalArray result(array.shape());
-  using std::isinf;
-  using arrays_internal::isinf;
-  arrayContTransform (array, result, [](T val){ return isinf(val);} );
+  arrayContTransform (array, result, casacore::IsInf<T>());
   return result;
 }
 
@@ -596,131 +585,129 @@ template<class T>
 LogicalArray isFinite (const Array<T> &array)
 {
   LogicalArray result(array.shape());
-  using std::isfinite;
-  using arrays_internal::isfinite;
-  arrayContTransform (array, result, [](T val){ return isfinite(val);} );
+  arrayContTransform (array, result, casacore::IsFinite<T>());
   return result;
 }
 
 template<class T>
-LogicalArray near (const Array<T> &l, const Array<T>& r, double tol)
+LogicalArray near (const Array<T> &l, const Array<T>& r, Double tol)
 {
   checkArrayShapes (l, r, "near");
   LogicalArray result(l.shape());
-  arrayContTransform (l, r, result, [tol](T left, T right){ return arrays_internal::near(left, right, tol); });
+  arrayContTransform (l, r, result, casacore::Near<T>(tol));
   return result;
 }
 
 
 template<class T> LogicalArray nearAbs(const Array<T> &l, const Array<T> &r,
-              				    double tol)
+              				    Double tol)
 {
   checkArrayShapes (l, r, "nearAbs");
   LogicalArray result(l.shape());
-  arrayContTransform (l, r, result, [tol](T left, T right){ return arrays_internal::nearAbs(left, right, tol); });
+  arrayContTransform (l, r, result, casacore::NearAbs<T>(tol));
   return result;
 }
 
 template<class T> LogicalArray near (const Array<T> &array, const T &val,
-				     double tol)
+				     Double tol)
 {
   LogicalArray result(array.shape());
-  arrayContTransform (array, val, result, [tol](T left, T right){ return arrays_internal::near(left, right, tol); });
+  arrayContTransform (array, val, result, casacore::Near<T>(tol));
   return result;
 }
 
 template<class T> LogicalArray near (const T &val, const Array<T> &array,
-				      double tol)
+				      Double tol)
 {
   LogicalArray result(array.shape());
-  arrayContTransform (val, array, result, [tol](T left, T right){ return arrays_internal::near(left, right, tol); });
+  arrayContTransform (val, array, result, casacore::Near<T>(tol));
   return result;
 }
 
 template<class T> LogicalArray nearAbs (const Array<T> &array, const T &val,
-				     double tol)
+				     Double tol)
 {
   LogicalArray result(array.shape());
-  arrayContTransform (array, val, result, [tol](T left, T right){ return arrays_internal::nearAbs(left, right, tol); });
+  arrayContTransform (array, val, result, casacore::NearAbs<T>(tol));
   return result;
 }
 
 template<class T> LogicalArray nearAbs (const T &val, const Array<T> &array,
-				      double tol)
+				      Double tol)
 {
   LogicalArray result(array.shape());
-  arrayContTransform (val, array, result, [tol](T left, T right){ return arrays_internal::nearAbs(left, right, tol); });
+  arrayContTransform (val, array, result, casacore::NearAbs<T>(tol));
   return result;
 }
 
 
-template<class T> bool allNear (const Array<T> &l, const Array<T> &r,
-				double tol)
+template<class T> Bool allNear (const Array<T> &l, const Array<T> &r,
+				Double tol)
 {
-  return arrayCompareAll (l, r, [tol](T left, T right){ return arrays_internal::near(left, right, tol); });
+  return arrayCompareAll (l, r, casacore::Near<T>(tol));
 }
 
-template<class T> bool allNear (const Array<T> &array, const T &val, double tol)
+template<class T> Bool allNear (const Array<T> &array, const T &val, Double tol)
 {
-  return arrayCompareAll (array, val, [tol](T left, T right){ return arrays_internal::near(left, right, tol); });
+  return arrayCompareAll (array, val, casacore::Near<T>(tol));
 }
 
-template<class T> bool allNear (const T &val, const Array<T> &array, double tol)
+template<class T> Bool allNear (const T &val, const Array<T> &array, Double tol)
 {
-  return arrayCompareAll (val, array, [tol](T left, T right){ return arrays_internal::near(left, right, tol); });
+  return arrayCompareAll (val, array, casacore::Near<T>(tol));
 }
 
-template<class T> bool allNearAbs (const Array<T> &l, const Array<T> &r,
-				   double tol)
+template<class T> Bool allNearAbs (const Array<T> &l, const Array<T> &r,
+				   Double tol)
 {
-  return arrayCompareAll (l, r, [tol](T left, T right){ return arrays_internal::nearAbs(left, right, tol); });
+  return arrayCompareAll (l, r, casacore::NearAbs<T>(tol));
 }
 
-template<class T> bool allNearAbs (const Array<T> &array, const T &val,
-				   double tol)
+template<class T> Bool allNearAbs (const Array<T> &array, const T &val,
+				   Double tol)
 {
-  return arrayCompareAll (array, val, [tol](T left, T right){ return arrays_internal::nearAbs(left, right, tol); });
+  return arrayCompareAll (array, val, casacore::NearAbs<T>(tol));
 }
 
-template<class T> bool allNearAbs (const T &val, const Array<T> &array,
-				   double tol)
+template<class T> Bool allNearAbs (const T &val, const Array<T> &array,
+				   Double tol)
 {
-  return arrayCompareAll (val, array, [tol](T left, T right){ return arrays_internal::nearAbs(left, right, tol); });
+  return arrayCompareAll (val, array, casacore::NearAbs<T>(tol));
 }
 
 
-template<class T> bool anyNear (const Array<T> &l, const Array<T> &r,
-				double tol)
+template<class T> Bool anyNear (const Array<T> &l, const Array<T> &r,
+				Double tol)
 {
-  return arrayCompareAny (l, r, [tol](T left, T right){ return arrays_internal::near(left, right, tol); });
+  return arrayCompareAny (l, r, casacore::Near<T>(tol));
 }
 
-template<class T> bool anyNear (const Array<T> &array, const T &val, double tol)
+template<class T> Bool anyNear (const Array<T> &array, const T &val, Double tol)
 {
-  return arrayCompareAny (array, val, [tol](T left, T right){ return arrays_internal::near(left, right, tol); });
+  return arrayCompareAny (array, val, casacore::Near<T>(tol));
 }
 
-template<class T> bool anyNear (const T &val, const Array<T> &array, double tol)
+template<class T> Bool anyNear (const T &val, const Array<T> &array, Double tol)
 {
-  return arrayCompareAny (val, array, [tol](T left, T right){ return arrays_internal::near(left, right, tol); });
+  return arrayCompareAny (val, array, casacore::Near<T>(tol));
 }
 
-template<class T> bool anyNearAbs (const Array<T> &l, const Array<T> &r,
-				   double tol)
+template<class T> Bool anyNearAbs (const Array<T> &l, const Array<T> &r,
+				   Double tol)
 {
-  return arrayCompareAny (l, r, [tol](T left, T right){ return arrays_internal::nearAbs(left, right, tol); });
+  return arrayCompareAny (l, r, casacore::NearAbs<T>(tol));
 }
 
-template<class T> bool anyNearAbs (const Array<T> &array, const T &val,
-				   double tol)
+template<class T> Bool anyNearAbs (const Array<T> &array, const T &val,
+				   Double tol)
 {
-  return arrayCompareAny (array, val, [tol](T left, T right){ return arrays_internal::nearAbs(left, right, tol); });
+  return arrayCompareAny (array, val, casacore::NearAbs<T>(tol));
 }
 
-template<class T> bool anyNearAbs (const T &val, const Array<T> &array,
-				   double tol)
+template<class T> Bool anyNearAbs (const T &val, const Array<T> &array,
+				   Double tol)
 {
-  return arrayCompareAny (val, array, [tol](T left, T right){ return arrays_internal::nearAbs(left, right, tol); });
+  return arrayCompareAny (val, array, casacore::NearAbs<T>(tol));
 }
 
 
@@ -731,58 +718,58 @@ template<class T> size_t nfalse (const Array<T> &array)
           std::count (array.begin(),  array.end(),  T()));
 }
 
-template<class T> Array<size_t> partialNTrue (const Array<T>& array,
+template<class T> Array<uInt> partialNTrue (const Array<T>& array,
 					    const IPosition& collapseAxes)
 {
   const IPosition& shape = array.shape();
-  size_t ndim = shape.nelements();
+  uInt ndim = shape.nelements();
   if (ndim == 0) {
-    return Array<size_t>();
+    return Array<uInt>();
   }
   IPosition resShape, incr;
-  int nelemCont = 0;
-  size_t stax = partialFuncHelper (nelemCont, resShape, incr, shape,
+  Int nelemCont = 0;
+  uInt stax = partialFuncHelper (nelemCont, resShape, incr, shape,
 				 collapseAxes);
-  Array<size_t> result (resShape);
+  Array<uInt> result (resShape);
   result = 0;
-  bool deleteData, deleteRes;
+  Bool deleteData, deleteRes;
   const T* arrData = array.getStorage (deleteData);
   const T* data = arrData;
-  size_t* resData = result.getStorage (deleteRes);
-  size_t* res = resData;
+  uInt* resData = result.getStorage (deleteRes);
+  uInt* res = resData;
   // Find out how contiguous the data is, i.e. if some contiguous data
   // end up in the same output element.
   // const tells if any data are contiguous.
   // stax gives the first non-contiguous axis.
   // no gives the number of contiguous elements.
-  bool cont = true;
-  unsigned n0 = nelemCont;
-  int incr0 = incr(0);
+  Bool cont = True;
+  uInt n0 = nelemCont;
+  Int incr0 = incr(0);
   if (nelemCont <= 1) {
-    cont = false;
+    cont = False;
     n0 = shape(0);
     stax = 1;
   }
   // Loop through all data and assemble as needed.
   IPosition pos(ndim, 0);
-  while (true) {
+  while (True) {
     if (cont) {
-      size_t tmp = *res;
-      for (size_t i=0; i<n0; i++) {
+      uInt tmp = *res;
+      for (uInt i=0; i<n0; i++) {
 	if (*data++) {
 	  tmp++;
 	}
       }
       *res = tmp;
     } else {
-      for (size_t i=0; i<n0; i++) {
+      for (uInt i=0; i<n0; i++) {
 	if (*data++) {
 	  (*res)++;
 	}
 	res += incr0;
       }
     }
-    size_t ax;
+    uInt ax;
     for (ax=stax; ax<ndim; ax++) {
       res += incr(ax);
       if (++pos(ax) < shape(ax)) {
@@ -799,16 +786,16 @@ template<class T> Array<size_t> partialNTrue (const Array<T>& array,
   return result;
 }
 
-template<class T> Array<size_t> partialNFalse (const Array<T>& array,
+template<class T> Array<uInt> partialNFalse (const Array<T>& array,
 					     const IPosition& collapseAxes)
 {
-  Array<size_t> result = partialNTrue (array, collapseAxes);
-  size_t nr = result.nelements();
+  Array<uInt> result = partialNTrue (array, collapseAxes);
+  uInt nr = result.nelements();
   if (nr > 0) {
-    size_t factor = array.nelements() / nr;
-    bool deleteRes;
-    size_t* res = result.getStorage (deleteRes);
-    for (size_t i=0; i<nr; i++) {
+    uInt factor = array.nelements() / nr;
+    Bool deleteRes;
+    uInt* res = result.getStorage (deleteRes);
+    for (uInt i=0; i<nr; i++) {
       res[i] = factor - res[i];
     }
     result.putStorage (res, deleteRes);

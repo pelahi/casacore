@@ -40,8 +40,8 @@ int main() {
         AlwaysAssert(proxy.type() == TpFloat, AipsError);
         AlwaysAssert(proxy.coordSysObject().nWorldAxes() == 2, AipsError);
     }
-    catch (const std::exception& x) {
-        cout << "Caught error " << x.what() << endl;
+    catch (const AipsError& x) {
+        cout << "Caught error " << x.getMesg() << endl;
         return 1;
     } 
     cout << "OK" << endl;

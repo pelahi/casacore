@@ -31,7 +31,7 @@
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
 #include <casacore/casa/Arrays/ArrayUtil.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Arrays/MaskArrMath.h>
 #include <casacore/casa/Arrays/Cube.h>
 #include <casacore/casa/Arrays/Slice.h>
@@ -290,9 +290,9 @@ Bool MSSelector::selectChannel(Int nChan, Int start, Int width, Int incr)
 
 	Int nSpW=spwId_p.nelements();
 	Matrix<Double> chanFreq =
-          msc.spectralWindow().chanFreq().getColumnCells(RefRows(RowNumbers(spwId_p)));
+			msc.spectralWindow().chanFreq().getColumnCells(RefRows(spwId_p));
 	Matrix<Double> bandwidth =
-          msc.spectralWindow().resolution().getColumnCells(RefRows(RowNumbers(spwId_p)));
+			msc.spectralWindow().resolution().getColumnCells(RefRows(spwId_p));
 	for (Int i=0; i<nSpW; i++) {
 		chanFreq_p.resize(nChan,nSpW); bandwidth_p.resize(nChan,nSpW);
 		for (Int j=0; j<nChan; j++) {
@@ -495,10 +495,11 @@ Bool MSSelector::select(const Record& items, Bool oneBased)
 		break;
 		case MSS::ROWS:
 		{
-			Vector<Int64> rows = items.toArrayInt64(RecordFieldId(i));
+			Vector<Int> rows = items.asArrayInt(RecordFieldId(i));
 			if (rows.nelements()>0) {
-                                if (oneBased) rows-=Int64(1);
-				Vector<rownr_t> uRows(rows.size());
+				Int n=rows.nelements();
+				if (oneBased) rows-=1;
+				Vector<uInt> uRows(n);
 				convertArray(uRows,rows);
 				// Select rows from the base table.
 				// This is consistent with the rownumbers returned by range.
@@ -663,8 +664,8 @@ Record MSSelector::getData(const Vector<String>& items, Bool ifrAxis,
 	Int nItems=items.nelements(),nRows=selms_p.nrow();
 	Table tab;
 	if (inc>1 && inc<=nRows) {
-		Vector<rownr_t> rows(nRows/inc);
-		indgen(rows,rownr_t(0),rownr_t(inc));
+		Vector<uInt> rows(nRows/inc);
+		indgen(rows,uInt(0),uInt(inc));
 		tab=selms_p(rows);
 	} else {
 		tab=selms_p;
@@ -1575,7 +1576,7 @@ Bool MSSelector::putData(const Record& items)
 }
 
 Bool MSSelector::iterInit(const Vector<String>& columns,
-		Double interval, rownr_t maxRows,
+		Double interval, Int maxRows,
 		Bool addDefaultSortColumns)
 {
 	LogIO os;
@@ -1605,7 +1606,7 @@ Bool MSSelector::iterNext()
 {
 	Bool more=False;
 	if (msIter_p) {
-		rownr_t nIterRow=msIter_p->table().nrow();
+		Int nIterRow=msIter_p->table().nrow();
 		if (startRow_p==0 || startRow_p> nIterRow) {
 			(*msIter_p)++;
 			more=msIter_p->more();
@@ -1613,9 +1614,9 @@ Bool MSSelector::iterNext()
 			startRow_p = 0;
 		}
 		if (startRow_p>0 || (more && maxRow_p>0 && nIterRow>maxRow_p)) {
-			rownr_t nRow=min(maxRow_p,nIterRow-startRow_p);
+			Int nRow=min(maxRow_p,nIterRow-startRow_p);
 			selRows_p.resize(nRow);
-			indgen(selRows_p,rownr_t(startRow_p),rownr_t(1));
+			indgen(selRows_p,uInt(startRow_p),uInt(1));
 			startRow_p+=maxRow_p;
 			selms_p=msIter_p->table()(selRows_p);
 			more=True;
@@ -1633,12 +1634,12 @@ Bool MSSelector::iterOrigin()
 	if (msIter_p) {
 		startRow_p=0;
 		msIter_p->origin();
-		rownr_t nIterRow=msIter_p->table().nrow();
+		Int nIterRow=msIter_p->table().nrow();
 		if (maxRow_p==0 || nIterRow<=maxRow_p) {
 			selms_p=msIter_p->table();
 		} else {
 			selRows_p.resize(maxRow_p);
-			indgen(selRows_p,rownr_t(0),rownr_t(1));
+			indgen(selRows_p,uInt(0),uInt(1));
 			selms_p=msIter_p->table()(selRows_p);
 			startRow_p=maxRow_p;
 		}
@@ -1678,7 +1679,7 @@ void MSSelector::getAveragedData(Array<Complex>& avData, const Array<Bool>& flag
 		chanSel(0)=data.shape()(1); chanSel(1)=0; chanSel(2)=1; chanSel(3)=1;
 	}
 	Int nChan=chanSel(0);
-	Int64 nRow=data.shape()(2);
+	Int nRow=data.shape()(2);
 	avData.resize(IPosition(3,nPol,nChan,nRow));
 	if (chanSel(2)==1) {
 		// no averaging, just copy the data across
@@ -1686,8 +1687,8 @@ void MSSelector::getAveragedData(Array<Complex>& avData, const Array<Bool>& flag
 	} else {
 		// Average channel by channel
 		Array<Bool> mask(!flag);
-		Array<Float> wt(flag.shape(),0.0f); wt(mask)=1.0;
-		Array<Float> avWt(avData.shape(),0.0f);
+		Array<Float> wt(flag.shape(),0.0); wt(mask)=1.0;
+		Array<Float> avWt(avData.shape(),0.0);
 		for (Int i=0; i<nChan; i++) {
 			// if width>1, the slice doesn't have an increment, so we take big steps
 			Int chn=i*chanSel(3);
@@ -1746,7 +1747,7 @@ void MSSelector::getAveragedData(Array<Float>& avData, const Array<Bool>& flag,
 		chanSel(0)=data.shape()(1); chanSel(1)=0; chanSel(2)=1; chanSel(3)=1;
 	}
 	Int nChan=chanSel(0);
-	Int64 nRow=data.shape()(2);
+	Int nRow=data.shape()(2);
 	avData.resize(IPosition(3,nPol,nChan,nRow));
 	if (chanSel(2)==1) {
 		// no averaging, just copy the data across
@@ -1754,8 +1755,8 @@ void MSSelector::getAveragedData(Array<Float>& avData, const Array<Bool>& flag,
 	} else {
 		// Average channel by channel
 		Array<Bool> mask(!flag);
-		Array<Float> wt(flag.shape(),0.0f); wt(mask)=1.0;
-		Array<Float> avWt(avData.shape(),0.0f);
+		Array<Float> wt(flag.shape(),0.0); wt(mask)=1.0;
+		Array<Float> avWt(avData.shape(),0.0);
 		for (Int i=0; i<nChan; i++) {
 			// if width>1, the slice doesn't have an increment, so we take big steps
 			Int chn=i*chanSel(3);
@@ -1817,7 +1818,7 @@ Array<Bool> MSSelector::getAveragedFlag(Array<Bool>& avFlag,
 		chanSel(0)=flag.shape()(1); chanSel(1)=0; chanSel(2)=1; chanSel(3)=1;
 	}
 	Int nChan=chanSel(0);
-	Int64 nRow=flag.shape()(2);
+	Int nRow=flag.shape()(2);
 	avFlag.resize(IPosition(3,nPol,nChan,nRow));
 	if (chanSel(2)==1) {
 		// no averaging, just copy flags
@@ -1859,7 +1860,7 @@ void MSSelector::putAveragedFlag(const Array<Bool>& avFlag,
 	Array<Bool> polFlag=avFlag;
 	Array<Bool> out;
 	Int n=polIndex_p.nelements();
-	Int64 nRow=avFlag.shape()(2);
+	Int nRow=avFlag.shape()(2);
 	// check if we need to read the data before writing it back
 	if (convert_p || (n>2 && n<col.shape(0)(0))||
 			(chanSel_p(2)>1 && chanSel_p(3)>chanSel_p(2))) {
@@ -1937,15 +1938,15 @@ Array<Float> MSSelector::getWeight(const ArrayColumn<Float>& wtCol,
 void MSSelector::reorderFlagRow(Array<Bool>& flagRow)
 {
 	Int nIfr=flagRow.shape()(0), nSlot=flagRow.shape()(1);
-	rownr_t nRow=selms_p.nrow();
+	Int nRow=selms_p.nrow();
 	Bool deleteFlag, deleteRow;
 	const Bool* pFlag=flagRow.getStorage(deleteFlag);
-	const Int64* pRow=rowIndex_p.getStorage(deleteRow);
+	const Int* pRow=rowIndex_p.getStorage(deleteRow);
 	Vector<Bool> rowFlag(nRow);
 	Int offset=0;
 	for (Int i=0; i<nSlot; i++, offset+=nIfr) {
 		for (Int j=0; j<nIfr; j++) {
-			rownr_t k=pRow[offset+j];
+			Int k=pRow[offset+j];
 			if (k>0) {
 				rowFlag(k)=pFlag[offset+j];
 			}
@@ -1960,16 +1961,16 @@ void MSSelector::reorderFlagRow(Array<Bool>& flagRow)
 void MSSelector::reorderWeight(Array<Float>& weight)
 {
 	Int nCorr=weight.shape()(0), nIfr=weight.shape()(1), nSlot=weight.shape()(2);
-	Int64 nRow=selms_p.nrow();
+	Int nRow=selms_p.nrow();
 	Bool deleteWeight, deleteRow, deleteRowWeight;
 	const Float* pWeight=weight.getStorage(deleteWeight);
-	const Int64* pRow=rowIndex_p.getStorage(deleteRow);
+	const Int* pRow=rowIndex_p.getStorage(deleteRow);
 	Matrix<Float> rowWeight(nCorr, nRow);
 	Float* pRowWeight=rowWeight.getStorage(deleteRowWeight);
 	Int offset=0;
 	for (Int i=0; i<nSlot; i++) {
 		for (Int j=0; j<nIfr; j++, offset++) {
-			rownr_t k=pRow[offset];
+			Int k=pRow[offset];
 			if (k>0) {
 				Int wOffset = nCorr*offset;
 				Int rwOffset = nCorr*k;

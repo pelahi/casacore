@@ -27,7 +27,6 @@
 
 #include <casacore/casa/Json/JsonOut.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
-#include <casacore/casa/BasicMath/Math.h>
 #include <casacore/casa/Containers/ValueHolder.h>
 #include <iostream>
 #include <stdexcept>

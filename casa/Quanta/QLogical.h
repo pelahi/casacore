@@ -32,7 +32,7 @@
 //# Includes
 #include <casacore/casa/aips.h>
 #include <casacore/casa/Quanta/Quantum.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
+#include <casacore/casa/Arrays/LogiArrayFwd.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 

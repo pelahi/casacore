@@ -91,7 +91,7 @@ void MSFeedIndex::attachIds()
 Int MSFeedIndex::compare (const Block<void*>& fieldPtrs,
                           const Block<void*>& dataPtrs,
                           const Block<Int>& dataTypes,
-                          rownr_t index)
+                          Int index)
 {
   // this implementation has been adapted from the default compare function in 
   // ColumnsIndex.cc.  The support for data types other than Integer have been

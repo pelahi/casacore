@@ -85,12 +85,13 @@ const TableColumn& TableExprRange::getColumn() const
 void TableExprRange::mixAnd (const TableExprRange& that)
 {
     //# Allocate vectors (long enough) to hold the result.
-    size_t nrres=0;
+    uInt nrres=0;
     Vector<double> stres (sval_p.nelements() + that.sval_p.nelements());
     Vector<double> endres(sval_p.nelements() + that.sval_p.nelements());
+    uInt i,j;
     //# Loop through all intervals of this.
-    for (size_t i=0; i<sval_p.nelements(); i++) {
-        for (size_t j=0; j<that.sval_p.nelements(); j++) {
+    for (i=0; i<sval_p.nelements(); i++) {
+        for (j=0; j<that.sval_p.nelements(); j++) {
             if (that.sval_p(j) > eval_p(i)) {
                 break;                              // that past this; next this
             }
@@ -114,14 +115,15 @@ void TableExprRange::mixAnd (const TableExprRange& that)
 void TableExprRange::mixOr (const TableExprRange& that)
 {
     //# Allocate vectors (long enough) to hold the result.
-    size_t nrres=0;
+    uInt nrres=0;
     Vector<double> stres (sval_p.nelements() + that.sval_p.nelements());
     Vector<double> endres(sval_p.nelements() + that.sval_p.nelements());
-    size_t j=0;
+    uInt i;
+    uInt j=0;
     //# Loop through all intervals of this.
     //# Store in the result, while inserting the that intervals,
     //# in order of start-value.
-    for (size_t i=0; i<sval_p.nelements(); i++) {
+    for (i=0; i<sval_p.nelements(); i++) {
         while (j < that.sval_p.nelements()  &&  that.sval_p(j) < sval_p(i)) {
             stres(nrres)  = that.sval_p(j);
             endres(nrres) = that.eval_p(j);
@@ -142,10 +144,10 @@ void TableExprRange::mixOr (const TableExprRange& that)
     //# Now combine overlapping intervals and store result in temporary.
     Vector<double> stmp(nrres);
     Vector<double> etmp(nrres);
-    j = 0;
+    j=0;
     stmp(0) = stres(0);                             // first interval
     etmp(0) = endres(0);
-    for (size_t i=1; i<nrres; i++) {
+    for (i=1; i<nrres; i++) {
         if (stres(i) <= etmp(j)) {                  // overlap
             if (endres(i) > etmp(j)) {
                 etmp(j) = endres(i);                // higher end-value

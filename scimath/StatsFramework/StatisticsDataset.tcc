@@ -314,7 +314,7 @@ void StatisticsDataset<CASA_STATP>::initThreadVars(
         ++nBlocks;
     }
     ThrowIf(nBlocks == 0, "Logic error: nBlocks should never be 0");
-    nthreads = std::min(nThreadsMax, nBlocks);
+    nthreads = min(nThreadsMax, nBlocks);
     ThrowIf(nthreads == 0, "Logic error: nthreads should never be 0");
     for (uInt tid=0; tid<nthreads; ++tid) {
         // advance the per-thread iterators to their correct starting

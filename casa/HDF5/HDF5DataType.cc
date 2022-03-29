@@ -37,12 +37,6 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 #ifdef HAVE_HDF5
 
-// H5free_memory was introduced in 1.8.13
-// If the versions of hdf5 we depend on was formalized this could be simpler
-#if H5_VERS_MAJOR == 1 && (H5_VERS_MINOR < 8 || (H5_VERS_MINOR == 8 && H5_VERS_RELEASE < 13))
-auto &H5free_memory = free;
-#endif
-
   HDF5DataType::HDF5DataType (const Bool*)
     : itsSize (sizeof(Bool))
   {
@@ -334,8 +328,8 @@ auto &H5free_memory = free;
       char* f0 = H5Tget_member_name(dtid, 0);
       char* f1 = H5Tget_member_name(dtid, 1);
       res = (strcmp(f0, "re") == 0  &&  strcmp (f1, "im") == 0);
-      H5free_memory(f0);
-      H5free_memory(f1);
+      free(f0);
+      free(f1);
     }
     return res;
   }
@@ -349,9 +343,9 @@ auto &H5free_memory = free;
       char* f2 = H5Tget_member_name(dtid, 2);
       res = (strcmp(f0, "emptyarray") == 0  &&  strcmp (f1, "rank") == 0  &&
              strcmp(f2, "casatype") == 0);
-      H5free_memory(f0);
-      H5free_memory(f1);
-      H5free_memory(f2);
+      free(f0);
+      free(f1);
+      free(f2);
     }
     return res;
   }

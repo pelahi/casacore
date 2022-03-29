@@ -31,14 +31,16 @@
 #define FITS_FITSHISTORYUTIL_H
 
 #include <casacore/casa/aips.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
 #include <vector>
+
+
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 class ConstFitsKeywordList;
 class FitsKeywordList;
 class String;
+template<class T> class Vector;
 class LoggerHolder;
 
 // <summary>

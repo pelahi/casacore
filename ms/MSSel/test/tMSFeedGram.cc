@@ -98,8 +98,8 @@ int main(int argc, const char* argv[])
            << "Selected feed2 = " << selectedFeed2 << endl;
     }
     delete mssel;
-  } catch (std::exception& x) {
-    cout << "ERROR: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << "ERROR: " << x.getMesg() << endl;
     return 1;
   } 
   return 0;

@@ -101,9 +101,9 @@ int main(int argc, const char* argv[])
 	}
       delete mssel;
     } 
-  catch (std::exception& x) 
+  catch (AipsError& x) 
     {
-      cout << "ERROR: " << x.what() << endl;
+      cout << "ERROR: " << x.getMesg() << endl;
       return 1;
     } 
   return 0;

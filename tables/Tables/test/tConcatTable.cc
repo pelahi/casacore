@@ -36,7 +36,7 @@
 #include <casacore/casa/Arrays/Cube.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Arrays/Slicer.h>
 #include <casacore/casa/Arrays/Slice.h>
 #include <casacore/casa/Utilities/Sort.h>
@@ -57,7 +57,7 @@ void doAddColumn(const Table &tab)
   Table tabrw(tab);
   tabrw.reopenRW();
 
-  rownr_t nrows = tab.nrow();
+  uInt nrows = tab.nrow();
   AlwaysAssertExit(!tabrw.canAddRow());
 
   auto newName = "new_col";
@@ -223,7 +223,7 @@ void doIt (const Table& tab)
   cout << "#columns in sortab2: " << sortab2.tableDesc().ncolumn() << endl;
 
   // Get a subset of the table via row numbers.
-  Vector<rownr_t> rownrs(4);
+  Vector<uInt> rownrs(4);
   rownrs(0)=3;
   rownrs(1)=1;
   rownrs(2)=9;
@@ -311,7 +311,7 @@ void doIt1 (const String& tableName)
   cout << "<<<" << endl;
   Table tab(tableName);
   cout << "end reading Tables" << endl;
-  rownr_t nr = tab.nrow();
+  uInt nr = tab.nrow();
   if (nr < 3) {
     cout << "Table must have at least 3 rows" << endl;
     return;
@@ -348,8 +348,8 @@ int main (int argc, const char* argv[])
 	doItMult (names);
       }
     }
-  } catch (std::exception& x) {
-    cout << "Caught an exception: " << x.what() << endl;
+  } catch (AipsError& x) {
+    cout << "Caught an exception: " << x.getMesg() << endl;
     return 1;
   } 
   return 0;                           // exit with success status

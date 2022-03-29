@@ -147,7 +147,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 	//
 	rstat = mss->getSelectedMS(selectedMS,outMSName);
       }
-    catch (std::exception& x)
+    catch (AipsError& x)
       {
 	if (mymss==NULL) delete mss;
 	throw;
@@ -235,7 +235,7 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 	mss->getChanSlices(chanSlices,&ms,defaultChanStep);
 	mss->getCorrSlices(corrSlices,&ms);
       }
-    catch (std::exception& x)
+    catch (AipsError& x)
       {
 	if (mymss == NULL) delete mss;
 	throw;

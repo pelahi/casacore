@@ -44,7 +44,7 @@
 #include <casacore/casa/Containers/RecordFieldId.h>
 #include <casacore/casa/Containers/Record.h>
 #include <casacore/casa/Arrays/Vector.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/BasicSL/String.h>
 #include <casacore/casa/Logging/LogIO.h>
 #include <casacore/casa/Logging/LogOrigin.h>
@@ -102,39 +102,39 @@ Bool MeasureHolder::isMeasure() const {
 }
 
 Bool MeasureHolder::isMDirection() const {
-  return (hold_p.ptr() && dynamic_cast<const MDirection*>(hold_p.ptr()));
+  return (hold_p.ptr() && hold_p.ptr()->type() == MDirection::myType());
 }
 
 Bool MeasureHolder::isMDoppler() const {
-  return (hold_p.ptr() && dynamic_cast<const MDoppler*>(hold_p.ptr()));
+  return (hold_p.ptr() && hold_p.ptr()->type() == MDoppler::myType());
 }
 
 Bool MeasureHolder::isMEpoch() const {
-  return (hold_p.ptr() && dynamic_cast<const MEpoch*>(hold_p.ptr()));
+  return (hold_p.ptr() && hold_p.ptr()->type() == MEpoch::myType());
 }
 
 Bool MeasureHolder::isMFrequency() const {
-  return (hold_p.ptr() && dynamic_cast<const MFrequency*>(hold_p.ptr()));
+  return (hold_p.ptr() && hold_p.ptr()->type() == MFrequency::myType());
 }
 
 Bool MeasureHolder::isMPosition() const {
-  return (hold_p.ptr() && dynamic_cast<const MPosition*>(hold_p.ptr()));
+  return (hold_p.ptr() && hold_p.ptr()->type() == MPosition::myType());
 }
 
 Bool MeasureHolder::isMRadialVelocity() const {
-  return (hold_p.ptr() && dynamic_cast<const MRadialVelocity*>(hold_p.ptr()));
+  return (hold_p.ptr() && hold_p.ptr()->type() == MRadialVelocity::myType());
 }
 
 Bool MeasureHolder::isMBaseline() const {
-  return (hold_p.ptr() && dynamic_cast<const MBaseline*>(hold_p.ptr()));
+  return (hold_p.ptr() && hold_p.ptr()->type() == MBaseline::myType());
 }
 
 Bool MeasureHolder::isMuvw() const {
-  return (hold_p.ptr() && dynamic_cast<const Muvw*>(hold_p.ptr()));
+  return (hold_p.ptr() && hold_p.ptr()->type() == Muvw::myType());
 }
 
 Bool MeasureHolder::isMEarthMagnetic() const {
-  return (hold_p.ptr() && dynamic_cast<const MEarthMagnetic*>(hold_p.ptr()));
+  return (hold_p.ptr() && hold_p.ptr()->type() == MEarthMagnetic::myType());
 }
 
 const Measure &MeasureHolder::asMeasure() const {

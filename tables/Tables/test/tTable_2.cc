@@ -34,7 +34,7 @@
 #include <casacore/casa/Arrays/Cube.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/ArrayLogical.h>
-#include <casacore/casa/IO/ArrayIO.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
 #include <casacore/casa/Arrays/Slicer.h>
 #include <casacore/casa/Arrays/Slice.h>
 #include <casacore/casa/Utilities/Sort.h>
@@ -61,8 +61,8 @@ int main (int argc, const char* argv[])
 	for (int i=1; i<argc; i++) {
 	    doIt (argv[i]);
 	}
-    } catch (std::exception& x) {
-	cout << "Caught an exception: " << x.what() << endl;
+    } catch (AipsError& x) {
+	cout << "Caught an exception: " << x.getMesg() << endl;
 	return 1;
     } 
     return 0;                           // exit with success status
@@ -199,7 +199,7 @@ void doIt (const String& tableName)
     cout << "#columns in sortab2: " << sortab2.tableDesc().ncolumn() << endl;
 
     // Get a subset of the table via row numbers.
-    Vector<rownr_t> rownrs(4);
+    Vector<uInt> rownrs(4);
     rownrs(0)=3;
     rownrs(1)=1;
     rownrs(2)=9;

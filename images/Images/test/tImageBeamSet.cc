@@ -669,8 +669,8 @@ int main() {
             AlwaysAssert(maxbeam.getMajor().getValue() == 4, AipsError);
         }
     }
-    catch (const std::exception& x) {
-        cout << x.what() << endl;
+    catch (const AipsError& x) {
+        cout << x.getMesg() << endl;
         cout << "FAIL" << endl;
         return 1;
     }

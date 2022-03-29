@@ -34,7 +34,6 @@
 #include <casacore/casa/Arrays/ArrayLogical.h>
 #include <casacore/scimath/Mathematics/Smooth.h>
 #include <casacore/casa/iostream.h>
-#include <casacore/casa/BasicSL/Complex.h>
 
 #include <casacore/casa/namespace.h>
 int main() {
@@ -43,8 +42,8 @@ int main() {
     Bool failed = False;
     // Test with Float Vectors, all flags 0
     
-    std::vector<Float> vyin; 
-    std::vector<Bool> vyinFlags;
+    vector<Float> vyin; 
+    vector<Bool> vyinFlags;
     
     Vector<Float> myexp;
     Vector<Float> outv;
@@ -115,8 +114,8 @@ int main() {
     Bool failed = False;
     // Test with Float Vectors, all flags 1
     
-    std::vector<Float> vyin; 
-    std::vector<Bool> vyinFlags;
+    vector<Float> vyin; 
+    vector<Bool> vyinFlags;
     
     Vector<Float> myexp;
     Vector<Float> outv;
@@ -181,8 +180,8 @@ int main() {
     Bool failed = False;
     // Test with Float Vectors, mixed flags
     
-    std::vector<Float> vyin; 
-    std::vector<Bool> vyinFlags;
+    vector<Float> vyin; 
+    vector<Bool> vyinFlags;
     
     Vector<Float> myexp;
     Vector<Float> outv;
@@ -265,8 +264,8 @@ int main() {
     Bool failed = False;
     // Test with Complex Vectors, all flags 0
     
-    std::vector<Complex> vyin; 
-    std::vector<Bool> vyinFlags;
+    vector<Complex> vyin; 
+    vector<Bool> vyinFlags;
     
     Vector<Complex> myexp;
     Vector<Complex> outv;
@@ -344,8 +343,8 @@ int main() {
     Bool failed = False;
     // Test with Complex Vectors, mixed flags
     
-    std::vector<Complex> vyin; 
-    std::vector<Bool> vyinFlags;
+    vector<Complex> vyin; 
+    vector<Bool> vyinFlags;
     
     Vector<Complex> myexp;
     Vector<Complex> outv;

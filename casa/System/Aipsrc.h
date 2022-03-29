@@ -32,8 +32,7 @@
 #include <casacore/casa/BasicSL/String.h>
 #include <casacore/casa/Containers/Block.h>
 #include <casacore/casa/Arrays/Vector.h>
-
-#include <mutex>
+#include <casacore/casa/OS/Mutex.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -385,7 +384,7 @@ protected:
 private:
   //# Data
   // Object to ensure safe multi-threaded lazy single initialization
-  static std::once_flag theirCallOnceFlag;
+  static CallOnce0 theirCallOnce;
   // Last time data was (re)read
   static Double lastParse; 
   // List of values belonging to keywords found

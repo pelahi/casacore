@@ -25,16 +25,19 @@
 //#
 //# $Id$
 
-#ifndef CASA_MASKLOGIARR_2_H
-#define CASA_MASKLOGIARR_2_H
+#ifndef CASA_MASKLOGIARR_H
+#define CASA_MASKLOGIARR_H
 
 //# There is no source file, so this pragma is not needed.
 #if 0
 #endif
 
-#include "MaskLogiArrFwd.h"
-#include "LogiArray.h"
-#include "MaskedArray.h"
+
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/MaskLogiArrFwd.h>
+#include <casacore/casa/Arrays/LogiArray.h>
+#include <casacore/casa/Arrays/MaskedArray.h>
+
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 

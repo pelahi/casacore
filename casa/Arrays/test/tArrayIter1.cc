@@ -27,41 +27,42 @@
 
 //# Includes
 
-#include "../Array.h"
-#include "../ArrayMath.h"
-#include "../ArrayLogical.h"
-#include "../Vector.h"
-#include "../Matrix.h"
-#include "../Cube.h"
-#include "../ArrayPosIter.h"
-#include "../ArrayIter.h"
-#include "../MatrixIter.h"
-#include "../VectorIter.h"
+#include <casacore/casa/iostream.h>
 
-#include <boost/test/unit_test.hpp>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/ArrayLogical.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Cube.h>
+#include <casacore/casa/Arrays/ArrayPosIter.h>
+#include <casacore/casa/Arrays/ArrayIter.h>
+#include <casacore/casa/Arrays/MatrixIter.h>
+#include <casacore/casa/Arrays/VectorIter.h>
+#include <casacore/casa/Utilities/Assert.h>
+#include <casacore/casa/Exceptions/Error.h>
 
-using namespace casacore;
-
-BOOST_AUTO_TEST_SUITE(array_iter2)
+#include <casacore/casa/namespace.h>
 
 // Test iterating through a subset of a 5D array.
-void checkIter (const Array<int>& array, const IPosition& blc,
+void checkIter (const Array<Int>& array, const IPosition& blc,
 		const IPosition& trc, const IPosition& inc)
 {
-  Array<int> a(array);
-  Array<int> a1 = a(blc, trc, inc);
+  Array<Int> a(array);
+  Array<Int> a1 = a(blc, trc, inc);
   {
     IPosition st(blc);
     IPosition end(blc);
     end(0) = trc(0);
     IPosition shp = a1.shape();
     shp.resize (1);
-    ReadOnlyArrayIterator<int> ai(a1,1);
-    for (int i5=blc(4); i5<=trc(4); i5+=inc(4)) {
-      for (int i4=blc(3); i4<=trc(3); i4+=inc(3)) {
-	for (int i3=blc(2); i3<=trc(2); i3+=inc(2)) {
-	  for (int i2=blc(1); i2<=trc(1); i2+=inc(1)) {
-	    BOOST_CHECK(allEQ (ai.array(), a(st,end,inc).reform(shp)));
+    ReadOnlyArrayIterator<Int> ai(a1,1);
+    for (Int i5=blc(4); i5<=trc(4); i5+=inc(4)) {
+      for (Int i4=blc(3); i4<=trc(3); i4+=inc(3)) {
+	for (Int i3=blc(2); i3<=trc(2); i3+=inc(2)) {
+	  for (Int i2=blc(1); i2<=trc(1); i2+=inc(1)) {
+	    AlwaysAssertExit(allEQ (ai.array(), a(st,end,inc).reform(shp)));
 	    ai.next();
 	    st(1)+=inc(1);
 	    end(1)+=inc(1);
@@ -81,7 +82,7 @@ void checkIter (const Array<int>& array, const IPosition& blc,
       st(4)+=inc(4);
       end(4)+=inc(4);
     }
-    BOOST_CHECK (ai.pastEnd());
+    AlwaysAssertExit (ai.pastEnd());
   }
   {
     IPosition st(blc);
@@ -90,11 +91,11 @@ void checkIter (const Array<int>& array, const IPosition& blc,
     end(1) = trc(1);
     IPosition shp = a1.shape();
     shp.resize (2);
-    ReadOnlyArrayIterator<int> ai(a1,2);
-    for (int i5=blc(4); i5<=trc(4); i5+=inc(4)) {
-      for (int i4=blc(3); i4<=trc(3); i4+=inc(3)) {
-	for (int i3=blc(2); i3<=trc(2); i3+=inc(2)) {
-	  BOOST_CHECK(allEQ (ai.array(), a(st,end,inc).reform(shp)));
+    ReadOnlyArrayIterator<Int> ai(a1,2);
+    for (Int i5=blc(4); i5<=trc(4); i5+=inc(4)) {
+      for (Int i4=blc(3); i4<=trc(3); i4+=inc(3)) {
+	for (Int i3=blc(2); i3<=trc(2); i3+=inc(2)) {
+	  AlwaysAssertExit(allEQ (ai.array(), a(st,end,inc).reform(shp)));
 	  ai.next();
 	  st(2)+=inc(2);
 	  end(2)+=inc(2);
@@ -109,7 +110,7 @@ void checkIter (const Array<int>& array, const IPosition& blc,
       st(4)+=inc(4);
       end(4)+=inc(4);
     }
-    BOOST_CHECK (ai.pastEnd());
+    AlwaysAssertExit (ai.pastEnd());
   }
   {
     IPosition st(blc);
@@ -119,10 +120,10 @@ void checkIter (const Array<int>& array, const IPosition& blc,
     end(2) = trc(2);
     IPosition shp = a1.shape();
     shp.resize (3);
-    ReadOnlyArrayIterator<int> ai(a1,3);
-    for (int i5=blc(4); i5<=trc(4); i5+=inc(4)) {
-      for (int i4=blc(3); i4<=trc(3); i4+=inc(3)) {
-	BOOST_CHECK(allEQ (ai.array(), a(st,end,inc).reform(shp)));
+    ReadOnlyArrayIterator<Int> ai(a1,3);
+    for (Int i5=blc(4); i5<=trc(4); i5+=inc(4)) {
+      for (Int i4=blc(3); i4<=trc(3); i4+=inc(3)) {
+	AlwaysAssertExit(allEQ (ai.array(), a(st,end,inc).reform(shp)));
 	ai.next();
 	st(3)+=inc(3);
 	end(3)+=inc(3);
@@ -132,7 +133,7 @@ void checkIter (const Array<int>& array, const IPosition& blc,
       st(4)+=inc(4);
       end(4)+=inc(4);
     }
-    BOOST_CHECK (ai.pastEnd());
+    AlwaysAssertExit (ai.pastEnd());
   }
   {
     IPosition st(blc);
@@ -143,14 +144,14 @@ void checkIter (const Array<int>& array, const IPosition& blc,
     end(3) = trc(3);
     IPosition shp = a1.shape();
     shp.resize (4);
-    ReadOnlyArrayIterator<int> ai(a1,4);
-    for (int i5=blc(4); i5<=trc(4); i5+=inc(4)) {
-      BOOST_CHECK(allEQ (ai.array(), a(st,end,inc).reform(shp)));
+    ReadOnlyArrayIterator<Int> ai(a1,4);
+    for (Int i5=blc(4); i5<=trc(4); i5+=inc(4)) {
+      AlwaysAssertExit(allEQ (ai.array(), a(st,end,inc).reform(shp)));
       ai.next();
       st(4)+=inc(4);
       end(4)+=inc(4);
     }
-    BOOST_CHECK (ai.pastEnd());
+    AlwaysAssertExit (ai.pastEnd());
   }
   {
     IPosition st(blc);
@@ -162,50 +163,52 @@ void checkIter (const Array<int>& array, const IPosition& blc,
     end(4) = trc(4);
     IPosition shp = a1.shape();
     shp.resize (5);
-    ReadOnlyArrayIterator<int> ai(a1,5);
-    BOOST_CHECK(allEQ (ai.array(), a(st,end,inc).reform(shp)));
+    ReadOnlyArrayIterator<Int> ai(a1,5);
+    AlwaysAssertExit(allEQ (ai.array(), a(st,end,inc).reform(shp)));
     ai.next();
-    BOOST_CHECK (ai.pastEnd());
+    AlwaysAssertExit (ai.pastEnd());
   }
 }
 
-BOOST_AUTO_TEST_CASE( iterate_5d_array )
+int main()
 {
+  try {
+
     IPosition shape(3);
     shape=3;
     ArrayPositionIterator api(shape, 1);
-    int count = 0;
+    Int count = 0;
     while (!api.pastEnd()) {
 	count++;
 	api.next();
     }
-    BOOST_CHECK(count == 9);
+    AlwaysAssertExit(count == 9);
 
-    Cube<int> a(3,3,3);
-    MatrixIterator<int> ai(a);
-    int i;
+    Cube<Int> a(3,3,3);
+    MatrixIterator<Int> ai(a);
+    Int i;
     for (i = 0; i < 3; i++)
 	a.xyPlane(i) = i;
     count = 0;
     while (!ai.pastEnd()) {
-	BOOST_CHECK(allEQ (ai.array(), count));
-	BOOST_CHECK(allEQ (ai.matrix(), count));
+	AlwaysAssertExit(allEQ (ai.array(), count));
+	AlwaysAssertExit(allEQ (ai.matrix(), count));
 	count++;
 	ai.next();
     }
 
-    ReadOnlyMatrixIterator<int> roai(a);
+    ReadOnlyMatrixIterator<Int> roai(a);
     for (i = 0; i < 3; i++)
 	a.xyPlane(i) = i;
     count = 0;
     while (!roai.pastEnd()) {
-	BOOST_CHECK(allEQ (roai.array(), count));
-	BOOST_CHECK(allEQ (roai.matrix(), count));
+	AlwaysAssertExit(allEQ (roai.array(), count));
+	AlwaysAssertExit(allEQ (roai.matrix(), count));
 	count++;
 	roai.next();
     }
 
-    VectorIterator<int> ai2(a);
+    VectorIterator<Int> ai2(a);
     count = 0;
     while (!ai2.pastEnd()) {
 	ai2.vector().set(count);
@@ -214,12 +217,12 @@ BOOST_AUTO_TEST_CASE( iterate_5d_array )
     }
 
     ai.origin();
-    BOOST_CHECK(ai.atStart());
+    AlwaysAssertExit(ai.atStart());
 
     count = 0;
     while (!ai.pastEnd()) {
 	for (i=0; i<3; i++) {
-	    BOOST_CHECK(allEQ (ai.matrix().column(i), count));
+	    AlwaysAssertExit(allEQ (ai.matrix().column(i), count));
 	    count++;
 	}
 	ai.next();
@@ -227,34 +230,34 @@ BOOST_AUTO_TEST_CASE( iterate_5d_array )
 
     {
       // Test iterating by the same dimensionality as the array
-      Vector<int> theArray(100);
+      Vector<Int> theArray(100);
       theArray = 0;
       ArrayPositionIterator api(theArray.shape(), 1);
-      size_t count = 0;
+      uInt count = 0;
       while (! api.pastEnd()) {
 	count++;
 	api.next();
       }
-      BOOST_CHECK(count == 1);
+      AlwaysAssertExit(count == 1);
       
-      VectorIterator<int> vi(theArray);
+      VectorIterator<Int> vi(theArray);
       count = 0;
       while (! vi.pastEnd()) {
 	count++;
 	vi.next();
       }
-      BOOST_CHECK(count == 1);
+      AlwaysAssertExit(count == 1);
     }
 
     {
-      Cube<int> acube(16,16,16);
+      Cube<Int> acube(16,16,16);
       indgen(acube);
       {
-	Vector<int> b(16);
+	Vector<Int> b(16);
 	indgen(b);
-	VectorIterator<int> ai(acube);
+	VectorIterator<Int> ai(acube);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  b += 16;
 	  ai.next();
 	}
@@ -262,13 +265,13 @@ BOOST_AUTO_TEST_CASE( iterate_5d_array )
 
       // Test iterating through a subset (bottomleft) of the cube.
       {
-	Cube<int> a1 = acube(IPosition(3,0,0,0), IPosition(3,7,7,7));
-	Vector<int> b(8);
+	Cube<Int> a1 = acube(IPosition(3,0,0,0), IPosition(3,7,7,7));
+	Vector<Int> b(8);
 	indgen(b);
-	int count = 0;
-	VectorIterator<int> ai(a1);
+	Int count = 0;
+	VectorIterator<Int> ai(a1);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  count++;
 	  b += 16;
 	  if (count%8 == 0) {
@@ -280,14 +283,14 @@ BOOST_AUTO_TEST_CASE( iterate_5d_array )
 
       // Test iterating through a strided subset (bottomleft) of the cube.
       {
-	Cube<int> a1 = acube(IPosition(3,0,0,0), IPosition(3,7,7,7),
+	Cube<Int> a1 = acube(IPosition(3,0,0,0), IPosition(3,7,7,7),
 			     IPosition(3,2,2,2));
-	Vector<int> b(4);
+	Vector<Int> b(4);
 	indgen(b, 0, 2);
-	int count = 0;
-	VectorIterator<int> ai(a1);
+	Int count = 0;
+	VectorIterator<Int> ai(a1);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  count++;
 	  b += 32;
 	  if (count%4 == 0) {
@@ -299,13 +302,13 @@ BOOST_AUTO_TEST_CASE( iterate_5d_array )
 
       // Test iterating through a subset (middle) of the cube.
       {
-	Cube<int> a1 = acube(IPosition(3,5,4,3), IPosition(3,12,11,13));
-	Vector<int> b(8);
+	Cube<Int> a1 = acube(IPosition(3,5,4,3), IPosition(3,12,11,13));
+	Vector<Int> b(8);
 	indgen(b, 3*256+4*16+5);
-	int count = 0;
-	VectorIterator<int> ai(a1);
+	Int count = 0;
+	VectorIterator<Int> ai(a1);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  count++;
 	  b += 16;
 	  if (count%8 == 0) {
@@ -317,14 +320,14 @@ BOOST_AUTO_TEST_CASE( iterate_5d_array )
 
       // Test iterating through a strided subset (middle) of the cube.
       {
-	Cube<int> a1 = acube(IPosition(3,4,4,4), IPosition(3,11,11,11),
+	Cube<Int> a1 = acube(IPosition(3,4,4,4), IPosition(3,11,11,11),
 			     IPosition(3,2,2,2));
-	Vector<int> b(4);
+	Vector<Int> b(4);
 	indgen(b, 4*256+4*16+4, 2);
-	int count = 0;
-	VectorIterator<int> ai(a1);
+	Int count = 0;
+	VectorIterator<Int> ai(a1);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  count++;
 	  b += 32;
 	  if (count%4 == 0) {
@@ -337,14 +340,14 @@ BOOST_AUTO_TEST_CASE( iterate_5d_array )
       // Test iterating through a strided subset (middle) of the cube
       // with an axis of length 1.
       {
-	Cube<int> a1 = acube(IPosition(3,4,4,4), IPosition(3,11,4,11),
+	Cube<Int> a1 = acube(IPosition(3,4,4,4), IPosition(3,11,4,11),
 			     IPosition(3,2,2,2));
-	Vector<int> b(4);
+	Vector<Int> b(4);
 	indgen(b, 4*256+4*16+4, 2);
-	int count = 0;
-	VectorIterator<int> ai(a1);
+	Int count = 0;
+	VectorIterator<Int> ai(a1);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  count++;
 	  b += 512;
 	  ai.next();
@@ -354,54 +357,54 @@ BOOST_AUTO_TEST_CASE( iterate_5d_array )
 
     // Now test a 5D array.
     {
-      Array<int> array(IPosition(5,8,10,12,14,16));
+      Array<Int> array(IPosition(5,8,10,12,14,16));
       indgen(array);
       {
-	Array<int> b(IPosition(1,8));
+	Array<Int> b(IPosition(1,8));
 	indgen(b);
-	ArrayIterator<int> ai(array,1);
+	ArrayIterator<Int> ai(array,1);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  b += 8;
 	  ai.next();
 	}
       }
       {
-	Array<int> b(IPosition(2,8,10));
+	Array<Int> b(IPosition(2,8,10));
 	indgen(b);
-	ArrayIterator<int> ai(array,2);
+	ArrayIterator<Int> ai(array,2);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  b += 8*10;
 	  ai.next();
 	}
       }
       {
-	Array<int> b(IPosition(3,8,10,12));
+	Array<Int> b(IPosition(3,8,10,12));
 	indgen(b);
-	ArrayIterator<int> ai(array,3);
+	ArrayIterator<Int> ai(array,3);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  b += 8*10*12;
 	  ai.next();
 	}
       }
       {
-	Array<int> b(IPosition(4,8,10,12,14));
+	Array<Int> b(IPosition(4,8,10,12,14));
 	indgen(b);
-	ArrayIterator<int> ai(array,4);
+	ArrayIterator<Int> ai(array,4);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  b += 8*10*12*14;
 	  ai.next();
 	}
       }
       {
-	Array<int> b(IPosition(5,8,10,12,14,16));
+	Array<Int> b(IPosition(5,8,10,12,14,16));
 	indgen(b);
-	ArrayIterator<int> ai(array,5);
+	ArrayIterator<Int> ai(array,5);
 	while (!ai.pastEnd()) {
-	  BOOST_CHECK(allEQ (ai.array(), b));
+	  AlwaysAssertExit(allEQ (ai.array(), b));
 	  ai.next();
 	}
       }
@@ -426,6 +429,11 @@ BOOST_AUTO_TEST_CASE( iterate_5d_array )
       checkIter (array, IPosition(5,5,2,3,4,5),
 		 IPosition(5,5,2,9,11,13), IPosition(5,1,1,1,1,1));
     }
+  } catch (AipsError& x) {
+    cout << "Unexpected exception: " << x.getMesg() << endl;
+    return 1;
+  }
+      
+  cout << "OK\n";
+  return 0;
 }
-
-BOOST_AUTO_TEST_SUITE_END()

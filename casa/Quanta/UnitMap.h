@@ -37,8 +37,7 @@
 #include <casacore/casa/Quanta/UnitDim.h>
 #include <casacore/casa/Quanta/UnitVal.h>
 #include <casacore/casa/Quanta/UnitName.h>
-
-#include <mutex>
+#include <casacore/casa/OS/Mutex.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -333,7 +332,7 @@ public:
   // Copy assignment (not implemented)
   UnitMap &operator=(const UnitMap &other);
   
-  static std::mutex fitsMutex;
+  static Mutex fitsMutex;
   
   //# member functions
   // Get the static UMaps struct.

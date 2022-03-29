@@ -25,59 +25,58 @@
 //#
 //# $Id$
 
-#include "../VectorSTLIterator.h"
-#include "../ArrayMath.h"
-
-#include <boost/test/unit_test.hpp>
+#include <casacore/casa/Arrays/VectorSTLIterator.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Utilities/Assert.h>
 
 using namespace casacore;
 
-BOOST_AUTO_TEST_SUITE(vector_stl_iterator)
-
-BOOST_AUTO_TEST_CASE(vector_forward)
+void test1()
 {
-  Vector<int> vec(10);
+  Vector<Int> vec(10);
   indgen (vec);
   {
-    VectorSTLIterator<int> iter(vec);
+    VectorSTLIterator<Int> iter(vec);
     for (int i=0; i<int(vec.size()); ++i) {
-      BOOST_CHECK (*iter == i);
-      BOOST_CHECK (iter[i] == i);
+      AlwaysAssertExit (*iter == i);
+      AlwaysAssertExit (iter[i] == i);
       ++iter;
     }
     iter -= 10;
-    BOOST_CHECK (*iter == 0);
+    AlwaysAssertExit (*iter == 0);
     iter += 4;
-    BOOST_CHECK (*iter == 4);
-    BOOST_CHECK (*(iter-4) == 0);
-    BOOST_CHECK (*(iter+3) == 7);
-    BOOST_CHECK (iter - VectorSTLIterator<int>(vec) == 4);
+    AlwaysAssertExit (*iter == 4);
+    AlwaysAssertExit (*(iter-4) == 0);
+    AlwaysAssertExit (*(iter+3) == 7);
+    AlwaysAssertExit (iter - VectorSTLIterator<Int>(vec) == 4);
+  }
+  {
+    VectorSTLIterator<Int> iter(vec);
+    iter += vec.size();
+    for (int i=0; i<int(vec.size()); ++i) {
+      --iter;
+      AlwaysAssertExit (*iter == int(vec.size()) - i - 1);
+      AlwaysAssertExit (iter[i] == i);
+    }
+  }
+  {
+    // Uses ArraySTLIterator, not VectorSTLIterator.
+    int i=0;
+    for (Vector<Int>::const_iterator iter=vec.begin(); iter!=vec.end(); ++iter){
+      AlwaysAssertExit (*iter == i);
+      ++i;
+    }
   }
 }
 
-BOOST_AUTO_TEST_CASE(vector_backward)
+int main()
 {
-  Vector<int> vec(10);
-  indgen (vec);
-  VectorSTLIterator<int> iter(vec);
-  iter += vec.size();
-  for (int i=0; i<int(vec.size()); ++i) {
-    --iter;
-    BOOST_CHECK (*iter == int(vec.size()) - i - 1);
-    BOOST_CHECK (iter[i] == i);
-  }
+  try {
+    test1();
+  } catch (AipsError& x) {
+    cout << "\nCaught an exception: " << x.getMesg() << endl;
+    return 1;
+  } 
+  cout << "OK" << endl;
+  return 0;
 }
-
-BOOST_AUTO_TEST_CASE(array_forward)
-{
-  Vector<int> vec(10);
-  indgen (vec);
-  // Uses ArraySTLIterator, not VectorSTLIterator.
-  int i=0;
-  for (Vector<int>::const_iterator iter=vec.begin(); iter!=vec.end(); ++iter){
-    BOOST_CHECK (*iter == i);
-    ++i;
-  }
-}
-
-BOOST_AUTO_TEST_SUITE_END()

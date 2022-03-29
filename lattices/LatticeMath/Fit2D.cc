@@ -647,8 +647,8 @@ Fit2D::ErrorTypes Fit2D::fitData(const Vector<Double>& values,
 // A valid solution includes non-convergence
 //
       itsValidSolution = True;
-   } catch (std::exception& x) {
-      itsErrorMessage = String("Fitting failed because ") + x.what();
+   } catch (AipsError& x) {
+      itsErrorMessage = String("Fitting failed because ") + x.getMesg();
       status = Fit2D::FAILED;
    } 
 //

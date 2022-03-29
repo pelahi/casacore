@@ -25,13 +25,15 @@
 //#
 //# $Id: ArrayBase.h 21521 2014-12-10 08:06:42Z gervandiepen $
 
-#ifndef CASA_ARRAYBASE_2_H
-#define CASA_ARRAYBASE_2_H
+#ifndef CASA_ARRAYBASE_H
+#define CASA_ARRAYBASE_H
+
 
 //# Includes
-#include "IPosition.h"
-
-#include <memory>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Utilities/CountedPtr.h>
+#include <casacore/casa/Containers/Allocator.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -72,7 +74,7 @@ enum StorageInitPolicy {
 class ArrayBase
 {
 public:
-  ArrayBase() noexcept;
+  ArrayBase();
 
   // Create an array of the given shape, i.e. after construction
   // array.ndim() == shape.nelements() and array.shape() == shape.
@@ -81,21 +83,15 @@ public:
 
   // Copy constructor.
   ArrayBase (const ArrayBase& other);
-  
-  ArrayBase (ArrayBase&& source) noexcept;
 
   // Assignment.
-  ArrayBase& assign (const ArrayBase&);
-  
-  ArrayBase& operator=(const ArrayBase&) = delete;
-
-  ArrayBase& operator=(ArrayBase&&) noexcept;
+  ArrayBase& operator= (const ArrayBase&);
 
   // Destructor.
-  virtual ~ArrayBase() noexcept;
+  virtual ~ArrayBase();
 
   // The dimensionality of this array.
-  size_t ndim() const
+  uInt ndim() const
     { return ndimen_p; }
 
   // How many elements does this array have? Product of all axis lengths.
@@ -107,19 +103,19 @@ public:
   // </group>
 
   // Is the array empty (i.e. no elements)?
-  bool empty() const
+  Bool empty() const
     { return nels_p == 0; }
 
   // Are the array data contiguous?
   // If they are not contiguous, <src>getStorage</src> (see below)
   // needs to make a copy.
-  bool contiguousStorage() const
+  Bool contiguousStorage() const
     { return contiguous_p; }
 
   // Check to see if the Array is consistent. This is about the same thing
   // as checking for invariants. If AIPS_DEBUG is defined, this is invoked
   // after construction and on entry to most member functions.
-  virtual bool ok() const;
+  virtual Bool ok() const;
 
   // The length of each axis.
   const IPosition& shape() const
@@ -139,69 +135,65 @@ public:
   // Array version for major change (used by ArrayIO).
   // enum did not work properly with cfront 3.0.1), so replaced
   // by a static inline function. Users won't normally use this.
-  static unsigned arrayVersion()
+  static uInt arrayVersion()
     {return 3;}
 
   // Make an empty array of the same type.
   // <br>The default implementation in ArrayBase throws an exception.
-  virtual std::unique_ptr<ArrayBase> makeArray() const;
+  virtual CountedPtr<ArrayBase> makeArray() const;
 
   // Resize the array and optionally copy the values.
   // <br>The default implementation in ArrayBase throws an exception.
-  virtual void resize(const IPosition &newShape, bool copyValues=false);
+  virtual void resize(const IPosition &newShape, Bool copyValues=False);
 
   // Resize the array and optionally copy the values.
   // <br>The default implementation in ArrayBase throws an exception.
-  //virtual void resize(const IPosition &newShape, bool copyValues, ArrayInitPolicy policy);
+  virtual void resize(const IPosition &newShape, Bool copyValues, ArrayInitPolicy policy);
 
   // Create an ArrayIterator object of the correct type.
   // This is implemented in the derived Array classes.
   // <br>The default implementation in ArrayBase throws an exception.
-  virtual std::unique_ptr<ArrayPositionIterator> makeIterator (size_t byDim) const;
+  virtual CountedPtr<ArrayPositionIterator> makeIterator (uInt byDim) const;
 
   // Get a reference to a section of an array.
   // This is the same as Array<T>::operator(), but without having to know
   // the exact template type.
   // <br>The default implementation in ArrayBase throws an exception.
-  virtual std::unique_ptr<ArrayBase> getSection (const Slicer&) const;
+  virtual CountedPtr<ArrayBase> getSection (const Slicer&) const;
 
   // Assign the source array to this array.
-  // If <src>checkType==true</src>, it is checked if the underlying template
+  // If <src>checkType==True</src>, it is checked if the underlying template
   // types match. Otherwise, it is only checked in debug mode (for performance).
   // <br>The default implementation in ArrayBase throws an exception.
-  virtual void assignBase (const ArrayBase& source, bool checkType=true);
+  virtual void assignBase (const ArrayBase& source, Bool checkType=True);
 
   // The following functions behave the same as the corresponding getStorage
   // functions in the derived templated Array class.
   // They handle a pointer to a contiguous block of array data.
   // If the array is not contiguous, a copy is used to make it contiguous.
   // <group>
-  virtual void* getVStorage (bool& deleteIt);
-  virtual const void* getVStorage (bool& deleteIt) const;
-  virtual void putVStorage(void*& storage, bool deleteAndCopy);
-  virtual void freeVStorage(const void*& storage, bool deleteIt) const;
+  virtual void* getVStorage (Bool& deleteIt);
+  virtual const void* getVStorage (Bool& deleteIt) const;
+  virtual void putVStorage(void*& storage, Bool deleteAndCopy);
+  virtual void freeVStorage(const void*& storage, Bool deleteIt) const;
   // <group>
 
 protected:
-  // For subclasses, this move constructor allows the moved-from object to
-  // obtain a given shape after resizing. This way, e.g. a source Matrix can 
-  // still kee a dimensionality of 2.
-  ArrayBase(ArrayBase&& source, const IPosition& shapeForSource) noexcept;
-  
-  void swap(ArrayBase& source) noexcept;
-  
+  void baseCopy (const ArrayBase& that)
+    { operator= (that); }
+
   // Either reforms the array if size permits or resizes it to the new shape.
   // Implementation of Array<T>::reformOrResize (slightly different signature).
 
-  bool reformOrResize (const IPosition & newShape,
-                       bool resizeIfNeeded,
-		       size_t nReferences,
-		       long long nElementsAllocated,
-           bool copyDataIfNeeded,
-		       size_t resizePercentage);
+  Bool reformOrResize (const IPosition & newShape,
+                       Bool resizeIfNeeded,
+		       uInt nReferences,
+		       Int64 nElementsAllocated,
+                       Bool copyDataIfNeeded,
+		       uInt resizePercentage);
 
   // Determine if the storage of a subset is contiguous.
-  bool isStorageContiguous() const;
+  Bool isStorageContiguous() const;
 
   // Check if the shape of a vector is correct. If possible, adjust if not.
   // It is possible if at most one axis has length > 1.
@@ -215,7 +207,7 @@ protected:
 
   // Reform the array to a shape with the same nr of elements.  If nonStrict then
   // caller assumes responsibility for not overrunning storage (avoid or use with extreme care).
-  void baseReform (ArrayBase& tmp, const IPosition& shape, bool strict=true) const;
+  void baseReform (ArrayBase& tmp, const IPosition& shape, Bool strict=True) const;
 
   // Remove the degenerate axes from the Array object.
   // This is the implementation of the nonDegenerate functions.
@@ -227,7 +219,7 @@ protected:
   // number of extra axes, all of length one, appended to the end of the
   // Array. Note that the <src>reform</src> function can also be
   // used to add extra axes.
-  void baseAddDegenerate (ArrayBase&, size_t numAxes);
+  void baseAddDegenerate (ArrayBase&, uInt numAxes);
 
   // Make a subset of an array.
   // It checks if start,end,incr are within the array limits.
@@ -241,36 +233,39 @@ protected:
   // defined by two consecutive axes is formed.
   // <src>diag</src> == 0 indicates the main diagonal, >0 above, <0 below.
   // It returns the offset of the diagonal in the (original) array.
-  size_t makeDiagonal (size_t firstAxis, long long diag);
+  size_t makeDiagonal (uInt firstAxis, Int64 diag);
 
   // Are the shapes identical?
-  bool conform2 (const ArrayBase& other) const
+  Bool conform2 (const ArrayBase& other) const
     { return length_p.isEqual (other.length_p); }
 
   // Make the indexing step sizes.
   void baseMakeSteps();
 
+  // Throw expection if vector dimensionality is incorrect.
+  void throwNdimVector();
+
   // Helper function for templated Vector class.
   // It returns if this and other are conformant.
-  bool copyVectorHelper (const ArrayBase& other);
+  Bool copyVectorHelper (const ArrayBase& other);
 
 public:
   // Various helper functions.
   // <group>
   void validateConformance (const ArrayBase&) const;
   void validateIndex (const IPosition&) const;
-  void validateIndex (size_t index) const;
-  void validateIndex (size_t index1, size_t index2) const;
-  void validateIndex (size_t index1, size_t index2, size_t index3) const;
+  void validateIndex (uInt index) const;
+  void validateIndex (uInt index1, uInt index2) const;
+  void validateIndex (uInt index1, uInt index2, uInt index3) const;
   // </group>
 
 protected:
   // Number of elements in the array. Cached rather than computed.
   size_t nels_p;
   // Dimensionality of the array.
-  size_t ndimen_p;
+  uInt ndimen_p;
   // Are the data contiguous?
-  bool contiguous_p;
+  Bool contiguous_p;
   // Used to hold the shape, increment into the underlying storage
   // and originalLength of the array.
   IPosition length_p, inc_p, originalLength_p;
@@ -302,7 +297,7 @@ protected:
 // What is the volume of an N-dimensional array. 
 // Shape[0]*Shape[1]*...*Shape[N-1]. An Array helper function.
 //# Implemented in Array2.cc.
-size_t ArrayVolume (size_t Ndim, const int* Shape);
+size_t ArrayVolume (uInt Ndim, const Int* Shape);
 
 // 
 // What is the linear index into an "Ndim" dimensional array of the given
@@ -310,10 +305,10 @@ size_t ArrayVolume (size_t Ndim, const int* Shape);
 //  An Array helper function.
 // <group>
 //# Implemented in Array2.cc.
-size_t ArrayIndexOffset (size_t Ndim, const ssize_t* Shape, 
+size_t ArrayIndexOffset (uInt Ndim, const ssize_t* Shape, 
                          const ssize_t* Origin, const ssize_t* Inc, 
                          const IPosition& Index);
-size_t ArrayIndexOffset (size_t Ndim, const ssize_t* Shape, 
+size_t ArrayIndexOffset (uInt Ndim, const ssize_t* Shape, 
                          const ssize_t* Inc, const IPosition& Index);
 // </group>
 

@@ -92,9 +92,9 @@ int main(int argc, const char* argv[])
 	cout << "selected table has rows " << mssel->nrow() << endl;
       delete mssel;
     } 
-  catch (std::exception& x) 
+  catch (AipsError& x) 
     {
-      cout << "ERROR: " << x.what() << endl;
+      cout << "ERROR: " << x.getMesg() << endl;
       return 1;
     } 
   return 0;

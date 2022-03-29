@@ -37,8 +37,9 @@
 #include <casacore/casa/Utilities/Assert.h>
 #include <casacore/casa/Containers/BlockIO.h>
 #include <casacore/casa/IO/AipsIO.h>
-#include <casacore/casa/IO/ArrayIO.h>
 #include <casacore/tables/DataMan/DataManError.h>
+
+
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -56,7 +57,7 @@ TiledShapeStMan::TiledShapeStMan()
 
 TiledShapeStMan::TiledShapeStMan (const String& hypercolumnName,
 				  const IPosition& defaultTileShape,
-				  uInt64 maximumCacheSize)
+				  uInt maximumCacheSize)
 : TiledStMan         (hypercolumnName, maximumCacheSize),
   defaultTileShape_p (defaultTileShape),
   nrUsedRowMap_p     (0),
@@ -73,7 +74,7 @@ TiledShapeStMan::TiledShapeStMan (const String& hypercolumnName,
         defaultTileShape_p = IPosition (spec.toArrayInt ("DEFAULTTILESHAPE"));
     }
     if (spec.isDefined ("MAXIMUMCACHESIZE")) {
-        setPersMaxCacheSize (spec.asInt64 ("MAXIMUMCACHESIZE"));
+        setPersMaxCacheSize (spec.asInt ("MAXIMUMCACHESIZE"));
     }
 }
 
@@ -111,10 +112,11 @@ IPosition TiledShapeStMan::defaultTileShape() const
     return defaultTileShape_p;
 }
 
-Bool TiledShapeStMan::canAccessColumn() const
+Bool TiledShapeStMan::canAccessColumn (Bool& reask) const
 {
     // The entire column can be accessed if all rows are in the same hypercube,
     // thus if there is 1 row map entry and the last value is #rows.
+    reask = True;
     return (nrUsedRowMap_p == 1  &&  rowMap_p[0] == nrrow_p-1);
 }
 
@@ -129,12 +131,12 @@ TSMCube* TiledShapeStMan::singleHypercube()
     return cubeSet_p[1];
 }
 
-void TiledShapeStMan::setShape (rownr_t rownr, TSMCube*,
+void TiledShapeStMan::setShape (uInt rownr, TSMCube*,
 				const IPosition& shape,
 				const IPosition& tileShape)
 {
     IPosition cubeShape = shape;
-    uInt64 n = shape.nelements();
+    uInt n = shape.nelements();
     cubeShape.resize (n+1);
     cubeShape(n) = 0;                   // hypercube is extensible
     // Find a hypercube with given shape.
@@ -155,9 +157,9 @@ Int TiledShapeStMan::findHypercube (const IPosition& shape)
 {
     // A hypercube matches when its shape matches.
     // Its last axis is excluded, because it represents the rows.
-    uInt64 n = cubeSet_p.nelements();
-    for (uInt64 i=1; i<n; i++) {
-	if (shape.isEqual (cubeSet_p[i]->cubeShape(), size_t(nrdim_p-1))) {
+    uInt n = cubeSet_p.nelements();
+    for (uInt i=1; i<n; i++) {
+	if (shape.isEqual (cubeSet_p[i]->cubeShape(), nrdim_p-1)) {
 	    return i;
 	}
     }
@@ -190,7 +192,7 @@ void TiledShapeStMan::setupCheck (const TableDesc& tableDesc,
 }
 
 
-void TiledShapeStMan::create64 (rownr_t nrrow)
+void TiledShapeStMan::create (uInt nrrow)
 {
     // Set up the various things.
     setup(1);
@@ -199,7 +201,7 @@ void TiledShapeStMan::create64 (rownr_t nrrow)
     cubeSet_p[0] = new TSMCube (this, 0, IPosition(), IPosition(),
                                 Record(), -1);
     // Add the rows for the given number of rows.
-    addRow64 (nrrow);
+    addRow (nrrow);
 }
 	    
 
@@ -226,7 +228,7 @@ Bool TiledShapeStMan::flush (AipsIO&, Bool fsync)
     return True;
 }
 
-void TiledShapeStMan::readHeader (rownr_t tabNrrow, Bool firstTime)
+void TiledShapeStMan::readHeader (uInt tabNrrow, Bool firstTime)
 {
     // Open the header file and read data from it.
     AipsIO* headerFile = headerFileOpen();
@@ -244,12 +246,12 @@ void TiledShapeStMan::readHeader (rownr_t tabNrrow, Bool firstTime)
 }
 
 
-void TiledShapeStMan::addRow64 (rownr_t nrow)
+void TiledShapeStMan::addRow (uInt nrow)
 {
-    rownr_t oldnrrow = nrrow_p;
+    uInt oldnrrow = nrrow_p;
     nrrow_p += nrow;
     if (fixedCellShape_p.nelements() > 0) {
-	for (rownr_t i=oldnrrow; i<oldnrrow+nrow; i++) {
+	for (uInt i=oldnrrow; i<oldnrrow+nrow; i++) {
 	    setShape (i, 0, fixedCellShape_p, defaultTileShape_p);
 	}
     }
@@ -257,7 +259,7 @@ void TiledShapeStMan::addRow64 (rownr_t nrow)
 }
 
 
-void TiledShapeStMan::addHypercube (rownr_t rownr,
+void TiledShapeStMan::addHypercube (uInt rownr,
 				    const IPosition& cubeShape,
 				    const IPosition& tileShape)
 {
@@ -275,24 +277,24 @@ void TiledShapeStMan::addHypercube (rownr_t rownr,
     extendHypercube (rownr, ncube);
 }
 
-void TiledShapeStMan::extendHypercube (rownr_t rownr, uInt cubeNr)
+void TiledShapeStMan::extendHypercube (uInt rownr, uInt cubeNr)
 {
     TSMCube* hypercube = cubeSet_p[cubeNr];
-    uInt64 pos = hypercube->cubeShape()(nrdim_p-1);
+    uInt pos = hypercube->cubeShape()(nrdim_p-1);
     hypercube->extend (1, emptyRecord, coordColSet_p[nrdim_p - 1]);
     updateRowMap (cubeNr, pos, rownr);
     setDataChanged();
 }
 
 
-void TiledShapeStMan::updateRowMap (uInt cubeNr, uInt pos, rownr_t rownr)
+void TiledShapeStMan::updateRowMap (uInt cubeNr, uInt pos, uInt rownr)
 {
     // Check if the row number is correct.
     if (rownr >= nrrow_p) {
 	throw (TSMError ("TiledShapeStMan::updateRowMap: rownr is too high"));
     }
     // Determine the next row used and check (in debug mode) if it is right.
-    rownr_t nextRow = 0;
+    uInt nextRow = 0;
     if (nrUsedRowMap_p > 0) {
         nextRow = 1 + rowMap_p[nrUsedRowMap_p-1];
     }
@@ -361,7 +363,7 @@ void TiledShapeStMan::updateRowMap (uInt cubeNr, uInt pos, rownr_t rownr)
     Bool found;
     uInt index = binarySearchBrackets (found, rowMap_p, rownr, nrUsedRowMap_p);
     // Exit immediately if the cube and pos did not change.
-    rownr_t diffRow = rowMap_p[index] - rownr;
+    uInt diffRow = rowMap_p[index] - rownr;
     if (cubeNr == cubeMap_p[index]  &&  pos == posMap_p[index] - diffRow) {
         return;
     }
@@ -449,7 +451,7 @@ void TiledShapeStMan::updateRowMap (uInt cubeNr, uInt pos, rownr_t rownr)
     posMap_p[index]  = pos;
 }
 
-TSMCube* TiledShapeStMan::getHypercube (rownr_t rownr)
+TSMCube* TiledShapeStMan::getHypercube (uInt rownr)
 {
     if (rownr >= nrrow_p) {
 	throw (TSMError ("getHypercube: rownr is too high"));
@@ -470,7 +472,7 @@ TSMCube* TiledShapeStMan::getHypercube (rownr_t rownr)
     return cubeSet_p[cubeMap_p[lastHC_p]];
 }
 
-TSMCube* TiledShapeStMan::getHypercube (rownr_t rownr, IPosition& position)
+TSMCube* TiledShapeStMan::getHypercube (uInt rownr, IPosition& position)
 {
     if (rownr >= nrrow_p) {
 	throw (TSMError ("getHypercube: rownr is too high"));

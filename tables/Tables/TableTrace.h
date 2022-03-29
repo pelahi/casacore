@@ -32,10 +32,9 @@
 //# Includes
 #include <casacore/casa/aips.h>
 #include <casacore/casa/Utilities/Regex.h>
-
-#include <fstream>
-#include <mutex>
+#include <casacore/casa/OS/Mutex.h>
 #include <ostream>
+#include <fstream>
 #include <vector>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
@@ -175,8 +174,8 @@ private:
                           const IPosition& inc);
 
   //# Data members
-  static std::once_flag      theirCallOnceFlag;  //# for thread-safe lazy init
-  static std::mutex          theirMutex;
+  static CallOnce0           theirCallOnce;  //# for thread-safe lazy init
+  static Mutex               theirMutex;
   static std::ofstream       theirTraceFile;
   static std::ostream*       theirStream;
   static int                 theirDoTrace;   //# 0=init -1=no 1=yes 2=reftable

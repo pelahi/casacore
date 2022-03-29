@@ -35,8 +35,6 @@
 #include <casacore/tables/Tables/BaseTable.h>
 #include <casacore/tables/Tables/StorageOption.h>
 #include <casacore/casa/BasicSL/String.h>
-#include <casacore/casa/Arrays/ArrayFwd.h>
-
 #include <map>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
@@ -55,6 +53,8 @@ class MultiFile;
 class Record;
 class IPosition;
 class AipsIO;
+template<class T> class Vector;
+
 
 // <summary>
 // Class to manage a set of table columns
@@ -128,7 +128,7 @@ public:
     // It creates the data manager column objects for each column
     // and it allows the data managers to link themselves to the
     // Table object and to initialize themselves.
-    void initDataManagers (rownr_t nrrow, Bool bigEndian,
+    void initDataManagers (uInt nrrow, Bool bigEndian,
                            const TSMOption& tsmOption,
                            Table& tab);
 
@@ -171,11 +171,11 @@ public:
     Bool canRenameColumn (const String& columnName) const;
 
     // Add rows to all data managers.
-    void addRow (rownr_t nrrow);
+    void addRow (uInt nrrow);
 
     // Remove a row from all data managers.
     // It will throw an exception if not possible.
-    void removeRow (rownr_t rownr);
+    void removeRow (uInt rownr);
 
     // Remove the columns from the map and the data manager.
     void removeColumn (const Vector<String>& columnNames);
@@ -200,7 +200,7 @@ public:
     // </group>
 
     // Get nr of rows.
-    rownr_t nrow() const;
+    uInt nrow() const;
 
     // Get the actual table description.
     TableDesc actualTableDesc() const;
@@ -214,7 +214,7 @@ public:
       { return baseTablePtr_p->traceId(); }
 
     // Initialize rows startRownr till endRownr (inclusive).
-    void initialize (rownr_t startRownr, rownr_t endRownr);
+    void initialize (uInt startRownr, uInt endRownr);
 
     // Write all the data and let the data managers flush their data.
     // This function is called when a table gets written (i.e. flushed).
@@ -226,8 +226,8 @@ public:
     // This function gets called when an existing table is read back.
     // It returns the number of rows in case a data manager thinks there are
     // more. That is in particular used by LofarStMan.
-    rownr_t getFile (AipsIO&, Table& tab, rownr_t nrrow, Bool bigEndian,
-                     const TSMOption& tsmOption);
+    uInt getFile (AipsIO&, Table& tab, uInt nrrow, Bool bigEndian,
+                  const TSMOption& tsmOption);
 
     // Set the table to being changed.
     void setTableChanged();
@@ -241,7 +241,7 @@ public:
     // <src>forceSync=True</src> means that the data managers are forced
     // to do a sync. Otherwise the contents of the lock file tell if a data
     // manager has to sync.
-    rownr_t resync (rownr_t nrrow, Bool forceSync);
+    uInt resync (uInt nrrow, Bool forceSync);
 
     // Invalidate the column caches for all columns.
     void invalidateColumnCaches();
@@ -316,7 +316,7 @@ private:
     TableDesc*              tdescPtr_p;
     StorageOption           storageOpt_p;
     MultiFileBase*          multiFile_p;
-    rownr_t                 nrrow_p;          //# #rows
+    Int64                   nrrow_p;          //# #rows
     BaseTable*              baseTablePtr_p;
     TableLockData*          lockPtr_p;        //# lock object
     std::map<String,void*>  colMap_p;         //# list of PlainColumns
@@ -328,7 +328,7 @@ private:
 
 
 
-inline rownr_t ColumnSet::nrow() const
+inline uInt ColumnSet::nrow() const
 {
     return nrrow_p;
 }

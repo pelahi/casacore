@@ -36,6 +36,7 @@
 #include <casacore/measures/Measures/MCBase.h>
 #include <casacore/measures/Measures/MConvertBase.h>
 #include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/casa/OS/Mutex.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
@@ -153,7 +154,7 @@ private:
   // Transition matrix
   static uInt FromTo_p[MFrequency::N_Types][MFrequency::N_Types];
   // Object to ensure safe multi-threaded lazy single initialization
-  static std::once_flag theirInitOnceFlag;
+  static CallOnce0 theirInitOnce;
 
   //# Constructors
   // Copy constructor (not implemented)

@@ -178,12 +178,9 @@ int main() {
   {
    SparseDiff<Double> a(3,0), b(5,1), x(7);
    Double y(11);
-   const SparseDiff<Double> aref(a);
-   const SparseDiff<Double> bref(b);
-   const SparseDiff<Double> xref(x);
-   a -= aref;
-   b -= bref;
-   x -= xref;
+   a -= a;
+   b -= b;
+   x -= x;
    y -= y;
    cout << "a-=a: " << a << endl;
    cout << "b-=b: " << b << endl;
@@ -225,12 +222,9 @@ int main() {
   {
    SparseDiff<Double> a(3,0), b(5,1), x(7);
    Double y(11);
-   const SparseDiff<Double> aref(a);
-   const SparseDiff<Double> bref(b);
-   const SparseDiff<Double> xref(x);
-   a /= aref;
-   b /= bref;
-   x /= xref;
+   a /= a;
+   b /= b;
+   x /= x;
    y /= y;
    cout << "a/=a: " << a << endl;
    cout << "b/=b: " << b << endl;

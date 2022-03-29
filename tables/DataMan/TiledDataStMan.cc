@@ -30,7 +30,6 @@
 #include <casacore/tables/DataMan/TSMCube.h>
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/BasicSL/String.h>
-#include <casacore/casa/BasicSL/STLIO.h>
 #include <casacore/casa/Utilities/BinarySearch.h>
 #include <casacore/casa/Containers/BlockIO.h>
 #include <casacore/casa/IO/AipsIO.h>
@@ -42,22 +41,25 @@ namespace casacore { //# NAMESPACE CASACORE - BEGIN
 
 TiledDataStMan::TiledDataStMan ()
 : TiledStMan     (),
+  nrUsedRowMap_p (0),
   nrrowLast_p    (0)
 {}
 
 TiledDataStMan::TiledDataStMan (const String& hypercolumnName,
-				uInt64 maximumCacheSize)
+				uInt maximumCacheSize)
 : TiledStMan     (hypercolumnName, maximumCacheSize),
+  nrUsedRowMap_p (0),
   nrrowLast_p    (0)
 {}
 
 TiledDataStMan::TiledDataStMan (const String& hypercolumnName,
 				const Record& spec)
 : TiledStMan     (hypercolumnName, 0),
+  nrUsedRowMap_p (0),
   nrrowLast_p    (0)
 {
     if (spec.isDefined ("MAXIMUMCACHESIZE")) {
-        setPersMaxCacheSize (spec.asInt64 ("MAXIMUMCACHESIZE"));
+        setPersMaxCacheSize (spec.asInt ("MAXIMUMCACHESIZE"));
     }
 }
 
@@ -82,12 +84,12 @@ String TiledDataStMan::dataManagerType() const
     { return "TiledDataStMan"; }
 
 
-void TiledDataStMan::create64 (rownr_t nrrow)
+void TiledDataStMan::create (uInt nrrow)
 {
     // Set up the various things.
     setup(-1);
     // Add the rows for the given number of rows.
-    addRow64 (nrrow);
+    addRow (nrrow);
 }
 	    
 
@@ -100,50 +102,39 @@ Bool TiledDataStMan::flush (AipsIO&, Bool fsync)
     }
     // Create the header file and write data in it.
     AipsIO* headerFile = headerFileCreate();
-    headerFile->putstart ("TiledDataStMan", 2);
+    headerFile->putstart ("TiledDataStMan", 1);
     // Let the base class write its data.
     headerFilePut (*headerFile, cubeSet_p.nelements());
     // Write the data from this object.
     *headerFile << nrrowLast_p;
-    *headerFile << rowMap_p << cubeMap_p << posMap_p;
+    *headerFile << nrUsedRowMap_p;
+    putBlock (*headerFile, rowMap_p,  Int(nrUsedRowMap_p));
+    putBlock (*headerFile, cubeMap_p, Int(nrUsedRowMap_p));
+    putBlock (*headerFile, posMap_p,  Int(nrUsedRowMap_p));
     headerFile->putend();
     headerFileClose (headerFile);
     return True;
 }
 
-void TiledDataStMan::readHeader (rownr_t tabNrrow, Bool firstTime)
+void TiledDataStMan::readHeader (uInt tabNrrow, Bool firstTime)
 {
     // Open the header file and read data from it.
     AipsIO* headerFile = headerFileOpen();
-    uInt version = headerFile->getstart ("TiledDataStMan");
+    headerFile->getstart ("TiledDataStMan");
     // Let the base class read and initialize its data.
-    uInt hdrVersion = headerFileGet (*headerFile, tabNrrow, firstTime, -1);
+    headerFileGet (*headerFile, tabNrrow, firstTime, -1);
     // Read the data for this object.
-    // Version 1 was not incremented at the change to rownr_t, but the
-    // parent class TiledStMan was. So test that version as well.
-    if (version == 1  &&  hdrVersion < 3) {
-        uInt nrow;
-        *headerFile >> nrow;
-        nrrowLast_p = nrow;
-    } else {
-        *headerFile >> nrrowLast_p;
-    }
-    if (version == 1) {
-      uInt nused;
-      *headerFile >> nused;
-      std::vector<uInt> rowMap;
-      *headerFile >> rowMap;
-      rowMap_p.insert (rowMap_p.end(), rowMap.begin(), rowMap.end());
-      *headerFile >> cubeMap_p >> posMap_p;
-    } else {
-      *headerFile >> rowMap_p >> cubeMap_p >> posMap_p;
-    }
+    *headerFile >> nrrowLast_p;
+    *headerFile >> nrUsedRowMap_p;
+    getBlock (*headerFile, rowMap_p);
+    getBlock (*headerFile, cubeMap_p);
+    getBlock (*headerFile, posMap_p);
     headerFile->getend();
     headerFileClose (headerFile);
 }
 
 
-void TiledDataStMan::addRow64 (rownr_t nrow)
+void TiledDataStMan::addRow (uInt nrow)
 {
     nrrow_p += nrow;
     setDataChanged();
@@ -151,9 +142,9 @@ void TiledDataStMan::addRow64 (rownr_t nrow)
 
 
 void TiledDataStMan::checkNrrow (const IPosition& cubeShape,
-				 uInt64 incrInLastDim) const
+				 uInt incrInLastDim) const
 {
-    rownr_t nrrow = addedNrrow (cubeShape, incrInLastDim);
+    uInt nrrow = addedNrrow (cubeShape, incrInLastDim);
     if (nrrowLast_p + nrrow > nrrow_p) {
 	throw (TSMError
 	             ("Insufficient #rows in table for add/extendHypercube"));
@@ -177,7 +168,7 @@ void TiledDataStMan::addHypercube (const IPosition& cubeShape,
     updateRowMap (ncube, cubeShape(nrdim_p-1));
 }
 
-void TiledDataStMan::extendHypercube (uInt64 incrInLastDim,
+void TiledDataStMan::extendHypercube (uInt incrInLastDim,
 				      const Record& values)
 {
     // Check if id values are correctly given.
@@ -199,28 +190,35 @@ void TiledDataStMan::extendHypercube (uInt64 incrInLastDim,
 }
 
 
-void TiledDataStMan::updateRowMap (uInt cubeNr, uInt64 incrInLastDim)
+void TiledDataStMan::updateRowMap (uInt cubeNr, uInt incrInLastDim)
 {
     if (incrInLastDim == 0) {
 	return;
     }
+    // Extend the maps when needed.
+    if (nrUsedRowMap_p == rowMap_p.nelements()) {
+	rowMap_p.resize (nrUsedRowMap_p + 64);
+	cubeMap_p.resize (nrUsedRowMap_p + 64);
+	posMap_p.resize (nrUsedRowMap_p + 64);
+    }
     // Determine the numbers of rows added via the extension.
     const IPosition& shape = cubeSet_p[cubeNr]->cubeShape();
-    rowMap_p.push_back (nrrowLast_p);
-    cubeMap_p.push_back (cubeNr);
-    posMap_p.push_back (shape(nrdim_p-1) - incrInLastDim);
+    rowMap_p[nrUsedRowMap_p] = nrrowLast_p;
+    cubeMap_p[nrUsedRowMap_p] = cubeNr;
+    posMap_p[nrUsedRowMap_p] = shape(nrdim_p-1) - incrInLastDim;
+    nrUsedRowMap_p++;
     // Now update the last row number used with the
     // number of rows this extension represents.
-    rownr_t nr = addedNrrow (cubeSet_p[cubeNr]->cubeShape(), incrInLastDim);
+    uInt nr = addedNrrow (cubeSet_p[cubeNr]->cubeShape(), incrInLastDim);
     nrrowLast_p += nr;
 }
 
-TSMCube* TiledDataStMan::getHypercube (rownr_t rownr)
+TSMCube* TiledDataStMan::getHypercube (uInt rownr)
 {
     IPosition pos;
     return TiledDataStMan::getHypercube (rownr, pos);
 }
-TSMCube* TiledDataStMan::getHypercube (rownr_t rownr, IPosition& position)
+TSMCube* TiledDataStMan::getHypercube (uInt rownr, IPosition& position)
 {
     // Check if the row number is correct.
     if (rownr >= nrrowLast_p ) {
@@ -228,14 +226,14 @@ TSMCube* TiledDataStMan::getHypercube (rownr_t rownr, IPosition& position)
     }
     // Find the closest row number in the map (equal or less).
     Bool found;
-    uInt index = binarySearchBrackets (found, rowMap_p, rownr, rowMap_p.size());
+    uInt index = binarySearchBrackets (found, rowMap_p, rownr, nrUsedRowMap_p);
     if (!found) {
 	index--;
     }
     // Get the hypercube and the rownr relative to the start
     // of the hypercube chunk the requested row is in.
     TSMCube* hypercube = cubeSet_p[cubeMap_p[index]];
-    rownr_t rowDiff = rownr - rowMap_p[index];
+    uInt rowDiff = rownr - rowMap_p[index];
     // Transform the relative rownr into a hypercube position.
     // When the hypercube has axes with vector coordinates, those
     // axes are part of the data in the cell (thus only scalar

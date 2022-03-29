@@ -31,7 +31,6 @@
 #include <casacore/scimath/Mathematics/MatrixMathLA.h>
 #include <casacore/casa/Arrays/ArrayError.h>
 #include <casacore/casa/Utilities/Assert.h>
-#include <casacore/casa/Containers/Block.h>
 
 namespace casacore { //# NAMESPACE CASACORE - BEGIN
 

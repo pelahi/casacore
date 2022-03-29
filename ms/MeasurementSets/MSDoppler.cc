@@ -88,7 +88,7 @@ MSDoppler::MSDoppler(const String& tableName, const String &tableDescName,
 			 "table is not a valid MSDoppler"));
 }
 
-MSDoppler::MSDoppler(SetupNewTable &newTab, rownr_t nrrow,
+MSDoppler::MSDoppler(SetupNewTable &newTab, uInt nrrow,
 			       Bool initialize)
     : MSTable<MSDopplerEnums>(newTab, nrrow, initialize), 
       hasBeenDestroyed_p(False)
@@ -96,7 +96,7 @@ MSDoppler::MSDoppler(SetupNewTable &newTab, rownr_t nrrow,
     // verify that the now opened table is valid
     addVelDef();
     if (! validate(this->tableDesc()))
-	throw (AipsError("MSDoppler(SetupNewTable &, rownr_t, Bool) - "
+	throw (AipsError("MSDoppler(SetupNewTable &, uInt, Bool) - "
 			 "table is not a valid MSDoppler"));
 }
 
